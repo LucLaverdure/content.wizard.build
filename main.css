@@ -1,0 +1,207 @@
+.red {
+	background:#dd0000 !important;	
+}
+input[type=submit] {
+	cursor:pointer;
+}
+.admin-wrap, .admin-wrap p, .admin-wrap span, input, textarea, select, option {
+	font-size:20px;
+	line-height:23px;
+}
+h2 {
+	font-size:28px;
+	text-transform:capitalize;
+}
+.card {
+	min-height:390px;
+	box-sizing:border-box;
+}
+.head {
+	width:180px;
+	display:inline-block;
+	vertical-align:top;
+}
+.body {
+	display:inline-block;
+}
+.body input {
+	display:inline-block;
+	width:500px;
+}
+input, textarea, select {
+	border:1px solid #000 !important;
+}
+.body.save {
+	text-align:right;
+}
+.body textarea {
+	clear:left;
+	width:500px;
+	height:130px;
+	overflow-x: scroll;
+	overflow-y: scroll;
+}
+.add-ct, .add-ct:focus {
+	background: #33aa33;
+	color: #fff;
+	text-shadow:1px 1px solid #000;
+	font-weight:bold;
+	text-align:center;
+	width:250px;
+	display:inline-block;
+	text-decoration:none;
+	padding:10px;
+	float:right;
+	clear:left;
+	margin:0 0 0 10px;
+}
+.add-ct.add-ct-click {
+	margin-top:20px;
+}
+.add-ct.del-field {
+	background: #aa3333;
+}
+.add-ct:hover {
+	color:#fff;
+}
+.save input{
+	background: #33aa33;
+	color: #fff;
+	text-shadow:1px 1px solid #000;
+	font-weight:bold;
+	height:50px;
+	width:150px;
+	cursor:pointer;
+}
+
+.run input{
+	height:50px;
+	background: #3333ff;
+	text-shadow:1px 1px solid #000;
+	font-weight:bold;
+	color: #fff;
+	width:200px;
+	cursor:pointer;
+}
+.card {
+	clear:left;
+	float:left;
+	max-width:100%;
+	width:100%;
+	margin-right:30px;
+	box-sizing:border-box;
+}
+.card.double {
+	width:930px;
+	min-height:350px;
+	box-sizing:border-box;
+}
+.options{
+	padding:20px;
+	clear:left;
+	display:block;
+}
+.nav a {
+	float:left;
+	display:block;
+	width:230px;
+	max-width:100%;
+	background: #ccc;
+	padding:10px;
+	text-decoration:none;
+	text-align:center;
+	font-size:16px;
+	color: #670c5f;
+	font-weight:bold;
+}
+.nav a:hover, .nav a.selected {
+	color: #ff0cff;
+	background: #ddd;
+}
+.nav a.selected {
+	border:2px solid #0000ff;
+}
+.admin-wrap select {
+	height:auto;
+	margin:0;
+	padding:0;
+	
+}
+.save-wrapper {
+	margin-top:150px;
+	margin-bottom:20px;
+}
+.box-map, .box-container {
+	border: 1px solid #444;
+	padding:20px 20px 20px 20px;
+	margin-bottom:10px;
+}
+body .box-map {
+	border:none;
+}
+.box-container h2 {
+	margin:0 0 10px 0;
+	background: #f3f3f3;
+	padding:10px;
+	cursor:pointer;
+}
+.field-map {
+	max-width:100%;
+	width: 180px;
+	box-sizing:border-box;
+	padding-right:20px;
+}
+.box-container .body .selector {
+	width: 290px;
+}
+#ctt {
+	float:right;
+	margin-top:20px;
+}
+body .add-ct.add-field, body .add-ct.del-field,{
+	margin:0 0 0 10px;
+}
+.del {
+	color: #880000;
+}
+body h2 .arrow-point {
+	font-size:30px;
+}
+textarea#urls {
+	width:1000px;
+}
+.progress-box {
+	margin-top:100px;
+	clear:both;
+}
+.crawled, .mapped {
+	line-height:25px;
+	height:25px;
+	clear:both;
+	margin: 20px 0;
+	display:block;
+}
+.crawled .total, .mapped .total {
+	line-height:25px;
+	height:25px;
+	display:inline-block;
+	width:500px;
+	background: #ff0000;
+	border: 1px solid #000;
+}
+.crawled .progress, .mapped .progress {
+	line-height:25px;
+	height:25px;
+	display:inline-block;
+	width:0;
+	background: #00ff00;
+}
+.crawled-count, .crawled-total, .mapped-count, .mapped-total {
+	line-height:25px;
+	height:25px;
+	display:inline-block;
+}
+.head-f {
+	display:inline-block;
+	width:200px;
+}
