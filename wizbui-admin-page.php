@@ -3,7 +3,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 define("WIZBUI_PLUGIN_PATH", ABSPATH . 'wp-content/plugins/content.wizard.build/');
 
-include "includes/helper.functions.php";
+include_once "includes/helper.functions.php";
 
 ?>
 

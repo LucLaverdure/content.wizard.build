@@ -2,6 +2,21 @@
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
+include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
+
+function get_dirs() {
+	$path_init = WIZBUI_PLUGIN_PATH . "cache";
+	if(!file_exists(dirname($path_init))) {
+		@mkdir(dirname($path_init), 0777, true);
+	}
+	$dirs = getDirContents($path_init);
+	$dir_array = array();
+	foreach($dirs as $dirX) {
+		$dir_array[] = "http://".str_replace(WIZBUI_PLUGIN_PATH."cache/", '', $dirX."\n");
+	}
+	return $dir_array;
+}
+
 function pathme($fromURL, $relURL) {
 	if (strpos($relURL, 'http') === false) {
 		if (strpos($fromURL, 'http') === false) {
@@ -118,8 +133,15 @@ if (is_admin()) {
 			}
 		}
 		
+		$cache_data = get_dirs();
+		$urls_ret_final = array();
+		foreach ($urls_ret as $url) {
+			if (!in_array($url, $cache_data))
+				$urls_ret_final[$url] = $url;
+		}
+			
 		// write urls to crawl to disk
-		file_put_contents($urlsfile_path, implode("\n", $urls_ret), FILE_APPEND);
+		file_put_contents($urlsfile_path, implode("\n", $urls_ret_final), FILE_APPEND);
 	} catch (Exception $e) {
 		// meh, was prolly binary...
 	}

@@ -63,18 +63,11 @@ $(function() {
 	});
 	
 	$("#apikey").click();
-
-	// get current state
-	get_current_state();
 	
 	// update progress bars
 	ini_crawl_stats();
 	update_progress();
 });
-
-function get_current_state() {
-	window.crawledList = $.trim($('#urls-done').val()).split("\n");
-}
 
 // update progress bars
 function update_progress() {
@@ -99,6 +92,7 @@ var crawlUrl = function(url, path) {
 		dataType: 'html',
 		url: new_url,
 		success: function(data, textStatus, jqXHR) {
+			$(".crawlspin").show();
 			$.post("/wp-admin/admin-post.php?action=wb_save_hook",
 			  {
 				data: data,
@@ -122,12 +116,14 @@ var crawlUrl = function(url, path) {
 						$('#urls').prop('disabled', false);
 						$('.crawlnow').prop('disabled', false);
 						$('.crawlstop').prop('disabled', true);
+						$(".crawlspin").hide();
 					},
 					error: function() {
 						$('#urls').val("");
 						$('#urls').prop('disabled', false);
 						$('.crawlnow').prop('disabled', false);
 						$('.crawlstop').prop('disabled', true);
+						$(".crawlspin").hide();						
 					}
 				});
 			  }
@@ -138,14 +134,6 @@ var crawlUrl = function(url, path) {
 			$("#urls-errors").append(url+"\n");
 			console.log("error crawling url: "+url)
 			update_progress();
-			/*
-			if (window.crawlerIO) {
-				sleep(window.delay).then(() => {
-					window.crawlerBatched--;
-					processCrawler();
-				});
-			}
-			*/
 		}
 	});
 }
@@ -227,7 +215,8 @@ function ini_crawl_stats() {
 	
 // init crawl
 function initCrawler() {
-
+	$(".crawlspin").show();
+	
 	window.crawlerIO = true;
 	
 	window.crawlList = $.trim($('#urls').val()).split("\n");
