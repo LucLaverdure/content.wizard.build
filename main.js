@@ -108,6 +108,7 @@ var crawlUrl = function(url, path) {
 					dataType: 'text',
 					context: document.body,
 					success: function(data, textStatus, jqXHR) {
+						// TODO: get as json, populate crawled & tocrawl
 						if ($.trim(data) != "") {
 							$('#urls').val(data);
 							window.crawlList = $.trim(data).split("\n");

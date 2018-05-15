@@ -92,7 +92,7 @@ if (is_admin()) {
 				$urls_to_add[] = pq($links)->attr("src");
 			}
 
-			// get A SCRIPT SRC links
+			// get A IMG SRC links
 			foreach(pq("img") as $links) {
 				$urls_to_add[] = pq($links)->attr("src");
 			}
