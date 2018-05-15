@@ -22,7 +22,7 @@
 		</p>
 	</div>
 
-	<div>
+	<div style="display:none">
 		<p>
 		<span class="head">Crawled URLs:</span>
 		<span class="body">
@@ -43,7 +43,7 @@
 		</p>
 	</div>
 
-	<div>
+	<div style="display:none">
 		<p>
 		<span class="head">Error URLs:</span>
 		<span class="body">

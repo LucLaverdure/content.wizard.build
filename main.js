@@ -204,12 +204,23 @@ function processCrawler() {
 // init stats
 function ini_crawl_stats() {
 	window.crawlList = $.trim($('#urls').val()).split("\n");
+	$.each(window.crawlList, function(i, el){
+		if ($.inArray(el, completed) == -1) {
+			window.crawlList.splice(i, 1);
+		}
+	});
+	var completed = $.trim($('#urls-done').val()).split("\n");
 	var switcharoo = [];
 	$.each(window.crawlList, function(i, el){
-		if($.inArray(el, switcharoo) === -1) switcharoo.push(el);
+		if (($.inArray(el, switcharoo) == -1) && ($.inArray(el, completed) == -1)) {
+			switcharoo.push(el);
+		}
 	});
+
 	window.crawlList = switcharoo;
 	window.crawlList.sort();
+	
+	$('#urls').val(window.crawlList.join("\n"));
 	
 	window.crawledList = $("#urls-done").val().split("\n");
 	
