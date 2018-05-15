@@ -33,10 +33,33 @@ function admin_post_wb_save_hook_callback() {
 // core Wizard.Build.Content get new urls to crawl
 add_action( 'admin_post_wb_get_hook', 'admin_post_wb_get_hook_callback' );
 function admin_post_wb_get_hook_callback() {
-	$crawl_file = __DIR__ . "/cache/crawl.me.txt";
-	if (file_exists($crawl_file)) {
-		echo file_get_contents($crawl_file);
-	} else {
-		echo "";
+	
+	define("WIZBUI_PLUGIN_PATH", ABSPATH . 'wp-content/plugins/content.wizard.build/');
+	include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
+	
+	// has been crawled
+	$crawled = array();
+	$path_init = WIZBUI_PLUGIN_PATH . "cache";
+	if(file_exists(dirname($path_init))) {
+		$files = getDirContents($path_init);
+		foreach($files as $dirX) {
+			$crawled[] = "http://".str_replace(WIZBUI_PLUGIN_PATH."cache/", '', $dirX."\n");
+		}
 	}
+
+	// to crawl
+	$crawl_file = __DIR__ . "/cache/crawl.me.txt";
+	$to_crawl = array();
+	$to_crawl_ret = array();
+	if (file_exists($crawl_file)) {
+		$to_crawl = explode("\n", file_get_contents($crawl_file));
+		foreach ($to_crawl as $crawl_url) {
+			if (!in_array($crawl_url, $crawled)) {
+				$to_crawl_ret[] = $crawl_url;
+			}
+		}
+	}
+
+	echo json_encode(array( "to_crawl" => $to_crawl_ret, "crawled" => $crawled));
+	
 }

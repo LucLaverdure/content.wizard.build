@@ -16,8 +16,8 @@ h2 {
 	min-height:390px;
 	box-sizing:border-box;
 }
-.head {
-	width:180px;
+body .admin-wrap .head {
+	width:210px;
 	display:inline-block;
 	vertical-align:top;
 }
@@ -138,6 +138,16 @@ input, textarea, select {
 }
 body .box-map {
 	border:none;
+	padding:0;
+}
+body .box-container{
+	position:relative;
+	padding-bottom:50px;
+}
+body .box-container .ct-opt {
+	position:absolute;
+	bottom:10px;
+	right:10px;
 }
 .box-container h2 {
 	margin:0 0 10px 0;
@@ -152,7 +162,8 @@ body .box-map {
 	padding-right:20px;
 }
 .box-container .body .selector {
-	width: 290px;
+	width: 300px;
+	vertical-align:top;
 }
 #ctt {
 	float:right;

@@ -69,13 +69,30 @@ $(function() {
 	update_progress();
 });
 
+function filter_array(test_array) {
+    var index = -1,
+        arr_length = test_array ? test_array.length : 0,
+        resIndex = -1,
+        result = [];
+
+    while (++index < arr_length) {
+        var value = test_array[index];
+
+        if (value) {
+            result[++resIndex] = value;
+        }
+    }
+
+    return result;
+}
+
 // update progress bars
 function update_progress() {
-	
-	$('.crawled-count').html(window.crawledList.length);
-	var total = window.crawlList.length + window.crawledList.length;
+	var count = filter_array(window.crawledList).length;
+	$('.crawled-count').html(count);
+	var total = filter_array(window.crawlList).length + count;
 	$('.crawled-total').html(total);
-	var progress = parseInt(window.crawledList.length / total * 100);
+	var progress = parseInt(count / total * 100);
 	$('.crawled-percent').html(progress);
 	$('.crawled .progress').css('width', (progress / 100) * parseInt($('.crawled .total').width()));
 }
@@ -105,15 +122,18 @@ var crawlUrl = function(url, path) {
 				update_progress();
 				$.ajax({
 					url: "/wp-admin/admin-post.php?action=wb_get_hook",
-					dataType: 'text',
+					dataType: 'json',
 					context: document.body,
 					success: function(data, textStatus, jqXHR) {
-						// TODO: get as json, populate crawled & tocrawl
-						if ($.trim(data) != "") {
-							$('#urls').val(data);
-							window.crawlList = $.trim(data).split("\n");
-							update_progress();
+						if (data.to_crawl.length > 0) {
+							$('#urls').val(data.to_crawl.join("\n"));
+							window.crawlList = data.to_crawl;
 						}
+						if (data.crawled.length > 0) {
+							$('#urls-done').val(data.crawled.join("\n"))
+							window.crawledList = data.crawled;
+						}
+						update_progress();
 						$('#urls').prop('disabled', false);
 						$('.crawlnow').prop('disabled', false);
 						$('.crawlstop').prop('disabled', true);
@@ -150,8 +170,8 @@ var crawlUrlExists = function(urlX) {
 		if (urlX.indexOf(domains[key]) != -1) pass = true;
 	}
 	if (!pass) {
+		window.crawledList.push(urlX);
 		$("#urls-errors").append(urlX+"\n");
-		console.log("Item Not Found: " + urlModded + "\n");
 		return;
 	}
 	
@@ -267,6 +287,13 @@ $(document).on("click", ".add-ct-click", function() {
 	$(".box-map").append($(".box-container-wrapper").clone().html().replace("%ptype%", $("#ctt").val()));
 	return false;
 });
+
+// Delete Content type button click
+$(document).on("click", ".del-field", function() {
+	$(this).parents(".box-container").slideUp(400, function() {$(this).remove()});
+	return false;
+});
+
 
 // Add new field button click
 $(document).on("click", ".add-field", function() {
