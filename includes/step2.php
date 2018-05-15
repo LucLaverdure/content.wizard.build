@@ -67,7 +67,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	</div>
 	<div class="">
 		<p>* Files &amp; URLs will be saved to</p>
-		<p><?php echo WIZBUI_PLUGIN_PATH; ?>/cache</p>
+		<p><?php echo WIZBUI_PLUGIN_PATH; ?>cache</p>
 	</div>
 
 </div>
