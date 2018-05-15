@@ -6,6 +6,7 @@
 		/ 
 		<span class="crawled-total">0</span>
 		(<span class="crawled-percent">0</span>%)
+<img src="http://content.wizard.build/wp-content/plugins/content.wizard.build/includes/../spinner.gif" style="width:25px;margin-left:10px;display:inline-block;display:none;" class="crawlspin">
 	</div>
 	<div class="mapped">
 		<span class="head-f">Mapped files:</span>

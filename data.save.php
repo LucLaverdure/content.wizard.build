@@ -139,7 +139,7 @@ if (is_admin()) {
 			if (!in_array($url, $cache_data))
 				$urls_ret_final[$url] = $url;
 		}
-			
+
 		// write urls to crawl to disk
 		file_put_contents($urlsfile_path, implode("\n", $urls_ret_final), FILE_APPEND);
 	} catch (Exception $e) {

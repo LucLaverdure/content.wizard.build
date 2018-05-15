@@ -100,7 +100,7 @@ var crawlUrl = function(url, path) {
 				whitelist: $("#domains").val()
 			  },
 			  function() {
-				crawledList.push(url);
+				window.crawledList.push(url);
 				$("#urls-done").append(url+"\n");
 				update_progress();
 				$.ajax({
@@ -130,7 +130,7 @@ var crawlUrl = function(url, path) {
 			);
 		},
 		error: function() {
-			crawledList.push(url);
+			window.crawledList.push(url);
 			$("#urls-errors").append(url+"\n");
 			console.log("error crawling url: "+url)
 			update_progress();
@@ -169,7 +169,7 @@ var crawlUrlExists = function(urlX) {
 		url: urlModded,
 		success: function() {
 			console.log("Item Cached: " + urlModded + "\n");
-			crawledList.push(urlX);
+			window.crawledList.push(urlX);
 			update_progress();
 			window.crawlerBatched--;
 			/* processCrawler(); */
@@ -210,6 +210,9 @@ function ini_crawl_stats() {
 	});
 	window.crawlList = switcharoo;
 	window.crawlList.sort();
+	
+	window.crawledList = $("#urls-done").val().split("\n");
+	
 	update_progress();
 }
 	
