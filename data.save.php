@@ -68,6 +68,8 @@ if (is_admin()) {
 			// TODO: get image urls
 		} elseif ($ext=="js") {
 			// TODO: nothing
+		} elseif (in_array($ext, array("php", ".php", ".php3", ".php4", ".php5", ".phtml"))) {
+			// TODO: secure file
 		} else {
 			/* get links (a href)
 			*  get meta links (link href)
