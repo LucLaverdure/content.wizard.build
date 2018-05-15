@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+?><?php
 	$fields = get_all_posts_fields();
 	foreach($fields as $field) {
 ?>

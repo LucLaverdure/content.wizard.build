@@ -1,4 +1,6 @@
-<div class="card urls" style="display:none;">
+<?php
+defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+?><div class="card urls" style="display:none;">
 	<h2>Step 2 - Get/Provide URLs list</h2>
 	<p>Crawl start entry URLs</p>
 

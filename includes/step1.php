@@ -1,4 +1,6 @@
-<div class="card licence">
+<?php
+defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+?><div class="card licence">
 	<h2>Step 1 - Account Settings and Licence</h2>
 	<p>Migrate content to this wordpress installation.</p>
 

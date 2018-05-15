@@ -1,4 +1,6 @@
-<div class="card map" style="display:none;">
+<?php
+defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+?><div class="card map" style="display:none;">
 	<h2>Step 3 - Content Mappings</h2>
 	<p>Associate data to content.</p>
 

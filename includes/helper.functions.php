@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+?><?php
 
 function save_options() {
 	if (isset($_POST['save'])) {

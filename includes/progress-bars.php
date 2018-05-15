@@ -1,4 +1,6 @@
-<div class="progress-box">
+<?php
+defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+?><div class="progress-box">
 	<div class="crawled">
 		<span class="head-f">Crawled URLs:</span>
 		<span class="total"><span class="progress"></span></span>
