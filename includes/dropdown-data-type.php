@@ -1,6 +1,6 @@
 <?php
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
-?><option>String</option>
+?><option>String (Text)</option>
 <option>Date</option>
 <option>Alpha</option>
 <option>Numeric</option>

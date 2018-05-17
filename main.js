@@ -112,9 +112,10 @@ var crawlUrl = function(url, path) {
 			$(".crawlspin").show();
 			$.post("/wp-admin/admin-post.php?action=wb_save_hook",
 			  {
+				url: url,
 				data: data,
 				path: path,
-				whitelist: $("#domains").val()
+				whitelist: $("#domains").val().split("\n").join(";")
 			  },
 			  function() {
 				window.crawledList.push(url);
@@ -164,12 +165,12 @@ var crawlUrl = function(url, path) {
 var crawlUrlExists = function(urlX) {
 	
 	// verify domain whitelist
-	var pass = false;
+	var pass = [];
 	var domains = $.trim($('#domains').val()).split("\n");
 	for (key in domains) {
-		if (urlX.indexOf(domains[key]) != -1) pass = true;
+		if (urlX.indexOf(domains[key]) != -1) pass.push(true);
 	}
-	if (!pass) {
+	if (pass.length != domains.length) {
 		window.crawledList.push(urlX);
 		$("#urls-errors").append(urlX+"\n");
 		return;

@@ -43,10 +43,17 @@ function admin_post_wb_get_hook_callback() {
 	if(file_exists(dirname($path_init))) {
 		$files = getDirContents($path_init);
 		foreach($files as $dirX) {
-			$crawled[] = "http://".str_replace(WIZBUI_PLUGIN_PATH."cache/", '', $dirX."\n");
+			$thisurl = "http://".str_replace(WIZBUI_PLUGIN_PATH."cache/", '', $dirX);
+			$crawled[$thisurl] = $thisurl;
 		}
 	}
-
+	$crawled_file = __DIR__ . "/cache/crawled.txt";
+	if(file_exists($crawled_file)) {
+		$crawled_file = explode("\n", @file_get_contents($crawled_file));
+		foreach($crawled_file as $url) {
+			$crawled[$url] = $url;
+		}
+	}
 	// to crawl
 	$crawl_file = __DIR__ . "/cache/crawl.me.txt";
 	$to_crawl = array();

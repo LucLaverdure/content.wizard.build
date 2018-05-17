@@ -4,6 +4,36 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
 
+function whitelist_check($urls_to_add, $path_origin) {
+	// verify domain whitelist
+	$urls_to_add_parsed = array();
+	foreach ($urls_to_add as $urlX) {
+		$urlX = pathme($path_origin, $urlX);
+		$pass = array();
+		$domains = get_whitelist();
+		if (count($domains) > 0) {
+			foreach($domains as $val) {
+				if ( strrpos($urlX, $val) !== false) $pass[] = $val;
+			}
+			if (count($pass) == count($domains)) {
+				$urls_to_add_parsed[] = $urlX;
+			}
+		} else {
+			$urls_to_add_parsed[] = $urlX;
+		}
+	}
+	return $urls_to_add_parsed;
+}
+
+function get_whitelist() {
+	$whitelist = $_REQUEST["whitelist"];
+	$whitelist = explode(";", $whitelist);
+	if (count($whitelist) > 0)
+		return $whitelist;
+	else
+		return array();
+}
+
 function get_dirs() {
 	$path_init = WIZBUI_PLUGIN_PATH . "cache";
 	if(!file_exists(dirname($path_init))) {
@@ -15,6 +45,14 @@ function get_dirs() {
 		$dir_array[] = "http://".str_replace(WIZBUI_PLUGIN_PATH."cache/", '', $dirX."\n");
 	}
 	return $dir_array;
+}
+
+function get_crawled_list() {
+	$list = explode("\n", @file_get_contents(__DIR__ . "/cache/crawled.txt"));
+	if (count($list)>0)
+		return $list;
+	else
+		return array();
 }
 
 function pathme($fromURL, $relURL) {
@@ -40,7 +78,7 @@ if (is_admin()) {
 	$path_origin = $_REQUEST["path"];
 
 	
-	update_option('wb_domains', serialize($_REQUEST["whitelist"]));
+	update_option('wb_domains', serialize(implode("\n", get_whitelist())));
 	
 	$path = str_replace("../", "", $_REQUEST["path"]);
 	try {	
@@ -56,9 +94,13 @@ if (is_admin()) {
 	if(!file_exists(dirname($path)))
 		mkdir(dirname($path), 0777, true);
 
+	// save crawl file
 	file_put_contents($path, $data);
 
-	try {
+	// add to list of crawled urls
+	file_put_contents(__DIR__ . "/cache/crawled.txt", pathme($path, $_REQUEST["url"])."\n", FILE_APPEND);
+	
+	//try {
 		
 		$ext = substr($path, strrpos($path, '.') + 1);
 		
@@ -101,21 +143,8 @@ if (is_admin()) {
 			
 		}
 
-		
-		$urls_to_add_parsed = array();
-		
 		// verify domain whitelist
-		foreach ($urls_to_add as $urlX) {
-			$urlX = pathme($path_origin, $urlX);
-			$pass = false;
-			$domains = split("\n", trim($_REQUEST["whitelist"]));
-			foreach($domains as $val) {
-				if ( strrpos($urlX, $val) !== false) $pass = true;
-			}
-			if ($pass) {
-				$urls_to_add_parsed[] = $urlX;
-			}
-		}
+		$urls_to_add_parsed = whitelist_check($urls_to_add, $path_origin);
 
 		$urlsfile_path = __DIR__ . "/cache/crawl.me.txt";
 		$contents = @file_get_contents($urlsfile_path);
@@ -136,6 +165,10 @@ if (is_admin()) {
 		}
 		
 		$cache_data = get_dirs();
+		$crawled = get_crawled_list();
+		
+		$cache_data = array_merge($crawled, $cache_data);
+		
 		$urls_ret_final = array();
 		foreach ($urls_ret as $url) {
 			if (!in_array($url, $cache_data))
@@ -144,9 +177,9 @@ if (is_admin()) {
 
 		// write urls to crawl to disk
 		file_put_contents($urlsfile_path, implode("\n", $urls_ret_final), FILE_APPEND);
-	} catch (Exception $e) {
+	//} catch (Exception $e) {
 		// meh, was prolly binary...
-	}
+	//}
 }
 
 ?>
