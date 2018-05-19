@@ -3,10 +3,19 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 ?><?php
 
 function save_options() {
-	if (isset($_POST['save'])) {
+	
+	var_dump($_POST['apikey']);
+	
+	if (isset($_POST['apikey'])) {
 		update_option('wb_apikey', serialize($_POST['apikey']));
-		update_option('wb_jsenabled', serialize($_POST['jsenabled']));
 	}
+	if (isset($_POST['whitelist'])) {
+		update_option('wb_whitelist', serialize($_POST['whitelist']));
+	}
+	if (isset($_POST['blacklist'])) {
+		update_option('wb_blacklist', serialize($_POST['blacklist']));
+	}
+	
 }
 
 function getDirContents($dir, &$results = array()){

@@ -26,6 +26,7 @@ function wizbui_callback(){
 // core Wizard.Build.Content File Saver
 add_action( 'admin_post_wb_save_hook', 'admin_post_wb_save_hook_callback' );
 function admin_post_wb_save_hook_callback() {
+	include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
 	include_once(__DIR__ . "/lib/phpQuery.php");
 	include(__DIR__ . "/data.save.php");
 }
@@ -34,8 +35,8 @@ function admin_post_wb_save_hook_callback() {
 add_action( 'admin_post_wb_get_hook', 'admin_post_wb_get_hook_callback' );
 function admin_post_wb_get_hook_callback() {
 	
-	define("WIZBUI_PLUGIN_PATH", ABSPATH . 'wp-content/plugins/content.wizard.build/');
 	include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
+	define("WIZBUI_PLUGIN_PATH", ABSPATH . 'wp-content/plugins/content.wizard.build/');
 	
 	// has been crawled
 	$crawled = array();

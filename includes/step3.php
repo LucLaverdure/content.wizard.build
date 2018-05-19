@@ -95,7 +95,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </div>
 </div>
 
-<p style="background:#cfc;padding:10px;">* Full selector sample: "static value %url% {{#id .class element[attribute=value]}}"</p>
+<p style="background:#cfc;padding:10px;">* Full selector sample: "static value %url% {{#id .class element[attribute=value]}} {{{regex}}}"</p>
 
 	<div class="save-wrapper">
 		<input type="submit" name="save" value="Save Mappings" style="background-color:#009900;color: #fff;padding:20px;font-size:16px;" />

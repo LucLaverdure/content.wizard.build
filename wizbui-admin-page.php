@@ -16,6 +16,7 @@ include_once "includes/helper.functions.php";
 
 <script type="text/javascript">
 	var PLUGIN_CACHE_URL = "<?php echo plugins_url(); ?>/cache/";
+	var WB_PLUGIN_URL = "<?php echo site_url(); ?>/";
 	<?php
 	// JS file only for this page
 	include "main.js";

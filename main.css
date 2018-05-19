@@ -1,7 +1,7 @@
 .red {
 	background:#dd0000 !important;	
 }
-input[type=submit] {
+input[type=submit], input[type=button] {
 	cursor:pointer;
 }
 .admin-wrap, .admin-wrap p, .admin-wrap span, input, textarea, select, option {
@@ -178,19 +178,9 @@ body .add-ct.add-field, body .add-ct.del-field,{
 body h2 .arrow-point {
 	font-size:30px;
 }
-textarea#urls {
-	width:1000px;
-}
 .progress-box {
 	margin-top:100px;
 	clear:both;
-}
-.crawled, .mapped {
-	line-height:25px;
-	height:25px;
-	clear:both;
-	margin: 20px 0;
-	display:block;
 }
 .crawled .total, .mapped .total {
 	line-height:25px;
@@ -207,12 +197,24 @@ textarea#urls {
 	width:0;
 	background: #00ff00;
 }
-.crawled-count, .crawled-total, .mapped-count, .mapped-total {
-	line-height:25px;
-	height:25px;
-	display:inline-block;
+
+.progress-box .crawled, .progress-box .mapped, .progress-box .key {
+	padding-top:40px;
+	width:238px;
+	height:150px;
+	text-align:center;
+	border:1px solid #000;
+	box-sizing: border-box;
+	margin-right:20px;
+	float:left;
+}
+.progress-box .crawled .crawled-count, .progress-box .mapped .mapped-count, .progress-box .key .tokens-count {
+	margin-top: 20px;
+	font-size:50px;
+	font-weight:bold;
+	box-sizing: border-box;
 }
 .head-f {
-	display:inline-block;
-	width:200px;
+	display: block;
+	margin-bottom:20px;
 }

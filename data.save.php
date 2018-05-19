@@ -5,17 +5,17 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
 
 function whitelist_check($urls_to_add, $path_origin) {
-	// verify domain whitelist
+	// verify whitelist
 	$urls_to_add_parsed = array();
 	foreach ($urls_to_add as $urlX) {
 		$urlX = pathme($path_origin, $urlX);
 		$pass = array();
-		$domains = get_whitelist();
-		if (count($domains) > 0) {
-			foreach($domains as $val) {
-				if ( strrpos($urlX, $val) !== false) $pass[] = $val;
+		$whitelist = get_whitelist();
+		if (count($whitelist) > 0) {
+			foreach ($whitelist as $val) {
+				if ( strrpos(trim($urlX), trim($val)) !== false) $pass[] = $val;
 			}
-			if (count($pass) == count($domains)) {
+			if (count($pass) == count($whitelist)) {
 				$urls_to_add_parsed[] = $urlX;
 			}
 		} else {
@@ -26,8 +26,8 @@ function whitelist_check($urls_to_add, $path_origin) {
 }
 
 function get_whitelist() {
-	$whitelist = $_REQUEST["whitelist"];
-	$whitelist = explode(";", $whitelist);
+	$whitelist = $_POST["whitelist"];
+	$whitelist = explode("\n", $whitelist);
 	if (count($whitelist) > 0)
 		return $whitelist;
 	else
@@ -74,13 +74,16 @@ function pathme($fromURL, $relURL) {
 
 if (is_admin()) {
 
-	$path = $_REQUEST["path"];
-	$path_origin = $_REQUEST["path"];
+	save_options();
 
+	if (isset($_POST["quicksave"])) {
+		die();
+	}
 	
-	update_option('wb_domains', serialize(implode("\n", get_whitelist())));
+	$path = $_POST["path"];
+	$path_origin = $_POST["path"];
 	
-	$path = str_replace("../", "", $_REQUEST["path"]);
+	$path = str_replace("../", "", $_POST["path"]);
 	try {	
 		chmod(__DIR__ . "/cache", 0777);
 	} catch (Exception $e) { 
@@ -89,7 +92,7 @@ if (is_admin()) {
 	
 	$path = __DIR__ . "/cache/" . $path;
 	
-	$data = base64_decode($_REQUEST["data"]);
+	$data = base64_decode($_POST["data"]);
 
 	if(!file_exists(dirname($path)))
 		mkdir(dirname($path), 0777, true);
@@ -98,7 +101,7 @@ if (is_admin()) {
 	file_put_contents($path, $data);
 
 	// add to list of crawled urls
-	file_put_contents(__DIR__ . "/cache/crawled.txt", pathme($path, $_REQUEST["url"])."\n", FILE_APPEND);
+	file_put_contents(__DIR__ . "/cache/crawled.txt", pathme($path, $_POST["url"])."\n", FILE_APPEND);
 	
 	//try {
 		
@@ -143,7 +146,7 @@ if (is_admin()) {
 			
 		}
 
-		// verify domain whitelist
+		// verify whitelist
 		$urls_to_add_parsed = whitelist_check($urls_to_add, $path_origin);
 
 		$urlsfile_path = __DIR__ . "/cache/crawl.me.txt";

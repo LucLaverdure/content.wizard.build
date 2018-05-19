@@ -1,28 +1,34 @@
 <?php
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 ?><div class="card urls" style="display:none;">
-	<h2>Step 2 - Get/Provide URLs list</h2>
+	<h2>Step 2 - Download data with crawler</h2>
 	<p>Crawl start entry URLs</p>
 
 
-	<div>
-		<p>
-		<span class="head">Domains allowed:</span>
-		<span class="body">
-	<textarea id="domains" type="text" name="starturl" placeholder="mydomain.com" wrap="off" style="height:200px;"><?php $opt = get_option('wb_domains', null); if ($opt !==  null) { echo unserialize($opt); } ?></textarea></span>
-		</p>
+	<div style="float:left;margin-right:50px;">
+		<div style="margin-bottom:10px;"><strong>Whitelist</strong> (url must match all lines):</div>
+		<div>
+	<textarea id="whitelist" type="text" name="starturl" placeholder="i.e. mydomain.com" wrap="off" style="height:500px;"><?php $opt = get_option('wb_whitelist', null); if ($opt !==  null) { echo unserialize($opt); } ?></textarea>
+		</div>
+	</div>
+		
+	<div style="float:left;margin-right:50px;">
+		<div style="margin-bottom:10px;"><strong>Blacklist</strong> (url must NOT match all lines):</div>
+		<div>
+	<textarea id="blacklist" type="text" name="blacklist" placeholder="i.e. zip" wrap="off" style="height:500px;"><?php $opt = get_option('wb_blacklist', null); if ($opt !==  null) { echo unserialize($opt); } ?></textarea></span>
+		</div>
 	</div>
 
-	<div>
-		<p>
-		<span class="head">URLs To Crawl:</span>
-		<span class="body">
-	<textarea id="urls" type="text" name="starturl" placeholder="http://target-website-to-crawl.com" wrap="off" style="height:500px;"><?php 
+	<div style="float:left;">
+		<div style="margin-bottom:10px;">URLs To <strong>Crawl</strong> (one URL per line):</div>
+		<div>
+	<textarea id="urls" type="text" name="starturl" placeholder="i.e. LucLaverdure.com" wrap="off" style="height:500px;width:600px;"><?php 
 	$path_to_crawl_me_file = WIZBUI_PLUGIN_PATH. "cache/crawl.me.txt";
 	if (file_exists($path_to_crawl_me_file)) echo file_get_contents($path_to_crawl_me_file);
-?></textarea></span>
-		</p>
+?></textarea>
+		</div>
 	</div>
+		
 
 	<div style="display:none">
 		<p>
@@ -53,12 +59,13 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		</p>
 	</div>
 	
-	<p>* One URL per line.</p>
+	<div style="clear:left;padding-top:20px;">
 	<p>
 		<label style="font-size:20px;"><input type="checkbox" name="jsenabled" value="Y"
 		<?php $opt = get_option('wb_jsenabled', null); if (($opt !==  null) && (unserialize($opt) == "Y")) { echo 'checked="checked"'; } ?>
 		/> Enable Post Javascript Crawl (Slows Performance)</label>
 	</p>
+	</div>
 	
 	<div class="save-wrapper tostep2">
 		<input type="submit" name="save" value="Delete ALL cached data" style="color: #fff;padding:20px;font-size:16px;" class="red"/>
