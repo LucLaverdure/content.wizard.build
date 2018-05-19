@@ -32,34 +32,34 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <p>
 <span class="head">Instance Container Tag:</span>
 <span class="body">
-	<input type="text" class="selector" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.post}}" />
+	<input type="text" class="selector instance_container" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.post}}" />
 </span>
 </p>
 
 <p>
 <span class="head">Validator</span>
 <span class="body">
-	<input type="text" class="selector" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.title}}" />
+	<input type="text" class="selector validator" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.title}}" />
 	
-	<select class="selector">
+	<select class="selector op">
 		<option selected="selected">Is not null/empty</option>
 		<option>Contains</option>
 		<option>Is equal to</option>
 	</select>
 	
-	<input type="text" class="selector" name="selector[]" placeholder="" value="" />
+	<input type="text" class="selector opeq" name="selector[]" placeholder="" value="" />
 </span>
 </p>
 
 <p>
 <span class="head">ID (Must be unique):</span>
 <span class="body">
-	<input type="text" class="selector" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="%url%" />
-	<select class="selector">
+	<input type="text" class="selector idsel" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="%url%" />
+	<select class="selector idop">
 		<option selected="selected">Text (Strip HTML Tags)</option>
 		<option>HTML (Keep HTML Tags)</option>
 	</select>
-	<select class="selector">
+	<select class="selector idopeq">
 		<?php include "dropdown-data-type.php"; ?>
 	</select>
 </span>
@@ -73,12 +73,12 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		<?php include "dropdown-simple-fields.php"; ?>
 	</select>
 <span class="body">
-	<input type="text" class="selector" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.title}}" />
-	<select class="selector">
+	<input type="text" class="selector fieldsel" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.title}}" />
+	<select class="selector fieldop">
 		<option>Text (Strip HTML Tags)</option>
 		<option>HTML (Keep HTML Tags)</option>
 	</select>
-	<select class="selector">
+	<select class="selector fieldopeq">
 		<?php include "dropdown-data-type.php"; ?>
 	</select>
 	<a href="#" class="del">Delete</a>
@@ -98,9 +98,9 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <p style="background:#cfc;padding:10px;">* Full selector sample: "static value %url% {{#id .class element[attribute=value]}} {{{regex}}}"</p>
 
 	<div class="save-wrapper">
-		<input type="submit" name="save" value="Save Mappings" style="background-color:#009900;color: #fff;padding:20px;font-size:16px;" />
+		<input type="button" name="save" value="Save Mappings" style="background-color:#009900;color: #fff;padding:20px;font-size:16px;" onclick="console.log(decompileMappings());return false;"/>
 
-		<input type="submit" name="run" value="Save Mappings & Run Import" style="background-color:#000099;color: #fff;padding:20px;font-size:16px;" />
+		<input type="button" name="run" value="Save Mappings & Run Import" style="background-color:#000099;color: #fff;padding:20px;font-size:16px;" />
 	</div>
 	
 </div>

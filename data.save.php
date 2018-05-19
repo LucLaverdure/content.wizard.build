@@ -13,13 +13,17 @@ function whitelist_check($urls_to_add, $path_origin) {
 		$whitelist = get_whitelist();
 		if (count($whitelist) > 0) {
 			foreach ($whitelist as $val) {
-				if ( strrpos(trim($urlX), trim($val)) !== false) $pass[] = $val;
+				if ((trim($urlX) != "") && (trim($val) != false)) {
+					if (strrpos(trim($urlX), trim($val)) !== false) {
+						$pass[] = $val;
+					}
+				}
 			}
 			if (count($pass) == count($whitelist)) {
-				$urls_to_add_parsed[] = $urlX;
+				$urls_to_add_parsed[] = trim($urlX);
 			}
 		} else {
-			$urls_to_add_parsed[] = $urlX;
+			$urls_to_add_parsed[] = trim($urlX);
 		}
 	}
 	return $urls_to_add_parsed;
@@ -28,10 +32,16 @@ function whitelist_check($urls_to_add, $path_origin) {
 function get_whitelist() {
 	$whitelist = $_POST["whitelist"];
 	$whitelist = explode("\n", $whitelist);
-	if (count($whitelist) > 0)
-		return $whitelist;
-	else
+	if (count($whitelist) > 0) {
+		$list = array();
+		foreach($whitelist as $listed) {
+			if (trim($listed) != "") $list[] = $listed;
+		}
+		var_dump($list);
+		return $list;
+	} else {
 		return array();
+	}
 }
 
 function get_dirs() {
@@ -49,10 +59,15 @@ function get_dirs() {
 
 function get_crawled_list() {
 	$list = explode("\n", @file_get_contents(__DIR__ . "/cache/crawled.txt"));
-	if (count($list)>0)
-		return $list;
-	else
-		return array();
+	if (count($list)>0) {
+		$filtered = array();
+		foreach ($list as $line) {
+			if (trim($line) != "") $filtered[] = trim($line);
+		}
+		return $filtered;
+	} 
+	
+	return array();
 }
 
 function pathme($fromURL, $relURL) {
@@ -152,30 +167,31 @@ if (is_admin()) {
 		$urlsfile_path = __DIR__ . "/cache/crawl.me.txt";
 		$contents = @file_get_contents($urlsfile_path);
 		$urls_ret = array();
+		
 		// remove duplicates in crawl.me.txt
-		if ($contents) {
+		if (trim($contents) != "") {
 			$alreadyin = explode("\n", $contents);
 			foreach ($urls_to_add_parsed as $url) {
-				if (!in_array($url, $alreadyin)) {
-					$urls_ret[$url] = $url;
+				if (!in_array(trim($url), $alreadyin)) {
+					$urls_ret[trim($url)] = trim($url);
 				}
 			}
 		} else {
 			// remove duplicates
 			foreach ($urls_to_add_parsed as $url) {
-				$urls_ret[$url] = $url;
+				$urls_ret[trim($url)] = trim($url);
 			}
 		}
 		
+		// already crawled urls
 		$cache_data = get_dirs();
 		$crawled = get_crawled_list();
-		
 		$cache_data = array_merge($crawled, $cache_data);
 		
 		$urls_ret_final = array();
 		foreach ($urls_ret as $url) {
-			if (!in_array($url, $cache_data))
-				$urls_ret_final[$url] = $url;
+			if (!in_array(trim($url), $cache_data))
+				$urls_ret_final[trim($url)] = trim($url);
 		}
 
 		// write urls to crawl to disk

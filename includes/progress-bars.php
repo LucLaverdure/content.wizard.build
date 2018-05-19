@@ -1,14 +1,14 @@
 <?php
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 ?><div class="progress-box">
+	<div class="key">
+		<span class="head-f">Licenced Tokens Left:</span>
+		<span class="tokens-count" id="counter">0</span>
+	</div>
 	<div class="crawled">
 		<div class="head-f">Downloads:</div>
 		<span class="crawled-count">0</span>
 <img src="http://content.wizard.build/wp-content/plugins/content.wizard.build/includes/../spinner.gif" style="width:25px;margin-left:10px;display:inline-block;display:none;" class="crawlspin">
-	</div>
-	<div class="key">
-		<span class="head-f">Licenced Tokens Left:</span>
-		<span class="tokens-count" id="counter">0</span>
 	</div>
 	<div class="mapped">
 		<span class="head-f">Mapped content:</span>

@@ -351,6 +351,71 @@ function stopCrawler() {
 	setStopped();
 }
 
+function compileMappings() {
+	
+	var c_array = [];
+	$(".box-map .box-container").each(function() {
+		var container = [];
+		// content type header
+		container.push("POSTYPE"); // post type
+		container.push($(this).find(".instance_container").val());
+		container.push($(this).find(".validator").val());
+		container.push($(this).find(".op").val());
+		container.push($(this).find(".opeq").val());
+		container.push($(this).find(".idsel").val());
+		container.push($(this).find(".idop").val());
+		container.push($(this).find(".idopeq").val());
+		
+		var fields = [];
+		$(this).find(".field-sub-wrap").each(function() {
+			var field = [];
+			field.push($(this).find(".field-map").val());
+			field.push($(this).find(".fieldsel").val());
+			field.push($(this).find(".fieldop").val());
+			field.push($(this).find(".fieldopeq").val());
+			
+			fields.push(field.join(";;;"));
+		});
+		
+		container.push(fields.join(">>>"));
+		
+		c_array.push(container.join("|||"))
+		
+	});
+	$stringify = c_array.join("<<<");
+
+	return $stringify;
+	
+}
+
+function decompileMappings($stringify) {
+	$stringify="POSTYPE|||{{.post}}|||{{.title}}|||Is not null/empty||||||%url%|||Text (Strip HTML Tags)|||String (Text)|||post_title;;;{{.title}};;;Text (Strip HTML Tags);;;String (Text)>>>post_title;;;{{.title}};;;Text (Strip HTML Tags);;;String (Text)>>>post_title;;;{{.title}};;;Text (Strip HTML Tags);;;String (Text)>>>post_title;;;{{.title}};;;Text (Strip HTML Tags);;;String (Text)<<<POSTYPE|||{{.post}}|||{{.title}}|||Is not null/empty||||||%url%|||Text (Strip HTML Tags)|||String (Text)|||post_title;;;{{.title}};;;Text (Strip HTML Tags);;;String (Text)>>>post_title;;;{{.title}};;;Text (Strip HTML Tags);;;String (Text)";
+	var ctype = $stringify.split("<<<");
+	
+	$.each(ctype, function(k, v) {
+		
+		var head = v.split("|||");
+		
+		$.each(head, function(kk, vv) {
+			
+			var field = vv.split(">>>");
+			
+			$.each(field, function(kkk, vvv) {
+				
+				var singleton = vvv.split(";;;");
+				
+				$.each(singleton, function(kkkk, vvvv) {
+					
+					console.log(vvvv);
+					
+				});
+				
+			});
+		});
+		
+	});
+}
+
 // Add Content type button click
 $(document).on("click", ".add-ct-click", function() {
 	$(".box-map").append($(".box-container-wrapper").clone().html().replace("%ptype%", $("#ctt").val()));
