@@ -357,7 +357,7 @@ function compileMappings() {
 	$(".box-map .box-container").each(function() {
 		var container = [];
 		// content type header
-		container.push("POSTYPE"); // post type
+		container.push($(this).find(".ptype").html()); // post type
 		container.push($(this).find(".instance_container").val());
 		container.push($(this).find(".validator").val());
 		container.push($(this).find(".op").val());
@@ -367,57 +367,112 @@ function compileMappings() {
 		container.push($(this).find(".idopeq").val());
 		
 		var fields = [];
-		$(this).find(".field-sub-wrap").each(function() {
+		$(this).find(".field-sub-wrap:visible").each(function() {
 			var field = [];
 			field.push($(this).find(".field-map").val());
 			field.push($(this).find(".fieldsel").val());
 			field.push($(this).find(".fieldop").val());
 			field.push($(this).find(".fieldopeq").val());
 			
-			fields.push(field.join(";;;"));
+			fields.push(field);
 		});
 		
-		container.push(fields.join(">>>"));
+		container.push(fields);
 		
-		c_array.push(container.join("|||"))
+		c_array.push(container)
 		
 	});
-	$stringify = c_array.join("<<<");
-
-	return $stringify;
+	var $stringify = c_array;
 	
+	var ret = JSON.stringify($stringify);
+	
+	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_save_hook",
+			  {
+				mappings: ret,
+				quicksave: "true"
+			  },
+			  function() {
+				  // meh
+			  }
+	)
 }
 
 function decompileMappings($stringify) {
-	$stringify="POSTYPE|||{{.post}}|||{{.title}}|||Is not null/empty||||||%url%|||Text (Strip HTML Tags)|||String (Text)|||post_title;;;{{.title}};;;Text (Strip HTML Tags);;;String (Text)>>>post_title;;;{{.title}};;;Text (Strip HTML Tags);;;String (Text)>>>post_title;;;{{.title}};;;Text (Strip HTML Tags);;;String (Text)>>>post_title;;;{{.title}};;;Text (Strip HTML Tags);;;String (Text)<<<POSTYPE|||{{.post}}|||{{.title}}|||Is not null/empty||||||%url%|||Text (Strip HTML Tags)|||String (Text)|||post_title;;;{{.title}};;;Text (Strip HTML Tags);;;String (Text)>>>post_title;;;{{.title}};;;Text (Strip HTML Tags);;;String (Text)";
-	var ctype = $stringify.split("<<<");
 	
-	$.each(ctype, function(k, v) {
-		
-		var head = v.split("|||");
-		
-		$.each(head, function(kk, vv) {
-			
-			var field = vv.split(">>>");
-			
-			$.each(field, function(kkk, vvv) {
-				
-				var singleton = vvv.split(";;;");
-				
-				$.each(singleton, function(kkkk, vvvv) {
-					
-					console.log(vvvv);
-					
-				});
-				
-			});
+	var json = JSON.parse($stringify);
+	
+	// start from scratch
+	$(".box-map").html("");
+	
+	// load data
+	$.each(json, function(k, main) { // main
+		var boxMap = $(".box-map");
+		$(".box-map").append($(".box-container-wrapper").clone().html());
+		var $this_element = $(".box-map").find(".box-container").last();
+		var inc = 0;
+		$.each(main, function(kkk, field) { // field
+			inc++;
+			switch (inc) {
+				case 1:
+					$this_element.find(".ptype").html(field); // post type
+					break;
+				case 2:
+					$this_element.find(".instance_container").val(field);
+					break;
+				case 3:
+					$this_element.find(".validator").val(field);
+					break;
+				case 4:
+					$this_element.find(".op").val(field);
+					break;
+				case 5:
+					$this_element.find(".opeq").val(field);
+					break;
+				case 6:
+					$this_element.find(".idsel").val(field);
+					break;
+				case 7:
+					$this_element.find(".idop").val(field);
+					break;
+				case 8:
+					$this_element.find(".idopeq").val(field);
+					break;
+			}
+			if (inc > 8) {
+				if (Array.isArray(field)) {
+					$.each(field, function(ka, dig) { // row
+						$this_element.find(".fold").append(
+							$this_element.find(".field-wrap").clone().html()
+						);
+						
+						var row_counter = 0;
+						$.each(dig, function(ka, row) { // row
+							row_counter++;
+							switch (row_counter) {
+								case 1:
+									$this_element.find(".fold .field-sub-wrap").last().find(".field-map").val(row);
+									break;
+								case 2:
+									$this_element.find(".fold .field-sub-wrap").last().find(".fieldsel").val(row);
+									break;
+								case 3:
+									$this_element.find(".fold .field-sub-wrap").last().find(".fieldop").val(row);
+									break;
+								case 4:
+									$this_element.find(".fold .field-sub-wrap").last().find(".fieldopeq").val(row);
+									$this_element.find(".fold .field-sub-wrap").last().show();
+									break;
+							}
+						});
+					});
+				}
+			}
 		});
-		
 	});
 }
 
 // Add Content type button click
-$(document).on("click", ".add-ct-click", function() {
+$(document).on("click", ".add-ct.add-ct-click", function() {
 	$(".box-map").append($(".box-container-wrapper").clone().html().replace("%ptype%", $("#ctt").val()));
 	return false;
 });
@@ -430,9 +485,9 @@ $(document).on("click", ".del-field", function() {
 
 
 // Add new field button click
-$(document).on("click", ".add-field", function() {
-	$(this).parents(".box-container .fold").append(
-		$(this).parents(".box-container").find(".field-wrap").html()
+$(document).on("click", ".add-ct.add-field", function() {
+	$(this).parents(".box-container").find(".fold").append(
+		$(this).parents(".box-container").find(".field-wrap").clone().html()
 	);
 	return false;
 });

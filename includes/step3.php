@@ -25,7 +25,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <div class="box-container-wrapper" style="display:none;">
 <div class="box-container">
 
-<h2>%ptype% <span class="arrow-point">&uArr;</span><span class="arrow-point" style="display:none;">&dArr;</span></h2>
+<h2><span class="ptype">%ptype%</span> <span class="arrow-point">&uArr;</span><span class="arrow-point" style="display:none;">&dArr;</span></h2>
 <div class="fold">
 
 
@@ -98,9 +98,10 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <p style="background:#cfc;padding:10px;">* Full selector sample: "static value %url% {{#id .class element[attribute=value]}} {{{regex}}}"</p>
 
 	<div class="save-wrapper">
-		<input type="button" name="save" value="Save Mappings" style="background-color:#009900;color: #fff;padding:20px;font-size:16px;" onclick="console.log(decompileMappings());return false;"/>
+		<input type="button" name="save" value="Save Mappings" style="background-color:#009900;color: #fff;padding:20px;font-size:16px;" onclick="compileMappings();return false;"/>
 
 		<input type="button" name="run" value="Save Mappings & Run Import" style="background-color:#000099;color: #fff;padding:20px;font-size:16px;" />
 	</div>
 	
 </div>
+

@@ -15,6 +15,9 @@ function save_options() {
 	if (isset($_POST['blacklist'])) {
 		update_option('wb_blacklist', serialize($_POST['blacklist']));
 	}
+	if (isset($_POST['mappings'])) {
+		update_option('wb_mappings', serialize($_POST['mappings']));
+	}
 	
 }
 
