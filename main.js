@@ -392,7 +392,8 @@ function compileMappings() {
 				quicksave: "true"
 			  },
 			  function() {
-				  // meh
+					window.scrollTo(0,0);
+					$(".wbmsg").fadeIn();
 			  }
 	)
 }
