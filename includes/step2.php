@@ -74,6 +74,22 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<div style="clear:left;padding-top:20px;">
 	<p>
 		<label style="font-size:20px;"><input type="checkbox" name="jsenabled" value="Y"
+		<?php $opt = get_option('wb_get_disabled', null); if (($opt !==  null) && (unserialize($opt) == "Y")) { echo 'checked="checked"'; } ?>
+		/> Remove GET parameters from URLs (?get=param)</label>
+	</p>
+	</div>
+
+	<div style="clear:left;padding-top:0;">
+	<p>
+		<label style="font-size:20px;"><input type="checkbox" name="jsenabled" value="Y"
+		<?php $opt = get_option('wb_hash_disabled', null); if (($opt !==  null) && (unserialize($opt) == "Y")) { echo 'checked="checked"'; } ?>
+		/> Remove Hash parameters from URLs (#hash_state)</label>
+	</p>
+	</div>
+
+	<div style="clear:left;padding-top:0;">
+	<p>
+		<label style="font-size:20px;"><input type="checkbox" name="jsenabled" value="Y"
 		<?php $opt = get_option('wb_jsenabled', null); if (($opt !==  null) && (unserialize($opt) == "Y")) { echo 'checked="checked"'; } ?>
 		/> Enable Post Javascript Crawl (Slows Performance)</label>
 	</p>

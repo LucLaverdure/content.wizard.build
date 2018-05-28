@@ -16,7 +16,7 @@ wp_enqueue_style("wiz.css", plugin_dir_url( __FILE__ )."/wiz.css");
 // core Wizard.Build.Content admin panel
 add_action('admin_menu', 'wizbui_setup_menu');
 function wizbui_setup_menu(){
-	add_menu_page( 'Content Wizard Build', 'Wizard.Build', 'manage_options', 'content-wizard-build', 'wizbui_callback', plugin_dir_url( __FILE__ ) ."/wizard.png" );
+	add_menu_page( 'Content Wizard Build', 'Wizard.Build', 'manage_options', 'content-wizard-build', 'wizbui_callback', plugin_dir_url( __FILE__ ) ."/wizard-white.png" );
 }
 function wizbui_callback(){
 	include_once(__DIR__ . "/lib/phpQuery.php");
