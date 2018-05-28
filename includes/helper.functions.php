@@ -102,4 +102,140 @@ function get_all_posts_fields() {
 	return $fields;
 }
 
+
+function whitelist_check($urls_to_add, $path_origin) {
+	// verify whitelist
+	$urls_to_add_parsed = array();
+	foreach ($urls_to_add as $urlX) {
+		if (trim($path_origin) != "") {
+			$urlX = pathme($path_origin, $urlX);
+		}
+		$pass = array();
+		$whitelist = get_whitelist();
+		if (count($whitelist) > 0) {
+			foreach ($whitelist as $val) {
+				if ((trim($urlX) != "") && (trim($val) != false)) {
+					if (strrpos(trim($urlX), trim($val)) !== false) {
+						$pass[] = $val;
+					}
+				}
+			}
+			if (count($pass) == count($whitelist)) {
+				$urls_to_add_parsed[] = trim($urlX);
+			}
+		} else {
+			$urls_to_add_parsed[] = trim($urlX);
+		}
+	}
+	return $urls_to_add_parsed;
+}
+
+function blacklist_check($urls_to_add, $path_origin) {
+	// verify blacklist
+	$urls_to_add_parsed = array();
+	foreach ($urls_to_add as $urlX) {
+		if (trim($path_origin) != "") {
+			$urlX = pathme($path_origin, $urlX);
+		}
+		$pass = true;
+		$blacklist = get_blacklist();
+		if (count($blacklist) > 0) {
+			foreach ($blacklist as $val) {
+				if ((trim($urlX) != "") && (trim($val) != false)) {
+					if (strrpos(trim($urlX), trim($val)) !== false) {
+						$pass = false;
+					}
+				}
+			}
+			if ($pass == true) {
+				$urls_to_add_parsed[] = trim($urlX);
+			}
+		} else {
+			$urls_to_add_parsed[] = trim($urlX);
+		}
+	}
+	return $urls_to_add_parsed;
+}
+
+function get_blacklist() {
+	$opt = get_option('wb_blacklist', null);
+	return explode("\n", unserialize($opt));
+	/*
+	$blacklist = $_POST["blacklist"];
+	$blacklist = explode("\n", $blacklist);
+	if (count($blacklist) > 0) {
+		$list = array();
+		foreach($blacklist as $listed) {
+			if (trim($listed) != "") $list[] = $listed;
+		}
+		return $list;
+	} else {
+		return array();
+	}
+	*/
+}
+
+
+function get_whitelist() {
+	$opt = get_option('wb_whitelist', null);
+	return explode("\n", unserialize($opt));
+	
+	/*
+	$whitelist = $_POST["whitelist"];
+	$whitelist = explode("\n", $whitelist);
+	if (count($whitelist) > 0) {
+		$list = array();
+		foreach($whitelist as $listed) {
+			if (trim($listed) != "") $list[] = $listed;
+		}
+		return $list;
+	} else {
+		return array();
+	}
+	*/
+}
+
+
+function get_dirs() {
+	$path_init = WIZBUI_PLUGIN_PATH . "cache";
+	if(!file_exists(dirname($path_init))) {
+		@mkdir(dirname($path_init), 0777, true);
+	}
+	$dirs = getDirContents($path_init);
+	$dir_array = array();
+	foreach($dirs as $dirX) {
+		$dir_array[] = "http://".str_replace(WIZBUI_PLUGIN_PATH."cache/", '', $dirX."\n");
+	}
+	return $dir_array;
+}
+
+function get_crawled_list() {
+	$list = explode("\n", @file_get_contents(__DIR__ . "/cache/crawled.txt"));
+	if (count($list)>0) {
+		$filtered = array();
+		foreach ($list as $line) {
+			if (trim($line) != "") $filtered[] = trim($line);
+		}
+		return $filtered;
+	} 
+	
+	return array();
+}
+
+function pathme($fromURL, $relURL) {
+	if (strpos($relURL, 'http') === false) {
+		if (strpos($fromURL, 'http') === false) {
+			$fromURL = explode("/", $fromURL);
+			$relURL = "http://".$fromURL[0]."/".$relURL;
+		} else {
+			$fromURL = explode("/", $fromURL);
+			$relURL = $fromURL[0]."/".$relURL;
+		}
+	}
+	
+	$relURL = str_replace("//", "/", $relURL);
+	$relURL = str_replace("http:/", "http://", $relURL);
+	$relURL = str_replace("https:/", "https://", $relURL);
+	return $relURL;
+}
 ?>

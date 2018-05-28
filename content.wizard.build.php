@@ -68,6 +68,16 @@ function admin_post_wb_get_hook_callback() {
 		}
 	}
 
+	if ( (isset($_GET["path"])) && (trim($_GET["path"]) != "") ) {
+		$to_crawl_ret = whitelist_check($to_crawl_ret, urldecode($_GET["path"]));
+		$to_crawl_ret = blacklist_check($to_crawl_ret, urldecode($_GET["path"]));
+	} elseif ( (isset($_POST["path"])) && (trim($_POST["path"]) != "") ) {
+		$to_crawl_ret = whitelist_check($to_crawl_ret, urldecode($_POST["path"]));
+		$to_crawl_ret = blacklist_check($to_crawl_ret, urldecode($_POST["path"]));
+	} else {
+		$to_crawl_ret = whitelist_check($to_crawl_ret, "");
+		$to_crawl_ret = blacklist_check($to_crawl_ret, "");
+	}
 	echo json_encode(array( "to_crawl" => $to_crawl_ret, "crawled" => $crawled));
 	
 }

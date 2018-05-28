@@ -4,88 +4,6 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
 
-function whitelist_check($urls_to_add, $path_origin) {
-	// verify whitelist
-	$urls_to_add_parsed = array();
-	foreach ($urls_to_add as $urlX) {
-		$urlX = pathme($path_origin, $urlX);
-		$pass = array();
-		$whitelist = get_whitelist();
-		if (count($whitelist) > 0) {
-			foreach ($whitelist as $val) {
-				if ((trim($urlX) != "") && (trim($val) != false)) {
-					if (strrpos(trim($urlX), trim($val)) !== false) {
-						$pass[] = $val;
-					}
-				}
-			}
-			if (count($pass) == count($whitelist)) {
-				$urls_to_add_parsed[] = trim($urlX);
-			}
-		} else {
-			$urls_to_add_parsed[] = trim($urlX);
-		}
-	}
-	return $urls_to_add_parsed;
-}
-
-function get_whitelist() {
-	$whitelist = $_POST["whitelist"];
-	$whitelist = explode("\n", $whitelist);
-	if (count($whitelist) > 0) {
-		$list = array();
-		foreach($whitelist as $listed) {
-			if (trim($listed) != "") $list[] = $listed;
-		}
-		var_dump($list);
-		return $list;
-	} else {
-		return array();
-	}
-}
-
-function get_dirs() {
-	$path_init = WIZBUI_PLUGIN_PATH . "cache";
-	if(!file_exists(dirname($path_init))) {
-		@mkdir(dirname($path_init), 0777, true);
-	}
-	$dirs = getDirContents($path_init);
-	$dir_array = array();
-	foreach($dirs as $dirX) {
-		$dir_array[] = "http://".str_replace(WIZBUI_PLUGIN_PATH."cache/", '', $dirX."\n");
-	}
-	return $dir_array;
-}
-
-function get_crawled_list() {
-	$list = explode("\n", @file_get_contents(__DIR__ . "/cache/crawled.txt"));
-	if (count($list)>0) {
-		$filtered = array();
-		foreach ($list as $line) {
-			if (trim($line) != "") $filtered[] = trim($line);
-		}
-		return $filtered;
-	} 
-	
-	return array();
-}
-
-function pathme($fromURL, $relURL) {
-	if (strpos($relURL, 'http') === false) {
-		if (strpos($fromURL, 'http') === false) {
-			$fromURL = explode("/", $fromURL);
-			$relURL = "http://".$fromURL[0]."/".$relURL;
-		} else {
-			$fromURL = explode("/", $fromURL);
-			$relURL = $fromURL[0]."/".$relURL;
-		}
-	}
-	
-	$relURL = str_replace("//", "/", $relURL);
-	$relURL = str_replace("http:/", "http://", $relURL);
-	$relURL = str_replace("https:/", "https://", $relURL);
-	return $relURL;
-}
 
 if (is_admin()) {
 
@@ -94,11 +12,27 @@ if (is_admin()) {
 	if (isset($_POST["quicksave"])) {
 		die();
 	}
+
+	$path = "";
+	$path_origin = "";
+	if (isset($_POST["path"])) {
+		$path = $_POST["path"];
+		$path_origin = $_POST["path"];
+	} elseif (isset($_GET["path"])) {
+		$path = $_GET["path"];
+		$path_origin = $_GET["path"];
+	}
+
+	// prevent path hacks
+	$path = str_replace("../", "", $path);
 	
-	$path = $_POST["path"];
-	$path_origin = $_POST["path"];
-	
-	$path = str_replace("../", "", $_POST["path"]);
+	// fix filenames for get query parameters
+	$path = str_replace("?", "_", $path);
+
+	// fix filenames for php files
+	$ext = substr($path, strrpos($path, '.') + 1);
+	$path = str_replace(array(".php", ".php3", ".php4", ".php5", ".phtml"), ".html", $path);
+
 	try {	
 		chmod(__DIR__ . "/cache", 0777);
 	} catch (Exception $e) { 
@@ -113,7 +47,8 @@ if (is_admin()) {
 		mkdir(dirname($path), 0777, true);
 
 	// save crawl file
-	file_put_contents($path, $data);
+	if(!file_exists($path))
+		file_put_contents($path, $data);
 
 	// add to list of crawled urls
 	file_put_contents(__DIR__ . "/cache/crawled.txt", pathme($path, $_POST["url"])."\n", FILE_APPEND);
@@ -129,7 +64,7 @@ if (is_admin()) {
 		} elseif ($ext=="js") {
 			// TODO: nothing
 		} elseif (in_array($ext, array("php", ".php", ".php3", ".php4", ".php5", ".phtml"))) {
-			// TODO: secure file
+			// secure file, fixed at save level
 		} else {
 			/* get links (a href)
 			*  get meta links (link href)
@@ -162,7 +97,9 @@ if (is_admin()) {
 		}
 
 		// verify whitelist
-		$urls_to_add_parsed = whitelist_check($urls_to_add, $path_origin);
+		$urls_to_add = whitelist_check($urls_to_add, $path_origin);
+		// verify blacklist
+		$urls_to_add = blacklist_check($urls_to_add, $path_origin);
 
 		$urlsfile_path = __DIR__ . "/cache/crawl.me.txt";
 		$contents = @file_get_contents($urlsfile_path);
@@ -171,14 +108,14 @@ if (is_admin()) {
 		// remove duplicates in crawl.me.txt
 		if (trim($contents) != "") {
 			$alreadyin = explode("\n", $contents);
-			foreach ($urls_to_add_parsed as $url) {
+			foreach ($urls_to_add as $url) {
 				if (!in_array(trim($url), $alreadyin)) {
 					$urls_ret[trim($url)] = trim($url);
 				}
 			}
 		} else {
 			// remove duplicates
-			foreach ($urls_to_add_parsed as $url) {
+			foreach ($urls_to_add as $url) {
 				$urls_ret[trim($url)] = trim($url);
 			}
 		}

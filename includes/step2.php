@@ -8,14 +8,14 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<div style="float:left;margin-right:50px;">
 		<div style="margin-bottom:10px;"><strong>Whitelist</strong> (url must match all lines):</div>
 		<div>
-	<textarea id="whitelist" type="text" name="starturl" placeholder="i.e. mydomain.com" wrap="off" style="height:500px;"><?php $opt = get_option('wb_whitelist', null); if ($opt !==  null) { echo unserialize($opt); } ?></textarea>
+	<textarea id="whitelist" type="text" name="starturl" placeholder="i.e. mydomain.com" wrap="off" style="height:500px;"><?php $opt = get_option('wb_whitelist', null); if ($opt !==  null) { echo unserialize($opt); $_POST["whitelist"] = unserialize($opt);} ?></textarea>
 		</div>
 	</div>
 		
 	<div style="float:left;margin-right:50px;">
 		<div style="margin-bottom:10px;"><strong>Blacklist</strong> (url must NOT match all lines):</div>
 		<div>
-	<textarea id="blacklist" type="text" name="blacklist" placeholder="i.e. zip" wrap="off" style="height:500px;"><?php $opt = get_option('wb_blacklist', null); if ($opt !==  null) { echo unserialize($opt); } ?></textarea></span>
+	<textarea id="blacklist" type="text" name="blacklist" placeholder="i.e. zip" wrap="off" style="height:500px;"><?php $opt = get_option('wb_blacklist', null); if ($opt !==  null) { echo unserialize($opt); $_POST["blacklist"] = unserialize($opt); } ?></textarea></span>
 		</div>
 	</div>
 
@@ -24,7 +24,19 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		<div>
 	<textarea id="urls" type="text" name="starturl" placeholder="i.e. LucLaverdure.com" wrap="off" style="height:500px;width:600px;"><?php 
 	$path_to_crawl_me_file = WIZBUI_PLUGIN_PATH. "cache/crawl.me.txt";
-	if (file_exists($path_to_crawl_me_file)) echo file_get_contents($path_to_crawl_me_file);
+	if (file_exists($path_to_crawl_me_file)) {
+		$list = file_get_contents($path_to_crawl_me_file);
+	
+		$list = explode("\n", $list);
+		
+		// verify whitelist
+		$list = whitelist_check($list, "");
+		// verify blacklist
+		$list = blacklist_check($list, "");
+		
+		echo implode("\n", $list);
+	}
+
 ?></textarea>
 		</div>
 	</div>
@@ -70,7 +82,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<div class="save-wrapper tostep2">
 		<input type="submit" name="save" value="Delete ALL cached data" style="color: #fff;padding:20px;font-size:16px;" class="red"/>
 		<input class="crawlnow" type="button" name="save" value="Crawl URLs" onclick="initCrawler();" style="color: #fff;padding:20px;font-size:16px;"/>
-		<input class="crawlstop" type="button" name="save" value="Stop crawler" onclick="stopCrawler();" style="color: #fff;padding:20px;font-size:16px;"/>
+		<input class="crawlstop" type="button" name="save" value="Stop crawler" onclick="stopCrawler();window.location='';" style="color: #fff;padding:20px;font-size:16px;"/>
 	</div>
 	<div class="">
 		<p>* Files &amp; URLs will be saved to</p>

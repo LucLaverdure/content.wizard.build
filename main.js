@@ -185,9 +185,10 @@ var crawlUrl = function(url, path) {
 				$.ajax({
 					url: WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_get_hook",
 					dataType: 'json',
+					data: {path: encodeURIComponent(path)},
 					context: document.body,
 					success: function(data, textStatus, jqXHR) {
-						if (data.to_crawl.length > 0) {
+						if (data.to_crawl.length > 0) {							
 							$('#urls').val(data.to_crawl.join("\n"));
 							window.crawlList = data.to_crawl;
 						} else {
@@ -217,9 +218,10 @@ var crawlUrl = function(url, path) {
 	});
 }
 
+
 // verify if url is already cached, if not add to crawl list
 // crawlUrl(urlX, urlCached);
-var crawlUrlExists = function(urlX) {
+var crawlUrlExists = function(urlX, onlyCheckURL = false) {
 	
 	// verify whitelist
 	var pass = [];
@@ -230,7 +232,23 @@ var crawlUrlExists = function(urlX) {
 	if (pass.length != whitelist.length) {
 		window.crawledList.push(urlX);
 		$("#urls-errors").append(urlX+"\n");
-		return;
+		return false;
+	}
+	
+	/* verify blacklist */
+	var pass_black = true;
+	var blacklist = $('#blacklist').val().split("\n");
+	for (key in blacklist) {
+		if (urlX.indexOf($.trim(blacklist[key])) != -1) pass_black = false;
+	}
+	if (pass_black == false) {
+		window.crawledList.push(urlX);
+		$("#urls-errors").append(urlX+"\n");
+		return false;
+	}
+	
+	if (onlyCheckURL) {
+		return true;
 	}
 	
 	var urlMod = urlX.replace("http://", "");
@@ -242,6 +260,20 @@ var crawlUrlExists = function(urlX) {
 		urlCached.push("index.html");
 	}
 	urlCached = urlCached.join("/");
+
+/*
+	frontend fixes to match backend
+*/
+	// prevent path hacks
+	urlCached = urlCached.replace(/\.\.\//g, "");
+	// fix filenames for get query parameters
+	urlCached = urlCached.replace(/\?/g, "_");
+	// fix filenames for php files
+	var forbidden = [".php", ".php3", ".php4", ".php5", ".phtml"];
+	for (key in forbidden) {
+		urlCached = urlCached.replace(forbidden[key], ".html");
+	}
+	
 	var urlModded = PLUGIN_CACHE_URL + urlCached;
 	setInProgress();
 	$.ajax({
@@ -298,7 +330,6 @@ function ini_crawl_stats() {
 	});
 
 	window.crawlList = switcharoo;
-	window.crawlList.sort();
 	
 	$('#urls').val(window.crawlList.join("\n"));
 	
@@ -330,7 +361,6 @@ function initCrawler() {
 		if($.inArray(el, switcharoo) === -1) switcharoo.push(el);
 	});
 	window.crawlList = switcharoo;
-	window.crawlList.sort();
 	$('#urls').val(window.crawlList.join("\n"));
 	
 	setInProgress();

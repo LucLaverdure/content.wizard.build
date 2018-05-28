@@ -6,7 +6,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		<span class="tokens-count" id="counter">0</span>
 	</div>
 	<div class="crawled">
-		<div class="head-f">Downloads:</div>
+		<div class="head-f">Sanitized Downloads:</div>
 		<span class="crawled-count">0</span>
 <img src="http://content.wizard.build/wp-content/plugins/content.wizard.build/includes/../spinner.gif" style="width:25px;margin-left:10px;display:inline-block;display:none;" class="crawlspin">
 	</div>
