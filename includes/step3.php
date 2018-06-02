@@ -80,7 +80,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <div class="field-sub-wrap">
 <p>
 	<select name="field" class="field-map head">
-		<?php include "dropdown-simple-fields.php"; ?>
+		<?php include "dropdown-full-fields.php"; ?>
 	</select>
 <span class="body">
 	<input type="text" class="selector fieldsel" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.title}}" />

@@ -574,10 +574,24 @@ function setFrames() {
 		var $body = $('body', doc);
 		$body.on("click", function(e) { // assign a handler
 			$("#taglist", window.top.document).html("");
+			$(e.target).each(function(ii,el) {
+				var str = "";
+				
+				var tag = $(el).prop("tagName").toLowerCase();
+				if (typeof tag != "undefined") { str += tag}
+
+				var id = $(el).attr('id');
+				if (typeof id != "undefined") { str += " #" + id}
+
+				var cl = $(el).attr('class');
+				if (typeof cl != "undefined") { str += " ." + cl}
+
+				$("#taglist", window.top.document).append("<option>"+str+"</option>");
+			})
 			$(e.target).parents().each(function(ii, el) {
 				var str = "";
 				
-				var tag = $(el).prop("tagName");
+				var tag = $(el).prop("tagName").toLowerCase();
 				if (typeof tag != "undefined") { str += tag}
 
 				var id = $(el).attr('id');
