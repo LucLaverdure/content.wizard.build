@@ -218,3 +218,48 @@ body h2 .arrow-point {
 	display: block;
 	margin-bottom:20px;
 }
+.wiz-pick {
+	display: inline-block;
+	height:26px;
+	width:26px;
+	padding:4px;
+	box-sizing:border-box;
+	margin: 0 10px;
+}
+.wiz-pick img {
+	display: inline-block;
+	height:23px;
+	width:23px;
+}
+
+body .ui-widget-overlay {
+	background: #000;
+	opacity: .5;
+}
+
+.taglist {
+	margin-bottom:20px;
+}
+
+#wizsetter {
+	display:inline-block;
+	width:150px;
+}
+
+#savefilter {
+	display:inline-block;
+	width:150px;
+	background: #009900;
+	color:#fff;
+	font-weight:bold;
+}
+
+#magicframe {
+	margin-top:20px;
+}
+
+#magicfile, #taglist, #wizsetter, #tag, #savefilter {
+	font-size:20px;
+	line-height:24px;
+	height:40px;
+}

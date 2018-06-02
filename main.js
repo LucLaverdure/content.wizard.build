@@ -13,6 +13,7 @@
 	window.MappedURLsCount = 0;
 	window.MappedURLsTotal = 0;
 
+	window.magicfield = [];
 
 // sleep function
 function sleep (time) {
@@ -535,3 +536,68 @@ $(document).on("click", ".box-container h2", function() {
 	$(this).parents(".box-container").find(".arrow-point").toggle();
 	return false;
 });
+
+$(document).on("click", ".wiz-pick", function() {
+	
+	window.magicfield = $(this).parents(".body").first().find("input.selector");
+	
+	$( ".magic-pick #tag" ).val($(this).parents(".body").first().find("input.selector").val());
+	
+	$( ".magic-pick" ).dialog({
+		title: "Magic Selection",
+		width: 1024,
+		height: 850,
+		modal: true,
+		resizable: false,
+		draggable: false
+	});
+	return false;
+});
+
+$(document).on("click", "#savefilter", function() {
+	window.magicfield.val($("#tag").val());
+	$( ".magic-pick" ).dialog("close");
+});
+
+
+
+function magicgo() {
+	$("#magicframe").attr("src", WB_PLUGIN_URL + "wp-content/plugins/content.wizard.build/cache/" + 	$("#magicfile").val());
+	
+	setFrames();
+}
+
+function setFrames() {
+
+	setTimeout( function() {
+		var doc = $("iframe").first()[0].contentWindow.document;
+		var $body = $('body', doc);
+		$body.on("click", function(e) { // assign a handler
+			$("#taglist", window.top.document).html("");
+			$(e.target).parents().each(function(ii, el) {
+				var str = "";
+				
+				var tag = $(el).prop("tagName");
+				if (typeof tag != "undefined") { str += tag}
+
+				var id = $(el).attr('id');
+				if (typeof id != "undefined") { str += " #" + id}
+
+				var cl = $(el).attr('class');
+				if (typeof cl != "undefined") { str += " ." + cl}
+
+				$("#taglist", window.top.document).append("<option>"+str+"</option>");
+			});
+			return false;
+		});
+	}, 1000);
+}
+
+
+$(function() {
+	setFrames();
+});
+
+function setTag() {
+	$("#tag").val("{{"+$("#taglist").val()+"}}");
+}

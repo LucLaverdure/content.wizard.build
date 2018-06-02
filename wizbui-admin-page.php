@@ -48,6 +48,9 @@ include_once "includes/helper.functions.php";
 	// Step 3 tab: Mappings
 	include "includes/step3.php";
 
+	// Magic picker modal
+	include "includes/magic-picker.php";
+	
 ?>
 
 </div>

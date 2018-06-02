@@ -34,6 +34,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <span class="head">Instance Container Tag:</span>
 <span class="body">
 	<input type="text" class="selector instance_container" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.post}}" />
+	<a href="#" class="wiz-pick"><img src="<?php echo plugin_dir_url( __FILE__ )."../edit.png"; ?>" /></a>
 </span>
 </p>
 
@@ -41,6 +42,9 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <span class="head">Validator</span>
 <span class="body">
 	<input type="text" class="selector validator" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.title}}" />
+	
+	<a href="#" class="wiz-pick"><img src="<?php echo plugin_dir_url( __FILE__ )."../edit.png"; ?>" /></a>
+
 	
 	<select class="selector op">
 		<option selected="selected">Is not null/empty</option>
@@ -56,10 +60,15 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <span class="head">ID (Must be unique):</span>
 <span class="body">
 	<input type="text" class="selector idsel" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="%url%" />
+	
+	<a href="#" class="wiz-pick"><img src="<?php echo plugin_dir_url( __FILE__ )."../edit.png"; ?>" /></a>
+
+	
 	<select class="selector idop">
 		<option selected="selected">Text (Strip HTML Tags)</option>
 		<option>HTML (Keep HTML Tags)</option>
 	</select>
+	
 	<select class="selector idopeq">
 		<?php include "dropdown-data-type.php"; ?>
 	</select>
@@ -75,10 +84,15 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	</select>
 <span class="body">
 	<input type="text" class="selector fieldsel" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.title}}" />
+	
+	<a href="#" class="wiz-pick"><img src="<?php echo plugin_dir_url( __FILE__ )."../edit.png"; ?>" /></a>
+
+	
 	<select class="selector fieldop">
 		<option>Text (Strip HTML Tags)</option>
 		<option>HTML (Keep HTML Tags)</option>
 	</select>
+	
 	<select class="selector fieldopeq">
 		<?php include "dropdown-data-type.php"; ?>
 	</select>

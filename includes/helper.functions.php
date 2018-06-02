@@ -209,6 +209,19 @@ function get_dirs() {
 	return $dir_array;
 }
 
+function get_real_dirs() {
+	$path_init = WIZBUI_PLUGIN_PATH . "cache";
+	if(!file_exists(dirname($path_init))) {
+		@mkdir(dirname($path_init), 0777, true);
+	}
+	$dirs = getDirContents($path_init);
+	$dir_array = array();
+	foreach($dirs as $dirX) {
+		$dir_array[] = str_replace(WIZBUI_PLUGIN_PATH."cache/", '', $dirX);
+	}
+	return $dir_array;
+}
+
 function get_crawled_list() {
 	$list = explode("\n", @file_get_contents(__DIR__ . "/cache/crawled.txt"));
 	if (count($list)>0) {
