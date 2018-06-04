@@ -539,18 +539,19 @@ $(document).on("click", ".box-container h2", function() {
 
 $(document).on("click", ".wiz-pick", function() {
 	
-	window.magicfield = $(this).parents(".body").first().find("input.selector");
+	window.magicfield = $(this).parents(".body").first().find("input.selector").first();
 	
-	$( ".magic-pick #tag" ).val($(this).parents(".body").first().find("input.selector").val());
+	$( ".magic-pick #tag" ).val($(this).parents(".body").first().find("input.selector").first().val());
 	
 	$( ".magic-pick" ).dialog({
 		title: "Magic Selection",
-		width: 1024,
-		height: 850,
+		width: ($(window).width() * .8),
+		height: ($(window).height() * .9),
 		modal: true,
 		resizable: false,
 		draggable: false
 	});
+	
 	return false;
 });
 
@@ -574,6 +575,7 @@ function setFrames() {
 		var $body = $('body', doc);
 		$body.on("click", function(e) { // assign a handler
 			$("#taglist", window.top.document).html("");
+			$(".output-picked").html($(e.target).html());
 			$(e.target).each(function(ii,el) {
 				var str = "";
 				
@@ -581,10 +583,10 @@ function setFrames() {
 				if (typeof tag != "undefined") { str += tag}
 
 				var id = $(el).attr('id');
-				if (typeof id != "undefined") { str += " #" + id}
+				if (typeof id != "undefined") { str += "#" + id}
 
 				var cl = $(el).attr('class');
-				if (typeof cl != "undefined") { str += " ." + cl}
+				if (typeof cl != "undefined") { str += "." + cl.split(" ").join(".")}
 
 				$("#taglist", window.top.document).append("<option>"+str+"</option>");
 			})
@@ -595,10 +597,10 @@ function setFrames() {
 				if (typeof tag != "undefined") { str += tag}
 
 				var id = $(el).attr('id');
-				if (typeof id != "undefined") { str += " #" + id}
+				if (typeof id != "undefined") { str += "#" + id}
 
 				var cl = $(el).attr('class');
-				if (typeof cl != "undefined") { str += " ." + cl}
+				if (typeof cl != "undefined") { str += "." + cl.split(" ").join(".")}
 
 				$("#taglist", window.top.document).append("<option>"+str+"</option>");
 			});
@@ -614,4 +616,8 @@ $(function() {
 
 function setTag() {
 	$("#tag").val("{{"+$("#taglist").val()+"}}");
+	
+	var doc = $("iframe").first()[0].contentWindow.document;
+	var $body = $($("#taglist").val(), doc);
+	$(".output-picked").html($body);
 }
