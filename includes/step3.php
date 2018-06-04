@@ -50,6 +50,8 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		<option selected="selected">Is not null/empty</option>
 		<option>Contains</option>
 		<option>Is equal to</option>
+		<option>(to numeric) Is greater than</option>
+		<option>(to numeric) Is less than</option>
 	</select>
 	
 	<input type="text" class="selector opeq" name="selector[]" placeholder="" value="" />

@@ -1,9 +1,9 @@
 
 <div class="magic-pick" style="display:none;">
 
-	<div class="right-col" style="float:right;width:500px;max-width:100%;">
-		<h3>Sample Output</h3>
-		<div style="margin:20px;border:3px solid #000;max-height:300px;height:300px;padding:20px;box-sizing:border-box;overflow:scroll;">
+	<div class="right-col" style="float:right;width:800px;max-width:100%;">
+		<h3>Sample Output <span class="counted"></span></h3>
+		<div style="margin:20px;border:3px solid #000;max-height:270px;height:270px;padding:20px;box-sizing:border-box;overflow:scroll;">
 			<div class="output-picked">
 			
 			</div>

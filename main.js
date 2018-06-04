@@ -543,6 +543,10 @@ $(document).on("click", ".wiz-pick", function() {
 	
 	$( ".magic-pick #tag" ).val($(this).parents(".body").first().find("input.selector").first().val());
 	
+	$(".magic-pick .counted").html("(0)");
+	$(".output-picked").html("");
+	$("#magicframe").attr("src","");
+
 	$( ".magic-pick" ).dialog({
 		title: "Magic Selection",
 		width: ($(window).width() * .8),
@@ -571,11 +575,13 @@ function magicgo() {
 function setFrames() {
 
 	setTimeout( function() {
+	$(".magic-pick .counted").html("(0)");
+	$(".output-picked").html("");
 		var doc = $("iframe").first()[0].contentWindow.document;
 		var $body = $('body', doc);
 		$body.on("click", function(e) { // assign a handler
 			$("#taglist", window.top.document).html("");
-			$(".output-picked").html($(e.target).html());
+			//$(".output-picked").html($(e.target).html());
 			$(e.target).each(function(ii,el) {
 				var str = "";
 				
@@ -619,5 +625,7 @@ function setTag() {
 	
 	var doc = $("iframe").first()[0].contentWindow.document;
 	var $body = $($("#taglist").val(), doc);
-	$(".output-picked").html($body);
+	var counted = $body.length;
+	$(".magic-pick .counted").html("("+counted.toString()+")");
+	$(".output-picked").html($body.clone());
 }
