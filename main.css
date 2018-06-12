@@ -263,3 +263,24 @@ body .ui-widget-overlay {
 	line-height:24px;
 	height:40px;
 }
+
+
+/*Combo box */
+#combo-wrap .options {
+	border-top:1px solid #000;
+	background: #fff;
+	padding: 0;
+}
+#combo-wrap .options a {
+	background: #fff;
+	display:block;
+	padding: 10px;
+	clear:both;
+	border-right:1px solid #000;
+	border-left:1px solid #000;
+	border-bottom:1px solid #000;
+	text-decoration:none;
+}
+#combo-wrap .options a:hover {
+	background: #ddffdd;
+}

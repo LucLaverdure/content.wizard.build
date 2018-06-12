@@ -59,11 +59,11 @@ $(function() {
 				}
 				$('#counter').html(parseFloat(data).toLocaleString('en'));
 				if (parseInt($.trim($(".progress-box #counter").html())) <= 0) {
-					$(".need-tokens").show("slide");
+					$(".need-tokens").show("fold");
 					window.scrollTo(0,0);
 					return false;
 				} else {
-					$(".need-tokens").hide("slide");
+					$(".need-tokens").hide("fold");
 				}
 				
 			}
@@ -580,8 +580,9 @@ function setFrames() {
 		var doc = $("iframe").first()[0].contentWindow.document;
 		var $body = $('body', doc);
 		$body.on("click", function(e) { // assign a handler
-			$("#taglist", window.top.document).html("");
-			//$(".output-picked").html($(e.target).html());
+		
+			$("#combo-wrap .options", window.top.document).html("");
+		
 			$(e.target).each(function(ii,el) {
 				var str = "";
 				
@@ -594,7 +595,8 @@ function setFrames() {
 				var cl = $(el).attr('class');
 				if (typeof cl != "undefined") { str += "." + cl.split(" ").join(".")}
 
-				$("#taglist", window.top.document).append("<option>"+str+"</option>");
+				$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">'+str+"</a>");
+				$("#taglist", window.top.document).val(str);
 			})
 			$(e.target).parents().each(function(ii, el) {
 				var str = "";
@@ -608,8 +610,15 @@ function setFrames() {
 				var cl = $(el).attr('class');
 				if (typeof cl != "undefined") { str += "." + cl.split(" ").join(".")}
 
-				$("#taglist", window.top.document).append("<option>"+str+"</option>");
+				$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">'+str+"</a>");
 			});
+			
+			$("#taglist", window.top.document).show();
+			$("#wizsetter", window.top.document).show();
+			$("#combo-wrap .options", window.top.document).hide("slide");
+			$(".drop-select", window.top.document).css('display', 'inline-block');
+
+
 			return false;
 		});
 	}, 1000);
@@ -618,9 +627,11 @@ function setFrames() {
 
 $(function() {
 	setFrames();
+
 });
 
 function setTag() {
+
 	$("#tag").val("{{"+$("#taglist").val()+"}}");
 	
 	var doc = $("iframe").first()[0].contentWindow.document;
@@ -628,4 +639,14 @@ function setTag() {
 	var counted = $body.length;
 	$(".magic-pick .counted").html("("+counted.toString()+")");
 	$(".output-picked").html($body.clone());
+	
+}
+
+function comboclick($this) {
+	$("#taglist").val($($this).html());
+	$("#combo-wrap .options").hide("fold");
+}
+
+function toggleSelOptions() {
+	$("#combo-wrap .options").toggle("fold");
 }

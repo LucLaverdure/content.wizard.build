@@ -15,6 +15,7 @@ wp_enqueue_style("wiz.css", plugin_dir_url( __FILE__ )."/wiz.css");
 wp_enqueue_style("jqueryui-struct", plugin_dir_url( __FILE__ )."/lib/jquery-ui.structure.min.css");
 wp_enqueue_style("jqueryui-theme", plugin_dir_url( __FILE__ )."/lib/jquery-ui.theme.min.css");
 wp_enqueue_script("jqueryui-src", plugin_dir_url( __FILE__ )."/lib/jquery-ui.min.js");
+wp_enqueue_script("jqueryui-combobox", plugin_dir_url( __FILE__ )."/lib/jquery-ui.combobox.js");
 
 // core Wizard.Build.Content admin panel
 add_action('admin_menu', 'wizbui_setup_menu');

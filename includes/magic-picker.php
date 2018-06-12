@@ -26,9 +26,16 @@
 		</div>
 
 		<h3>Clicked Selection</h3>
-		<select id="taglist" style="width:400px;max-width:100%;">
-		</select>
-		<input type="button" onclick="setTag();" id="wizsetter" value="Apply Filter" />
+		<div id="combo-wrap" style="max-width:400px;display:inline-block;width:100%;position:relative;">
+		
+			<input type="text" id="taglist" onclick="toggleSelOptions();" style="display:none;width:350px;"/>
+			
+			<a class="drop-select" style="width:40px;height:40px;border:1px solid #000;display:none;font-size:30px;line-height:30px;text-align:center;" onclick="toggleSelOptions();">&darr;</a>
+			
+			<div class="options" style="position:absolute;top:43px;left:0;display:none;">
+			</div>
+		</div>
+		<input style="display:none;" type="button" onclick="setTag();" id="wizsetter" value="Apply Filter" />
 		
 		<h3>Filter</h3>
 		<input id="tag" type="text" style="width:400px;margin-bottom:20px;">
