@@ -650,3 +650,41 @@ function comboclick($this) {
 function toggleSelOptions() {
 	$("#combo-wrap .options").toggle("fold");
 }
+
+	function parseEntry(query, url, ht) {
+		
+		// parse regex expressions (triple brackets)
+		var re = new RegExp('{{{(.*)}}}', 'g');
+		q = query.match(re);
+		for (qq in q) {
+			var newregex = q[qq].replace("{{{", '').replace("}}}", '');
+			newregex = new RegExp(newregex, 'g');
+			newq = ht.match(newregex).join("");
+			query = query.replace(q[qq], newq);
+		}
+		
+
+		// parse jquery expressions (double brackets)
+		re = new RegExp('{{(.*)}}', 'g');
+		q = query.match(re);
+		for (qq in q) {
+			var newjq = q[qq].replace("{{", '').replace("}}", '');
+			code = $('<div>'+ht+'</div>').find(newjq);
+			console.log(ht);
+			console.log(code);
+			appendHTML = '';
+			code.each(function() {
+				appendHTML += $(this).html();
+			})
+			
+			query = query.replace(q[qq], appendHTML);
+			
+		}
+		
+
+		// parse %url%
+		ret = query.replace("%url%", url);
+		
+		// ret remaining
+		return ret;
+	}
