@@ -693,7 +693,7 @@ function parseEntry(query, url, ht) {
 		code = $('<div>'+ht+'</div>').find(newjq);
 		appendHTML = '';
 		code.each(function() {
-			appendHTML += $(this).html();
+			appendHTML += $(this)[0].outerHTML;
 		})
 		
 		query = query.replace(q[qq], appendHTML);

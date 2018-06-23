@@ -48,7 +48,7 @@
 				<div class="options" style="position:absolute;top:43px;left:0;display:none;">
 				</div>
 			</div>
-			<input type="button" onclick="setTag();" id="wizsetter" value="Apply Filter" />
+			<input type="button" onclick="setTag();" id="wizsetter" value="Test Filter" />
 		</div>
 		
 		<div class="filter-select-step" style="display:none;">
