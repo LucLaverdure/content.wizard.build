@@ -634,7 +634,7 @@ function setFrames() {
 			
 			$("#taglist", window.top.document).show();
 			$("#wizsetter", window.top.document).show();
-			$("#combo-wrap .options", window.top.document).hide("slide");
+			$("#combo-wrap .options", window.top.document).hide("slide","swing",100);
 			$(".drop-select", window.top.document).css('display', 'inline-block');
 			$(".test-select-step").fadeIn("fast");
 			$(".step-indicator").hide();
@@ -664,15 +664,17 @@ function setTag() {
 }
 
 function comboclick($this) {
-	$("#taglist").val($($this).html());
-	$("#combo-wrap .options").hide("fold");
+	$($this).parents(".combo-wrap").find(".combo-input").val($($this).html());
+	$($this).parents(".combo-wrap").find(".options").hide("fold","swing",100);
 }
 
-function toggleSelOptions() {
-	$("#combo-wrap .options").toggle("fold");
+function toggleSelOptions($this) {
+	$($this).parents(".combo-wrap").find(".options").toggle("fold","swing",100);
 }
 
-function parseEntry(query, url, ht) {
+function parseEntry(query, url, ht, isContainer = false) {
+	
+	var container_array = [];
 	
 	// parse regex expressions (triple brackets)
 	var re = new RegExp('{{{(.*)}}}', 'g');
@@ -681,9 +683,16 @@ function parseEntry(query, url, ht) {
 		var newregex = q[qq].replace("{{{", '').replace("}}}", '');
 		newregex = new RegExp(newregex, 'g');
 		newq = ht.match(newregex).join("");
+		
+		if (isContainer) {
+			var matches = ht.match(newregex);
+			for (found_match in matches) {
+				container_array.push(matches[found_match]);
+			}
+		}
+		
 		query = query.replace(q[qq], newq);
 	}
-	
 
 	// parse jquery expressions (double brackets)
 	re = new RegExp('{{(.*)}}', 'g');
@@ -693,11 +702,14 @@ function parseEntry(query, url, ht) {
 		code = $('<div>'+ht+'</div>').find(newjq);
 		appendHTML = '';
 		code.each(function() {
-			appendHTML += $(this)[0].outerHTML;
-		})
-		
+			var to_push = $(this)[0].outerHTML;
+			if (isContainer) {
+				container_array.push(to_push);
+			} else {
+				appendHTML += to_push;
+			}
+		});
 		query = query.replace(q[qq], appendHTML);
-		
 	}
 	
 
@@ -705,6 +717,9 @@ function parseEntry(query, url, ht) {
 	ret = query.replace("%url%", url);
 	
 	// ret remaining
+	if (isContainer) {
+		return container_array;
+	}
 	return ret;
 }
 

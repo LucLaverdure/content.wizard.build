@@ -16,13 +16,13 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <div class="box-container-wrapper" style="display:none;">
 <div class="box-container">
 
-<h2>Mappings Group <span class="ptype">1</span> <span class="arrow-point">&uArr;</span><span class="arrow-point" style="display:none;">&dArr;</span></h2>
+<h2>Mappings Group <span class="ptype" style="display:none;">1</span> <span class="arrow-point" style="transform: rotate(90deg);display:inline-block;zoom:0.8;">&#10148;</span><span class="arrow-point" style="display:none;">&#10148;</span></h2>
 
 <div class="fold">
 
 <p>
 
-	<span class="head">Input Method</span>
+	<span class="head">Input Method <span title="The only available option is 'Scraper' at the moment." class="info-ico">&#8505;</span></span>
 	<span class="body">
 	
 	<select name="inputmethod" class="selector input_type inputmethod">
@@ -36,7 +36,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 <p>
 
-	<span class="head">Content Type</span>
+	<span class="head">Content Type <span title="Migrate as pages, posts, products, etc." class="info-ico">&#8505;</span></span>
 	<span class="body">
 	
 	<select name="postType" class="selector postType">
@@ -53,7 +53,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </p>
 
 <p>
-<span class="head">Validator</span>
+<span class="head">Validator <span title="Only data matching the Validator rule will be ingested." class="info-ico">&#8505;</span></span>
 <span class="body">
 	<input type="text" class="selector validator" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.title}}" />
 	
@@ -73,7 +73,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </p>
 
 <p>
-<span class="head">ID (Must be unique):</span>
+<span class="head">ID (Must be unique): <span title="When ID doesn't exist, a new item is created. Otherwise, the item with the same id gets updated." class="info-ico">&#8505;</span></span>
 <span class="body">
 	<input type="text" class="selector idsel" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="%url%" />
 	
@@ -97,9 +97,80 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <div class="field-wrap" style="display:none">
 <div class="field-sub-wrap">
 <p>
-	<select name="field" class="field-map head">
-		<?php include "dropdown-full-fields.php"; ?>
-	</select>
+
+<div class="combo-wrap head" style="display:inline-block;max-width:100%;width:240px;position:relative;">
+
+	<input type="text" name="field" class="field-map combo-input autome" onclick="toggleSelOptions(this);" />
+	
+	<a class="drop-select" onclick="toggleSelOptions(this);">&darr;</a>
+	
+	<div class="options" style="position:absolute;top:34px;left:0;display:none;width:400px;max-height:300px;overflow-y:scroll;">
+<?php
+	$arr_data = array();
+	$arr_ret = array();
+	$arr_data["post_title"] = "Title";
+	$arr_data["post_excerpt"] = "Short Content (Excerpt)";
+	$arr_data["post_content"] = "Content";
+	$arr_data["post_category"] = "Categories (Separate with commas)";
+	
+	$arr_ret = array_merge($arr_ret, $arr_data);
+?>
+		<h3>Popular Fields</h3>
+<?php foreach($arr_data as $key => $val) { ?>
+		<a href="#" onclick="comboclick(this);return false;" data-val="<?php echo $key; ?>"><?php echo $val; ?></a>
+<?php } ?>
+
+		<h3>Woo Commerce Fields</h3>
+<?php 
+	
+	$arr_data["_visibility"] = "Visibility";
+	$arr_data["_stock_status"] = "In Stock";
+	$arr_data["total_sales"] = "Total Sales";
+	$arr_data["_downloadable"] = "Downloadable";
+	$arr_data["_virtual"] = "Virtual";
+	$arr_data["_regular_price"] = "Regular Price";
+	$arr_data["_sale_price"] = "Sale Price";
+	$arr_data["_purchase_note"] = "Purchase Note";
+	$arr_data["_featured"] = "Featured";
+	$arr_data["_weight"] = "Weight";
+	$arr_data["_length"] = "Length";
+	$arr_data["_width"] = "Width";
+	$arr_data["_height"] = "Height";
+	$arr_data["_sku"] = "SKU";
+	$arr_data["_product_attributes"] = "Product Attributes";
+	$arr_data["_sale_price_dates_from"] = "Sales Price Date - From";
+	$arr_data["_sale_price_dates_to"] = "Sales Price Date - To";
+	$arr_data["_price"] = "Price";
+	$arr_data["_sold_individually"] = "Sold Individually";
+	$arr_data["_manage_stock"] = "Manage Stock";
+	$arr_data["_backorders"] = "Back Orders";
+	$arr_data["_stock"] = "Stock";
+
+	$arr_ret = array_merge($arr_ret, $arr_data);	
+ ?>
+<?php foreach($arr_data as $key => $val) { ?>
+		<a href="#" onclick="comboclick(this);return false;" data-val="<?php echo $key; ?>"><?php echo $val; ?></a>
+<?php } ?>
+
+<?php
+	$arr_ret = array_merge($arr_ret, $arr_data);
+?>
+
+		<h3>Other Fields</h3>
+<?php
+	$fields = get_all_posts_fields();
+	foreach($fields as $key => $val) {
+		if ((!in_array($val, $arr_ret)) && (!in_array($val, array_flip($arr_ret)))) {
+?>
+		<a href="#" onclick="comboclick(this);return false;" data-val="<?php echo $val; ?>"><?php echo $val; ?></a>
+<?php
+		}
+	}
+?>
+
+	</div>
+</div>
+
 <span class="body">
 	<input type="text" class="selector fieldsel" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.title}}" />
 	

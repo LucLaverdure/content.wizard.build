@@ -39,11 +39,11 @@
 		
 		<div class="test-select-step" style="display:none;">
 			<h3>Clicked Selection</h3>
-			<div id="combo-wrap" style="max-width:400px;display:inline-block;width:100%;position:relative;">
+			<div id="combo-wrap" class="combo-wrap" style="max-width:400px;display:inline-block;width:100%;position:relative;">
 			
-				<input type="text" id="taglist" onclick="toggleSelOptions();" style="width:350px;"/>
+				<input type="text" id="taglist" onclick="toggleSelOptions(this);" style="width:350px;" class="combo-input" />
 				
-				<a class="drop-select" style="width:40px;height:40px;border:1px solid #000;font-size:30px;line-height:30px;text-align:center;cursor:pointer;" onclick="toggleSelOptions();">&darr;</a>
+				<a class="drop-select" style="width:40px;height:40px;border:1px solid #000;font-size:30px;line-height:30px;text-align:center;cursor:pointer;" onclick="toggleSelOptions(this);">&darr;</a>
 				
 				<div class="options" style="position:absolute;top:43px;left:0;display:none;">
 				</div>

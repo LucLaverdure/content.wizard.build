@@ -17,7 +17,7 @@ h2 {
 	box-sizing:border-box;
 }
 body .admin-wrap .head {
-	width:210px;
+	width:240px;
 	display:inline-block;
 	vertical-align:top;
 }
@@ -266,23 +266,47 @@ body .ui-widget-overlay {
 
 
 /*Combo box */
-#combo-wrap .options {
+#combo-wrap .options, .combo-wrap .options {
 	border-top:1px solid #000;
 	background: #fff;
 	padding: 0;
+	z-index: 999;
+	border-bottom: 1px solid #000;
 }
-#combo-wrap .options a {
+#combo-wrap .options a, .combo-wrap .options a {
 	background: #fff;
 	display:block;
-	padding: 10px;
+	padding: 3px;
 	clear:both;
 	border-right:1px solid #000;
 	border-left:1px solid #000;
 	border-bottom:1px solid #000;
 	text-decoration:none;
 }
-#combo-wrap .options a:hover {
+body .admin-wrap .combo-wrap .options {
+	top: 34px;
+}
+#combo-wrap .options a:hover, .combo-wrap .options a:hover {
 	background: #ddffdd;
+}
+#combo-wrap h3, .combo-wrap h3 {
+	margin: 0;
+	font-size: 20px;
+	border-right: 1px solid #000;
+	border-left: 1px solid #000;
+	border-bottom: 1px solid #000;
+	padding:5px;
+}
+
+.combo-wrap .drop-select {
+	width: 30px;
+	height: 29px;
+	border: 1px solid #000;
+	font-size: 30px;
+	line-height: 20px;
+	text-align: center;
+	cursor: pointer;
+	display: inline-block;
 }
 .output-tabs {
 	float:right;
@@ -309,4 +333,22 @@ body .ui-widget-overlay {
 .output-tabs a.selected {
 	color: #000;
 	background: #ccffcc;
+}
+
+.info-ico {
+	border-radius: 20px;
+	background: #ccc;
+	color: #fff;
+	display: inline-block;
+	width: 25px;
+	height: 25px;
+	text-align: center;
+	cursor: help;	
+}
+
+.ui-autocomplete-category {
+	font-weight: bold;
+	padding: .2em .4em;
+	margin: .8em 0 .2em;
+	line-height: 1.5;
 }
