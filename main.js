@@ -21,7 +21,7 @@ function sleep (time) {
 }
 
 // get WP jquery
-$ = jQuery;
+$ = jQuery.noConflict();
 
 // on window finished loading
 $(function() {
@@ -388,8 +388,8 @@ function compileMappings() {
 	$(".box-map .box-container").each(function() {
 		var container = [];
 		// content type header
-		container.push($(this).find(".ptype").html()); // post type
-		container.push($(this).find(".instance_container").val());
+		container.push($(this).find(".inputmethod").val()); // post type
+		container.push($(this).find(".postType").val()); // post type
 		container.push($(this).find(".validator").val());
 		container.push($(this).find(".op").val());
 		container.push($(this).find(".opeq").val());
@@ -444,12 +444,13 @@ function decompileMappings($stringify) {
 		var inc = 0;
 		$.each(main, function(kkk, field) { // field
 			inc++;
+			
 			switch (inc) {
 				case 1:
-					$this_element.find(".ptype").html(field); // post type
+					$this_element.find(".inputmethod").val(field); // post type
 					break;
 				case 2:
-					$this_element.find(".instance_container").val(field);
+					$this_element.find(".postType").val(field);
 					break;
 				case 3:
 					$this_element.find(".validator").val(field);

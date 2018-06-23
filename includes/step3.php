@@ -11,7 +11,35 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	
 	<p>
 	<a href="#" class="add-ct add-ct-click">Add Content Type</a>
-	<select id="ctt" name="postType">
+</p>
+
+<div class="box-container-wrapper" style="display:none;">
+<div class="box-container">
+
+<h2>Mappings Group <span class="ptype">1</span> <span class="arrow-point">&uArr;</span><span class="arrow-point" style="display:none;">&dArr;</span></h2>
+
+<div class="fold">
+
+<p>
+
+	<span class="head">Input Method</span>
+	<span class="body">
+	
+	<select name="inputmethod" class="selector input_type inputmethod">
+		<option selected="selected" value="scraper" style="background: #ddffdd;">Scraper</option>
+		<option value="csv" style="background: #ffdddd;">CSV <i>(Coming Soon!)</i></option>
+		<option value="csv" style="background: #ffdddd;">Excel <i>(Coming Soon!)</i></option>
+		<option value="sql" style="background: #ffdddd;">SQL <i>(Coming Soon!)</i></option>
+	</select>
+	</span>
+</p>
+
+<p>
+
+	<span class="head">Content Type</span>
+	<span class="body">
+	
+	<select name="postType" class="selector postType">
 <?php
 	$post_types = get_post_types();
 	foreach($post_types as $post_type) {
@@ -21,21 +49,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	}
 ?>
 	</select>
-</p>
-
-<div class="box-container-wrapper" style="display:none;">
-<div class="box-container">
-
-<h2><span class="ptype">%ptype%</span> <span class="arrow-point">&uArr;</span><span class="arrow-point" style="display:none;">&dArr;</span></h2>
-<div class="fold">
-
-
-<p>
-<span class="head">Instance Container Tag:</span>
-<span class="body">
-	<input type="text" class="selector instance_container" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.post}}" />
-	<a href="#" class="wiz-pick"><img src="<?php echo plugin_dir_url( __FILE__ )."../edit.png"; ?>" /></a>
-</span>
+	</span>
 </p>
 
 <p>
