@@ -284,3 +284,29 @@ body .ui-widget-overlay {
 #combo-wrap .options a:hover {
 	background: #ddffdd;
 }
+.output-tabs {
+	float:right;
+	max-width:300px;
+    margin-top: 14px;
+	margin-right:20px;
+}
+.output-tabs a {
+	float:right;
+	width:100px;
+	text-align:center;
+	background: #acacac;
+	display:inline-block;
+	padding:10px;
+	margin-left:20px;
+	font-size:20px;
+	text-decoration:none;
+	border-top: 2px solid #000;
+	border-left: 2px solid #000;
+	border-right: 2px solid #000;
+	color: #fff;
+}
+
+.output-tabs a.selected {
+	color: #000;
+	background: #ccffcc;
+}

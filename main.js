@@ -543,8 +543,8 @@ $(document).on("click", ".wiz-pick", function() {
 	
 	$( ".magic-pick #tag" ).val($(this).parents(".body").first().find("input.selector").first().val());
 	
-	$(".magic-pick .counted").html("(0)");
 	$(".output-picked").html("");
+	$(".output-picked-code").html("");
 	$("#magicframe").attr("src","");
 
 	$( ".magic-pick" ).dialog({
@@ -553,7 +553,15 @@ $(document).on("click", ".wiz-pick", function() {
 		height: ($(window).height() * .9),
 		modal: true,
 		resizable: false,
-		draggable: false
+		draggable: false,
+		beforeClose: function() {
+			$("#magicfile").val("");
+			$(".test-select-step").hide();
+			$(".sample-step").hide();
+			$(".filter-select-step").hide();
+			$(".frame-step").hide();
+			$("#taglist").val("");
+		}
 	});
 	
 	return false;
@@ -562,21 +570,29 @@ $(document).on("click", ".wiz-pick", function() {
 $(document).on("click", "#savefilter", function() {
 	window.magicfield.val($("#tag").val());
 	$( ".magic-pick" ).dialog("close");
+	$("#magicfile").val("");
+	$(".test-select-step").hide();
+	$(".sample-step").hide();
+	$(".filter-select-step").hide();
+	$(".frame-step").hide();
+	$("#taglist").val("");
 });
 
 
 
 function magicgo() {
 	$("#magicframe").attr("src", WB_PLUGIN_URL + "wp-content/plugins/content.wizard.build/cache/" + 	$("#magicfile").val());
-	
+	$(".frame-step").fadeIn("fast");
+	$(".step-indicator").fadeIn("fast");
+
 	setFrames();
 }
 
 function setFrames() {
 
 	setTimeout( function() {
-	$(".magic-pick .counted").html("(0)");
 	$(".output-picked").html("");
+	$(".output-picked-code").html("");
 		var doc = $("iframe").first()[0].contentWindow.document;
 		var $body = $('body', doc);
 		$body.on("click", function(e) { // assign a handler
@@ -595,8 +611,8 @@ function setFrames() {
 				var cl = $(el).attr('class');
 				if (typeof cl != "undefined") { str += "." + cl.split(" ").join(".")}
 
-				$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">'+str+"</a>");
-				$("#taglist", window.top.document).val(str);
+				$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{{'+str+"}}</a>");
+				$("#taglist", window.top.document).val('{{'+str+'}}');
 			})
 			$(e.target).parents().each(function(ii, el) {
 				var str = "";
@@ -610,14 +626,15 @@ function setFrames() {
 				var cl = $(el).attr('class');
 				if (typeof cl != "undefined") { str += "." + cl.split(" ").join(".")}
 
-				$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">'+str+"</a>");
+				$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{{'+str+"}}</a>");
 			});
 			
 			$("#taglist", window.top.document).show();
 			$("#wizsetter", window.top.document).show();
 			$("#combo-wrap .options", window.top.document).hide("slide");
 			$(".drop-select", window.top.document).css('display', 'inline-block');
-
+			$(".test-select-step").fadeIn("fast");
+			$(".step-indicator").hide();
 
 			return false;
 		});
@@ -631,15 +648,16 @@ $(function() {
 });
 
 function setTag() {
+	//var doc = $("iframe").first()[0].contentWindow.document;
+	var tested_output = parseEntry($("#taglist").val(), document.getElementById("magicframe").contentWindow.location.href, document.getElementById('magicframe').contentWindow.document.body.innerHTML);
 
-	$("#tag").val("{{"+$("#taglist").val()+"}}");
-	
-	var doc = $("iframe").first()[0].contentWindow.document;
-	var $body = $($("#taglist").val(), doc);
-	var counted = $body.length;
-	$(".magic-pick .counted").html("("+counted.toString()+")");
-	$(".output-picked").html($body.clone());
-	
+	$("#tag").val($("#taglist").val());
+
+	$(".output-picked").html(tested_output);
+	$(".output-picked-code").text(tested_output);
+	$(".filter-select-step").fadeIn("fast");
+	$(".sample-step").fadeIn("fast");
+
 }
 
 function comboclick($this) {
@@ -651,40 +669,51 @@ function toggleSelOptions() {
 	$("#combo-wrap .options").toggle("fold");
 }
 
-	function parseEntry(query, url, ht) {
-		
-		// parse regex expressions (triple brackets)
-		var re = new RegExp('{{{(.*)}}}', 'g');
-		q = query.match(re);
-		for (qq in q) {
-			var newregex = q[qq].replace("{{{", '').replace("}}}", '');
-			newregex = new RegExp(newregex, 'g');
-			newq = ht.match(newregex).join("");
-			query = query.replace(q[qq], newq);
-		}
-		
-
-		// parse jquery expressions (double brackets)
-		re = new RegExp('{{(.*)}}', 'g');
-		q = query.match(re);
-		for (qq in q) {
-			var newjq = q[qq].replace("{{", '').replace("}}", '');
-			code = $('<div>'+ht+'</div>').find(newjq);
-			console.log(ht);
-			console.log(code);
-			appendHTML = '';
-			code.each(function() {
-				appendHTML += $(this).html();
-			})
-			
-			query = query.replace(q[qq], appendHTML);
-			
-		}
-		
-
-		// parse %url%
-		ret = query.replace("%url%", url);
-		
-		// ret remaining
-		return ret;
+function parseEntry(query, url, ht) {
+	
+	// parse regex expressions (triple brackets)
+	var re = new RegExp('{{{(.*)}}}', 'g');
+	q = query.match(re);
+	for (qq in q) {
+		var newregex = q[qq].replace("{{{", '').replace("}}}", '');
+		newregex = new RegExp(newregex, 'g');
+		newq = ht.match(newregex).join("");
+		query = query.replace(q[qq], newq);
 	}
+	
+
+	// parse jquery expressions (double brackets)
+	re = new RegExp('{{(.*)}}', 'g');
+	q = query.match(re);
+	for (qq in q) {
+		var newjq = q[qq].replace("{{", '').replace("}}", '');
+		code = $('<div>'+ht+'</div>').find(newjq);
+		appendHTML = '';
+		code.each(function() {
+			appendHTML += $(this).html();
+		})
+		
+		query = query.replace(q[qq], appendHTML);
+		
+	}
+	
+
+	// parse %url%
+	ret = query.replace("%url%", url);
+	
+	// ret remaining
+	return ret;
+}
+
+$(document).on("click", ".output-tabs a", function() {
+	$(".output-tabs a").removeClass("selected");
+	$(this).addClass("selected");
+	if ($(this).hasClass("code")) {
+		$(".output-picked-code").show();
+		$(".output-picked").hide();
+	} else {
+		$(".output-picked-code").hide();
+		$(".output-picked").show();
+	}
+	return false;
+});
