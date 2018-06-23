@@ -561,6 +561,7 @@ $(document).on("click", ".wiz-pick", function() {
 			$(".filter-select-step").hide();
 			$(".frame-step").hide();
 			$("#taglist").val("");
+			$(".output-tabs a:first").click();
 		}
 	});
 	
@@ -576,6 +577,7 @@ $(document).on("click", "#savefilter", function() {
 	$(".filter-select-step").hide();
 	$(".frame-step").hide();
 	$("#taglist").val("");
+	$(".output-tabs a:first").click();
 });
 
 
