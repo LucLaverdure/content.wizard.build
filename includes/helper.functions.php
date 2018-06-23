@@ -251,4 +251,9 @@ function pathme($fromURL, $relURL) {
 	$relURL = str_replace("https:/", "https://", $relURL);
 	return $relURL;
 }
+
+function runmap($offset) {
+	
+}
+
 ?>

@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 </div>
 	
-	<p>
+<p>
 	<a href="#" class="add-ct add-ct-click">Add Content Type</a>
 </p>
 
@@ -28,7 +28,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<select name="inputmethod" class="selector input_type inputmethod">
 		<option selected="selected" value="scraper" style="background: #ddffdd;">Scraper</option>
 		<option value="csv" style="background: #ffdddd;">CSV <i>(Coming Soon!)</i></option>
-		<option value="csv" style="background: #ffdddd;">Excel <i>(Coming Soon!)</i></option>
+		<option value="xlsx" style="background: #ffdddd;">Excel <i>(Coming Soon!)</i></option>
 		<option value="sql" style="background: #ffdddd;">SQL <i>(Coming Soon!)</i></option>
 	</select>
 	</span>
@@ -61,11 +61,11 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 	
 	<select class="selector op">
-		<option selected="selected">Is not null/empty</option>
-		<option>Contains</option>
-		<option>Is equal to</option>
-		<option>(to numeric) Is greater than</option>
-		<option>(to numeric) Is less than</option>
+		<option value="notnull" selected="selected">Is not null/empty</option>
+		<option value="contains">Contains</option>
+		<option value="equals">Is equal to</option>
+		<option value="numgt">(to numeric) Is greater than</option>
+		<option value="numlt">(to numeric) Is less than</option>
 	</select>
 	
 	<input type="text" class="selector opeq" name="selector[]" placeholder="" value="" />
@@ -81,8 +81,10 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 	
 	<select class="selector idop">
-		<option selected="selected">Text (Strip HTML Tags)</option>
-		<option>HTML (Keep HTML Tags)</option>
+		<option value="text" selected="selected">Text (Strip HTML Tags)</option>
+		<option value="html">HTML (Keep HTML Tags)</option>
+		<option value="imgsrc">Image (get IMG SRC attribute)</option>
+		<option value="imgcss">Image (get CSS background attribute)</option>
 	</select>
 	
 	<select class="selector idopeq">
@@ -105,8 +107,10 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 	
 	<select class="selector fieldop">
-		<option>Text (Strip HTML Tags)</option>
-		<option>HTML (Keep HTML Tags)</option>
+		<option value="text" selected="selected">Text (Strip HTML Tags)</option>
+		<option value="html">HTML (Keep HTML Tags)</option>
+		<option value="imgsrc">Image (get IMG SRC attribute)</option>
+		<option value="imgcss">Image (get CSS background attribute)</option>
 	</select>
 	
 	<select class="selector fieldopeq">

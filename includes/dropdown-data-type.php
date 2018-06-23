@@ -2,6 +2,7 @@
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 ?><option>String (Text)</option>
 <option>Date</option>
+<option>Price</option>
 <option>Alpha</option>
 <option>Numeric</option>
 <option>Alpha & Numeric</option>
