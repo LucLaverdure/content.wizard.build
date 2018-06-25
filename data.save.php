@@ -10,6 +10,8 @@ if (is_admin()) {
 	save_options();
 
 	if (isset($_POST["quicksave"])) {
+		$ret = parseJsonConfig(stripslashes($_POST['mappings']));
+		var_dump($ret);
 		die();
 	}
 
@@ -136,6 +138,7 @@ if (is_admin()) {
 	//} catch (Exception $e) {
 		// meh, was prolly binary...
 	//}
+	
 }
 
 ?>

@@ -25,7 +25,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<span class="head">Input Method <span title="The only available option is 'Scraper' at the moment." class="info-ico">&#8505;</span></span>
 	<span class="body">
 	
-	<select name="inputmethod" class="selector input_type inputmethod">
+	<select name="inputmethod" class="selector input_type inputmethod" onchange="$(this).val('scraper');">
 		<option selected="selected" value="scraper" style="background: #ddffdd;">Scraper</option>
 		<option value="csv" style="background: #ffdddd;">CSV <i>(Coming Soon!)</i></option>
 		<option value="xlsx" style="background: #ffdddd;">Excel <i>(Coming Soon!)</i></option>

@@ -4,8 +4,6 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 function save_options() {
 	
-	var_dump($_POST['apikey']);
-	
 	if (isset($_POST['apikey'])) {
 		update_option('wb_apikey', serialize($_POST['apikey']));
 	}
@@ -252,8 +250,90 @@ function pathme($fromURL, $relURL) {
 	return $relURL;
 }
 
-function runmap($offset) {
+function parseJsonConfig($jsonConfig) {
+
+	$decodeConfig = json_decode($jsonConfig, true);
+	$outputConfig = array();
+
+	// load data
+	foreach ($decodeConfig as $k => $main) { // main
+		$this_config = array();
+		$inc = 0;
+		foreach ($main as $kkk => $field) { // fields
+			$inc++;
+			
+			switch ($inc) {
+				case 1:
+					$this_config["inputmethod"] = $field; // scraper
+					break;
+				case 2:
+					$this_config["postType"] = $field; // post / page ...
+					break;
+				case 3:
+					$this_config["validator"] = $field; // expression
+					break;
+				case 4:
+					$this_config["op"] = $field; // contains / equals
+					break;
+				case 5:
+					$this_config["opeq"] = $field; // expression of op
+					break;
+				case 6:
+					$this_config["idsel"] = $field; // id expression
+					break;
+				case 7:
+					$this_config["idop"] = $field; // text / image src / html
+					break;
+				case 8:
+					$this_config["idopeq"] = $field; // expression of id op
+					break;
+			}
+			if ($inc > 8) {
+				if (is_array($field)) {
+					$this_config["fields"] = array();
+					foreach ($field as $ka => $dig) {
+						$row_counter = 0;
+						$single_field = array();
+						foreach ($dig as $kar => $row) { // row
+							$row_counter++;
+							switch ($row_counter) {
+								case 1:
+									$single_field["field-map"] = $row;
+									break;
+								case 2:
+									$single_field["fieldsel"] = $row;
+									break;
+								case 3:
+									$single_field["fieldop"] = $row;
+									break;
+								case 4:
+									$single_field["fieldopeq"] = $row;
+									break;
+							}
+						}
+						$this_config["fields"][] = $single_field;
+					} // field
+				} // fields array
+			} // fields row
+			
+		} // fields looper
+		$outputConfig[] = $this_config;
+	} // json config
+
+	return $outputConfig;
 	
+} // function
+
+function runmap($offset, $mapCount, $json_config) {
+	
+	// get crawled files
+	$files = get_crawled_list();
+	for ($i = $offset; $i <= ($offset + $mapCount -1); ++$i) {
+		if (isset($files[i])) {
+			
+
+		}
+	}
 }
 
 ?>
