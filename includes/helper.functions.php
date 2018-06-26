@@ -325,13 +325,33 @@ function parseJsonConfig($jsonConfig) {
 } // function
 
 function runmap($offset, $mapCount, $json_config) {
-	
 	// get crawled files
 	$files = get_crawled_list();
 	for ($i = $offset; $i <= ($offset + $mapCount -1); ++$i) {
 		if (isset($files[i])) {
+			$args = array(
+				'meta_query' => array(
+					array(
+						'key' 		=> 'wizard.build.id',
+						'value'		=> '',
+						'compare' 	=> '='
+					)
+				)
+			);
 			
+			$the_query = new WP_Query( $args );
+			
+			if ( $the_query->have_posts() ) :
+				// found! update item
+				// // // while ( $the_query->have_posts() ) : $the_query->the_post();
+				// // // endwhile;
+				
+				wp_reset_postdata();
 
+			else : 
+				// not found... create item
+	
+			endif;
 		}
 	}
 }

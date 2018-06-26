@@ -122,7 +122,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 		<h3>Woo Commerce Fields</h3>
 <?php 
-	
+	$arr_data = array();
 	$arr_data["_visibility"] = "Visibility";
 	$arr_data["_stock_status"] = "In Stock";
 	$arr_data["total_sales"] = "Total Sales";

@@ -645,11 +645,6 @@ function setFrames() {
 }
 
 
-$(function() {
-	setFrames();
-
-});
-
 function setTag() {
 	//var doc = $("iframe").first()[0].contentWindow.document;
 	var tested_output = parseEntry($("#taglist").val(), document.getElementById("magicframe").contentWindow.location.href, document.getElementById('magicframe').contentWindow.document.body.innerHTML);
