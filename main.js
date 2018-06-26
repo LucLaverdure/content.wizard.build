@@ -664,7 +664,12 @@ function comboclick($this) {
 }
 
 function toggleSelOptions($this) {
-	$($this).parents(".combo-wrap").find(".options").toggle("fold","swing",100);
+	$($this).parents(".combo-wrap").find(".options").toggle("fold","swing",100).toggleClass("fold");
+	if ($($this).parents(".combo-wrap").find(".options").hasClass("fold")) {
+		$($this).parents(".combo-wrap").find(".drop-select").html("&uarr;");
+	} else {
+		$($this).parents(".combo-wrap").find(".drop-select").html("&darr;");
+	}
 }
 
 function parseEntry(query, url, ht, isContainer = false) {

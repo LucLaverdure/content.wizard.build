@@ -111,7 +111,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	$arr_data["post_title"] = "Title";
 	$arr_data["post_excerpt"] = "Short Content (Excerpt)";
 	$arr_data["post_content"] = "Content";
-	$arr_data["post_category"] = "Categories (Separate with commas)";
+	$arr_data["post_category"] = "Categories (Array and/or separated with commas)";
 	
 	$arr_ret = array_merge($arr_ret, $arr_data);
 ?>
