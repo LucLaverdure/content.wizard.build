@@ -270,25 +270,34 @@ function parseJsonConfig($jsonConfig) {
 					$this_config["postType"] = $field; // post / page ...
 					break;
 				case 3:
-					$this_config["validator"] = $field; // expression
+					$this_config["containerInstance"] = $field;
 					break;
 				case 4:
-					$this_config["op"] = $field; // contains / equals
+					$this_config["containerop"] = $field;
 					break;
 				case 5:
-					$this_config["opeq"] = $field; // expression of op
-					break;
+					$this_config["containeropeq"] = $field;
+					break;					
 				case 6:
-					$this_config["idsel"] = $field; // id expression
+					$this_config["validator"] = $field; // expression
 					break;
 				case 7:
-					$this_config["idop"] = $field; // text / image src / html
+					$this_config["op"] = $field; // contains / equals
 					break;
 				case 8:
+					$this_config["opeq"] = $field; // expression of op
+					break;
+				case 9:
+					$this_config["idsel"] = $field; // id expression
+					break;
+				case 10:
+					$this_config["idop"] = $field; // text / image src / html
+					break;
+				case 11:
 					$this_config["idopeq"] = $field; // expression of id op
 					break;
 			}
-			if ($inc > 8) {
+			if ($inc > 11) {
 				if (is_array($field)) {
 					$this_config["fields"] = array();
 					foreach ($field as $ka => $dig) {
@@ -329,6 +338,20 @@ function runmap($offset, $mapCount, $json_config) {
 	$files = get_crawled_list();
 	for ($i = $offset; $i <= ($offset + $mapCount -1); ++$i) {
 		if (isset($files[i])) {
+			/*
+			inputmethod
+			
+			containerInstance
+			containerop
+			containeropeq
+			
+			validator
+			op
+			opeq
+			
+			idsel
+			*/
+			
 			$args = array(
 				'meta_query' => array(
 					array(
@@ -341,17 +364,19 @@ function runmap($offset, $mapCount, $json_config) {
 			
 			$the_query = new WP_Query( $args );
 			
-			if ( $the_query->have_posts() ) :
+			if ( $the_query->have_posts() ) {
 				// found! update item
 				// // // while ( $the_query->have_posts() ) : $the_query->the_post();
 				// // // endwhile;
 				
 				wp_reset_postdata();
 
-			else : 
+			} else {
 				// not found... create item
 	
-			endif;
+			}
+		} else {
+			return "EOQ";
 		}
 	}
 }

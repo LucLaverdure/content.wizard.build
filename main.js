@@ -430,6 +430,8 @@ function compileMappings() {
 					$(".wbmsg").fadeIn();
 			  }
 	)
+	
+	return ret;
 }
 
 function decompileMappings($stringify) {
@@ -750,3 +752,25 @@ $(document).on("click", ".output-tabs a", function() {
 	}
 	return false;
 });
+
+function mappings_run(offset) {
+	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_mappings_hook", {
+			config: compileMappings(),
+			runmappings: true,
+			offset: offset
+		},
+		function(data) {
+			// exit code
+			if ($.trim(data) == "EOQ") return;
+			
+			// else, continue
+			offset = offset + 15;
+			sleep(window.delay).then(() => {
+				mappings_run(offset);
+			});
+		}
+	);
+	
+	return false;
+}
+

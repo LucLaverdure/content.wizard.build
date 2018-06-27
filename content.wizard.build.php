@@ -39,6 +39,15 @@ function admin_post_wb_save_hook_callback() {
 	include(__DIR__ . "/data.save.php");
 }
 
+// core Wizard.Build.Content Bulk Mappings scripts
+add_action( 'admin_post_wb_mappings_hook', 'admin_post_wb_mappings_hook_callback' );
+function admin_post_wb_mappings_hook_callback() {
+	include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
+	include_once(__DIR__ . "/lib/phpQuery.php");
+	include(__DIR__ . "/mappings.php");
+}
+
+
 // core Wizard.Build.Content get new urls to crawl
 add_action( 'admin_post_wb_get_hook', 'admin_post_wb_get_hook_callback' );
 function admin_post_wb_get_hook_callback() {
