@@ -43,7 +43,7 @@
 			
 				<input type="text" id="taglist" onclick="toggleSelOptions(this);" style="width:350px;" class="combo-input" />
 				
-				<a class="drop-select" style="width:40px;height:40px;border:1px solid #000;font-size:30px;line-height:30px;text-align:center;cursor:pointer;" onclick="toggleSelOptions(this);">&darr;</a>
+				<a class="drop-select fold" style="width:40px;height:40px;border:1px solid #000;font-size:30px;line-height:30px;text-align:center;cursor:pointer;" onclick="toggleSelOptions(this);">&darr;</a>
 				
 				<div class="options" style="position:absolute;top:43px;left:0;display:none;">
 				</div>

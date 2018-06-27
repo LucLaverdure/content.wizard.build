@@ -664,6 +664,7 @@ function comboclick($this) {
 }
 
 function toggleSelOptions($this) {
+	$(".combo-wrap").not($($this).parents(".combo-wrap")).find(".options").removeClass("fold").hide().parents(".combo-wrap").find(".drop-select").html("&darr;");
 	$($this).parents(".combo-wrap").find(".options").toggle("fold","swing",100).toggleClass("fold");
 	if ($($this).parents(".combo-wrap").find(".options").hasClass("fold")) {
 		$($this).parents(".combo-wrap").find(".drop-select").html("&uarr;");
