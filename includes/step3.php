@@ -53,6 +53,28 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </p>
 
 <p>
+
+	<span class="head">Container Instance <span title="Use to parse multiple containers per page." class="info-ico">&#8505;</span></span>
+	<span class="body">
+		<input type="text" class="selector containerInstance" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{body}}" />
+
+		<a href="#" class="wiz-pick"><img src="<?php echo plugin_dir_url( __FILE__ )."../edit.png"; ?>" /></a>
+
+		<select class="selector containerop">
+			<option value="text" selected="selected">Text (Strip HTML Tags)</option>
+			<option value="html">HTML (Keep HTML Tags)</option>
+			<option value="imgsrc">Image (get IMG SRC attribute)</option>
+			<option value="imgcss">Image (get CSS background attribute)</option>
+		</select>
+		
+		<select class="selector containeropeq">
+			<?php include "dropdown-data-type.php"; ?>
+		</select>
+
+	</span>
+</p>
+
+<p>
 <span class="head">Validator <span title="Only data matching the Validator rule will be ingested." class="info-ico">&#8505;</span></span>
 <span class="body">
 	<input type="text" class="selector validator" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{.title}}" />
@@ -104,7 +126,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	
 	<a class="drop-select" onclick="toggleSelOptions(this);">&darr;</a>
 	
-	<div class="options" style="position:absolute;top:34px;left:0;display:none;width:400px;max-height:300px;overflow-y:scroll;">
+	<div class="options" style="position:absolute;top:34px;left:0;display:none;width:400px;max-height:300px;overflow-y:scroll;border-right: 1px solid #000;">
 <?php
 	$arr_data = array();
 	$arr_ret = array();

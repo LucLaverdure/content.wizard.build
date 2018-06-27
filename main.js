@@ -390,6 +390,9 @@ function compileMappings() {
 		// content type header
 		container.push($(this).find(".inputmethod").val()); // post type
 		container.push($(this).find(".postType").val()); // post type
+		container.push($(this).find(".containerInstance").val());
+		container.push($(this).find(".containerop").val());
+		container.push($(this).find(".containeropeq").val());
 		container.push($(this).find(".validator").val());
 		container.push($(this).find(".op").val());
 		container.push($(this).find(".opeq").val());
@@ -453,25 +456,34 @@ function decompileMappings($stringify) {
 					$this_element.find(".postType").val(field);
 					break;
 				case 3:
-					$this_element.find(".validator").val(field);
+					$this_element.find(".containerInstance").val(field);
 					break;
 				case 4:
-					$this_element.find(".op").val(field);
+					$this_element.find(".containerop").val(field);
 					break;
 				case 5:
-					$this_element.find(".opeq").val(field);
+					$this_element.find(".containeropeq").val(field);
 					break;
 				case 6:
-					$this_element.find(".idsel").val(field);
+					$this_element.find(".validator").val(field);
 					break;
 				case 7:
-					$this_element.find(".idop").val(field);
+					$this_element.find(".op").val(field);
 					break;
 				case 8:
+					$this_element.find(".opeq").val(field);
+					break;
+				case 9:
+					$this_element.find(".idsel").val(field);
+					break;
+				case 10:
+					$this_element.find(".idop").val(field);
+					break;
+				case 11:
 					$this_element.find(".idopeq").val(field);
 					break;
 			}
-			if (inc > 8) {
+			if (inc > 11) {
 				if (Array.isArray(field)) {
 					$.each(field, function(ka, dig) { // row
 						$this_element.find(".fold").append(
