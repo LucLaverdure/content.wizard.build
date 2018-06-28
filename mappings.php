@@ -8,7 +8,7 @@ include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.
 if (is_admin()) {
 
 	$offset = $_POST["offset"];
-	$queue_size = 15;
+	$queue_size = 35;
 	$json_config = $_POST["config"];
 	$parseConfig = parseJsonConfig($json_config);
 	

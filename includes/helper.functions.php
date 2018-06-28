@@ -593,24 +593,32 @@ function runmap($offset, $mapCount, $json_config) {
 								$this_field = "";
 								// function parseEntry($query, $url, $ht, $isContainer = false) {
 								$this_field = parseEntry($raw_fields[$keyin]["fieldsel"], $filez[$i], $container);
-//echo "this_field:";var_dump($this_field);
+
 								// function parseAfterOp($html, $op, $opeq) {
 								$this_field = parseAfterOp($this_field, $raw_fields[$keyin]["fieldop"], $raw_fields[$keyin]["fieldopeq"]);
-//echo "this_field2:";var_dump($this_field);								
+
 								$build_fields[$raw_fields[$keyin]["field-map"]] = $this_field;
 							}
-//echo "build:";var_dump($build_fields);								
+
 							
 							// query current id
+
 							$args = array(
-								'numberposts'	=> 1,
-								'meta_key'		=> 'wizard.build.id',
-								'meta_value'	=> $id
+								'posts_per_page'   => -1,
+								'post_type'     => $jc_val["postType"],
+								'meta_query'    => array(
+									array(
+										'key'       => 'wizard_build_id',
+										'value'     => array($id),
+										'compare'   => 'IN'
+									)
+								)
 							);
+							$the_query = new WP_Query($args);
 
 							// verify if id exists
-							$the_query = new WP_Query( $args );
 							if ( $the_query->have_posts() ) {
+
 								// if id exists, update item
 								while ( $the_query->have_posts() ) : $the_query->the_post();
 									$my_post = array(
@@ -700,7 +708,7 @@ function runmap($offset, $mapCount, $json_config) {
 								}
 								
 								// Update the post into the database
-								update_post_meta($pid, 'wizard.build.id', $id);
+								update_post_meta($pid, 'wizard_build_id', $id);
 								foreach($meta as $mk => $mv) {
 									update_post_meta($pid , $mk, $mv);
 								}
@@ -717,7 +725,7 @@ function runmap($offset, $mapCount, $json_config) {
 			} // mappings group
 
 		} else {
-			return "EOQ";
+			echo "EOQ";
 		}
 	}
 }

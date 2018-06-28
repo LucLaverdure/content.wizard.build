@@ -12,7 +12,24 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	</div>
 	<div class="mapped">
 		<span class="head-f">Mapped content:</span>
-		<span class="mapped-count">0</span>
+		<span class="mapped-count">
+<?php
+							$args = array(
+								'posts_per_page'   => -1,
+								'post_type'  => 'any',
+								'meta_query'    => array(
+									array(
+										'key'       => 'wizard_build_id',
+										'value'     => 'any',
+										'compare'   => '!='
+									)
+								)
+							);
+							$the_query = new WP_Query($args);
+							echo $the_query->post_count;
+?>	
+		</span>
+		<img src="http://content.wizard.build/wp-content/plugins/content.wizard.build/includes/../spinner.gif" style="width:25px;margin-left:10px;display:inline-block;display:none;" class="mapspin">
 	</div>
 </div>
 <div class="need-tokens" style="clear:left;display:none;color:#990000;padding:40px 0 20px  0;width:800px;max-width:100%;">

@@ -427,7 +427,7 @@ function compileMappings() {
 			  },
 			  function() {
 					window.scrollTo(0,0);
-					$(".wbmsg").fadeIn();
+					$(".wbmsg").html("Saved content mappings.").fadeIn();
 			  }
 	)
 	
@@ -760,6 +760,8 @@ $(document).on("click", ".output-tabs a", function() {
 });
 
 function mappings_run(offset, mapped = false) {
+	$(".mapspin").show();
+	$(".mapped-count").html(offset);
 	var mappings = "";
 	if (mapped == false) {
 		mappings = compileMappings();
@@ -773,10 +775,14 @@ function mappings_run(offset, mapped = false) {
 		},
 		function(data) {
 			// exit code
-			if ($.trim(data) == "EOQ") return;
+			if ($.trim(data).indexOf("EOQ") !== -1) {
+				$(".mapspin").hide();
+				$(".wbmsg").html("All content migrated!").fadeIn();
+				return;
+			}
 			
 			// else, continue
-			offset = offset + 15;
+			offset = offset + 35;
 			sleep(window.delay).then(() => {
 				mappings_run(offset, mappings);
 			});
