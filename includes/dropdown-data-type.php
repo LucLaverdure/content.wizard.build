@@ -12,4 +12,3 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <option>lowercase</option>
 <option>MD5 Hash</option>
 <option>SHA1 Hash</option>
-<option>SHA2 Hash</option>

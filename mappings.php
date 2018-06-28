@@ -10,8 +10,9 @@ if (is_admin()) {
 	$offset = $_POST["offset"];
 	$queue_size = 15;
 	$json_config = $_POST["config"];
-
-	runmap($offset, $queue_size, parseJsonConfig($json_config));
+	$parseConfig = parseJsonConfig($json_config);
+	
+	runmap($offset, $queue_size, $parseConfig);
 
 }
 

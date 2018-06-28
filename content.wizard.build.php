@@ -37,6 +37,7 @@ function admin_post_wb_save_hook_callback() {
 // core Wizard.Build.Content Bulk Mappings scripts
 add_action( 'admin_post_wb_mappings_hook', 'admin_post_wb_mappings_hook_callback' );
 function admin_post_wb_mappings_hook_callback() {
+	define("WIZBUI_PLUGIN_PATH", ABSPATH . 'wp-content/plugins/content.wizard.build/');
 	include_once(__DIR__ . "/queue.php");
 	include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
 	include_once(__DIR__ . "/lib/phpQuery.php");

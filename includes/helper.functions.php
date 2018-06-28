@@ -209,6 +209,7 @@ function get_dirs() {
 
 function get_real_dirs() {
 	$path_init = WIZBUI_PLUGIN_PATH . "cache";
+	
 	if(!file_exists(dirname($path_init))) {
 		@mkdir(dirname($path_init), 0777, true);
 	}
@@ -403,41 +404,176 @@ function parseEntry($query, $url, $ht, $isContainer = false) {
 	return $ret;
 }
 
+function parseAfterOp($html, $op, $opeq) {
+	// Apply first transformation
+	switch ($op) {
+		case "text":
+			$html = strip_tags($html);
+			break;
+		case "html":
+			// nothing to do here
+			break;
+		case "imgsrc":
+
+			$doc = phpQuery::newDocument('<div>'.$html.'</div>'); 
+			$code = $doc->find("img");
+			$img = "";
+			foreach (pq($code) as $k => $thisf) {
+				$to_push = pq($thisf)->html();
+				$img = pq($thisf)->attr("src");
+				$html = $img;
+			}
+			break;
+		case "imgcss":
+			// TODO: css funk
+			break;
+	}
+
+	
+	// Apply second transformation
+	switch ($opeq) {
+		case "String (Text)":
+			// nothing to do here
+			break;
+		case "Date":
+			$html = strtotime($html);
+			break;
+		case "Price":
+			$matches = array();
+			$re = '/[0-9,.]+/';
+			preg_match_all($re, $html, $matches, PREG_SET_ORDER, 0);
+			$html = implode("", $matches);
+			break;
+		case "Alpha":
+			$matches = array();
+			$re = '/[a-zA-Z,.]+/';
+			preg_match_all($re, $html, $matches, PREG_SET_ORDER, 0);
+			$html = implode(" ", $matches);
+			break;
+		case "Numeric":
+			$matches = array();
+			$re = '/[0-9,.]+/';
+			preg_match_all($re, $html, $matches, PREG_SET_ORDER, 0);
+			$html = implode("", $matches);
+			break;
+		case "Alpha &amp; Numeric":
+			$matches = array();
+			$re = '/[a-zA-Z0-9]+/';
+			preg_match_all($re, $html, $matches, PREG_SET_ORDER, 0);
+			$html = implode(" ", $matches);
+			break;
+		case "URL Encode":
+			$html = urlencode(trim($html));
+			break;
+		case "Capitalize":
+			$html = ucwords(trim($html));
+			break;
+		case "UPPERCASE":
+			$html = strtoupper(trim($html));
+			break;
+		case "lowercase":
+			$html = strtolower(trim($html));
+			break;
+		case "MD5 Hash":
+			$html = md5(trim($html));
+			break;
+		case "SHA1 Hash":
+			$html = sha1(trim($html));
+			break;
+	}
+	
+	return $html;
+}
+
+function validateOp($query, $url, $html, $op, $opeq) {
+	$ret = parseEntry($query, $url, $html);	
+	switch ($op) {
+		case "notnull":
+			if (trim($ret) != "") return true;
+			break;
+		case "contains":
+			if (strpos($ret, $opeq) !== false) return true;
+			break;
+		case "equals":
+			if ($ret == $opeq) return true;
+			break;
+		case "numgt":
+			$matches = array();
+			$re = '/[0-9,.]+/';
+			preg_match_all($re, $ret, $matches, PREG_SET_ORDER, 0);
+			$html = implode("", $matches);
+			break;
+		case "numlt":
+			$matches = array();
+			$re = '/[0-9,.]+/';
+			preg_match_all($re, $ret, $matches, PREG_SET_ORDER, 0);
+			$html = implode("", $matches);
+			break;
+	}
+	
+	return false;
+}
+
 function runmap($offset, $mapCount, $json_config) {
 	// get crawled files
-//function parseEntry($query, $url, $ht, $isContainer = false) {
-$tst = parseEntry('static value %url% {{.thisclass}}  {{{(\\d+)}}} {{{(\\d+)}}}', "http://perdu.com", '<h1 class="thisclass">Test</h1><h2 class="thisclass">Test2</h2> 1234 12', true);
-var_dump($tst);
-return;
+
+	$path_init = WIZBUI_PLUGIN_PATH . "cache";
+	if(!file_exists(dirname($path_init))) {
+		@mkdir(dirname($path_init), 0777, true);
+	}
+	$filez = getDirContents($path_init);
 	
-	$files = get_crawled_list();
-	for ($i = $offset; $i <= ($offset + $mapCount -1); ++$i) {
-		if (isset($files[i])) {
-			
+	for ($i = $offset; $i <= ($offset + $mapCount - 1); ++$i) {
+
+		if (isset($filez[$i])) {
+
+			$file_contents = file_get_contents($filez[$i]);
+		
 			// for each Mappings Group
 			foreach($json_config as $jc_key => $jc_val) {
 				
+
 				$containers = array(); //  instance containers
 				
 				// Scraper Method
 				if ($jc_val["inputmethod"] == "scraper") {
+					
+					// get containers
+					// 		function parseEntry($query, $url, $ht, $isContainer = false) {
+					$containers = parseEntry($jc_val["containerInstance"], $filez[$i], $file_contents, true);
+					foreach ($containers as $container) {
+
+						// adjust container
+						// 		function parseAfterOp($html, $op, $opeq) {
+						$container = parseAfterOp($container, $jc_val["containerop"], $jc_val["containeropeq"]);
+						// validate mapping
+						//		function validateOp($query, $url, $html, $op, $opeq) {
+						$valid = validateOp($jc_val["validator"], $filez[$i], $container, $jc_val["op"], $jc_val["opeq"]);
+						
+						// when validation passed
+						if ($valid) {
+							// get id
+							// 		function parseEntry($query, $url, $ht, $isContainer = false) {
+							$id = parseEntry($jc_val["idsel"], $filez[$i], $container);
+
+							// 		function parseAfterOp($html, $op, $opeq) {
+							$id = parseAfterOp($id, $jc_val["idop"], $jc_val["idopeq"]);
+							
+							// verify if id exists
+							
+							// if id doesnt exist, create item
+							
+							// if id exists, update item
+							
+						}
+						
+					}
+					
 				}
 				
 			}
-			
+
 			/*
-		
-			containerInstance
-			containerop
-			containeropeq
-			
-			validator
-			op
-			opeq
-			
-			idsel
-			*/
-			
 			$args = array(
 				'meta_query' => array(
 					array(
@@ -461,6 +597,7 @@ return;
 				// not found... create item
 	
 			}
+			*/
 		} else {
 			return "EOQ";
 		}
