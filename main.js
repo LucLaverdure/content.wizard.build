@@ -753,9 +753,15 @@ $(document).on("click", ".output-tabs a", function() {
 	return false;
 });
 
-function mappings_run(offset) {
+function mappings_run(offset, mapped = false) {
+	var mappings = "";
+	if (mapped == false) {
+		mappings = compileMappings();
+	} else {
+		mappings = mapped;
+	}
 	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_mappings_hook", {
-			config: compileMappings(),
+			config: mappings,
 			runmappings: true,
 			offset: offset
 		},
@@ -766,7 +772,7 @@ function mappings_run(offset) {
 			// else, continue
 			offset = offset + 15;
 			sleep(window.delay).then(() => {
-				mappings_run(offset);
+				mappings_run(offset, mappings);
 			});
 		}
 	);

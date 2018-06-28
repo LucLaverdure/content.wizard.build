@@ -228,7 +228,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<div class="save-wrapper">
 		<input type="button" name="save" value="Save Mappings" style="background-color:#009900;color: #fff;padding:20px;font-size:16px;" onclick="compileMappings();return false;"/>
 
-		<input type="button" name="run" value="Save Mappings & Run Import" style="background-color:#000099;color: #fff;padding:20px;font-size:16px;" onclick="mappings_run();return false;"/>
+		<input type="button" name="run" value="Save Mappings & Run Import" style="background-color:#000099;color: #fff;padding:20px;font-size:16px;" onclick="mappings_run(0);return false;"/>
 	</div>
 	
 </div>

@@ -252,7 +252,7 @@ function pathme($fromURL, $relURL) {
 
 function parseJsonConfig($jsonConfig) {
 
-	$decodeConfig = json_decode($jsonConfig, true);
+	$decodeConfig = json_decode(stripslashes($jsonConfig), true);
 	$outputConfig = array();
 
 	// load data
@@ -333,14 +333,100 @@ function parseJsonConfig($jsonConfig) {
 	
 } // function
 
+function parseEntry($query, $url, $ht, $isContainer = false) {
+	
+	$container_array = array();
+	
+	// parse regex expressions (triple brackets)
+	$q = array();
+	preg_match_all('/{{{.*}}}/U', $query, $q, PREG_SET_ORDER, 0);
+
+	foreach ($q as $n => $qq) {
+		$qq = $qq[0];
+		
+		$newregex = str_replace("{{{", '', $qq);
+		$newregex = str_replace("}}}", '', $newregex);
+
+		$newq = array();
+		preg_match_all($newregex, $ht, $newq, PREG_SET_ORDER, 0);
+
+		$getzeros = array();
+		foreach ($newq as $z => $zero) {
+			$getzeros[] = $zero[0];
+		}
+		
+		$getzeros = implode("", $getzeros);
+		
+		if ($isContainer) {
+			$matches = array();
+			preg_match_all($newregex, $ht, $matches, PREG_SET_ORDER, 0);
+			foreach($matches as $b => $found_match) {
+				$container_array[] = $found_match;
+			}
+		}
+		
+		$query = str_replace($qq, $getzeros, $query);
+	}
+	
+	// parse jquery expressions (double brackets)
+	$q = array();
+	preg_match_all('/{{.*}}/U', $query, $q, PREG_SET_ORDER, 0);
+	
+	foreach ($q as $n => $qq) {
+		$qq = $qq[0];
+		
+		$newjq = str_replace("{{", '', $qq);
+		$newjq = str_replace("}}", '', $newjq);
+		$doc = phpQuery::newDocument('<div>'.$ht.'</div>'); 
+		
+		$code = $doc->find($newjq);
+		$appendHTML = '';
+		foreach (pq($code) as $k => $thisf) {
+			$to_push = pq($thisf)->html();
+			if ($isContainer) {
+				$container_array[] = $to_push;
+			} else {
+				$appendHTML .= $to_push;
+			}
+		}
+		$query = str_replace($qq, $appendHTML, $query);
+	}
+	
+
+	// parse %url%
+	$ret = str_replace("%url%", $url, $query);
+	
+	// ret remaining
+	if ($isContainer) {
+		return $container_array;
+	}
+	return $ret;
+}
+
 function runmap($offset, $mapCount, $json_config) {
 	// get crawled files
+//function parseEntry($query, $url, $ht, $isContainer = false) {
+$tst = parseEntry('static value %url% {{.thisclass}}  {{{(\\d+)}}} {{{(\\d+)}}}', "http://perdu.com", '<h1 class="thisclass">Test</h1><h2 class="thisclass">Test2</h2> 1234 12', true);
+var_dump($tst);
+return;
+	
 	$files = get_crawled_list();
 	for ($i = $offset; $i <= ($offset + $mapCount -1); ++$i) {
 		if (isset($files[i])) {
-			/*
-			inputmethod
 			
+			// for each Mappings Group
+			foreach($json_config as $jc_key => $jc_val) {
+				
+				$containers = array(); //  instance containers
+				
+				// Scraper Method
+				if ($jc_val["inputmethod"] == "scraper") {
+				}
+				
+			}
+			
+			/*
+		
 			containerInstance
 			containerop
 			containeropeq

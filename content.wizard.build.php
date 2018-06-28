@@ -11,22 +11,16 @@
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
-wp_enqueue_style("wiz.css", plugin_dir_url( __FILE__ )."/wiz.css");
-wp_enqueue_style("jqueryui-struct", plugin_dir_url( __FILE__ )."/lib/jquery-ui.structure.min.css");
-wp_enqueue_style("jqueryui-theme", plugin_dir_url( __FILE__ )."/lib/jquery-ui.theme.min.css");
-
-wp_deregister_script('jquery');
-wp_enqueue_script('jquery', 'https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js', array(), null, true);
-
-wp_enqueue_script("jqueryui-src", plugin_dir_url( __FILE__ )."/lib/jquery-ui.min.js");
-wp_enqueue_script("jqueryui-combobox", plugin_dir_url( __FILE__ )."/lib/jquery-ui.combobox.js");
+@wp_enqueue_style("wiz.css", plugin_dir_url( __FILE__ )."/wiz.css");
 
 // core Wizard.Build.Content admin panel
 add_action('admin_menu', 'wizbui_setup_menu');
 function wizbui_setup_menu(){
+	include_once(__DIR__ . "/queue.php");
 	add_menu_page( 'Content Wizard Build', 'Wizard.Build', 'manage_options', 'content-wizard-build', 'wizbui_callback', plugin_dir_url( __FILE__ ) ."/wizard-white.png" );
 }
 function wizbui_callback(){
+	include_once(__DIR__ . "/queue.php");
 	include_once(__DIR__ . "/lib/phpQuery.php");
 	include(__DIR__ . "/wizbui-admin-page.php");
 }
@@ -34,6 +28,7 @@ function wizbui_callback(){
 // core Wizard.Build.Content File Saver
 add_action( 'admin_post_wb_save_hook', 'admin_post_wb_save_hook_callback' );
 function admin_post_wb_save_hook_callback() {
+	include_once(__DIR__ . "/queue.php");
 	include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
 	include_once(__DIR__ . "/lib/phpQuery.php");
 	include(__DIR__ . "/data.save.php");
@@ -42,6 +37,7 @@ function admin_post_wb_save_hook_callback() {
 // core Wizard.Build.Content Bulk Mappings scripts
 add_action( 'admin_post_wb_mappings_hook', 'admin_post_wb_mappings_hook_callback' );
 function admin_post_wb_mappings_hook_callback() {
+	include_once(__DIR__ . "/queue.php");
 	include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
 	include_once(__DIR__ . "/lib/phpQuery.php");
 	include(__DIR__ . "/mappings.php");
@@ -51,7 +47,7 @@ function admin_post_wb_mappings_hook_callback() {
 // core Wizard.Build.Content get new urls to crawl
 add_action( 'admin_post_wb_get_hook', 'admin_post_wb_get_hook_callback' );
 function admin_post_wb_get_hook_callback() {
-	
+	include_once(__DIR__ . "/queue.php");
 	include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
 	define("WIZBUI_PLUGIN_PATH", ABSPATH . 'wp-content/plugins/content.wizard.build/');
 	

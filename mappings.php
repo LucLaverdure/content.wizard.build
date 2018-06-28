@@ -11,7 +11,7 @@ if (is_admin()) {
 	$queue_size = 15;
 	$json_config = $_POST["config"];
 
-	echo runmap($offset, $mapCount, parseJsonConfig($json_config));
+	runmap($offset, $queue_size, parseJsonConfig($json_config));
 
 }
 

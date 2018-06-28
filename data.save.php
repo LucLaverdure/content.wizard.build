@@ -11,7 +11,6 @@ if (is_admin()) {
 
 	if (isset($_POST["quicksave"])) {
 		$ret = parseJsonConfig(stripslashes($_POST['mappings']));
-		var_dump($ret);
 		die();
 	}
 
