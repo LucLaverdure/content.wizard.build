@@ -673,7 +673,13 @@ function setTag() {
 }
 
 function comboclick($this) {
-	$($this).parents(".combo-wrap").find(".combo-input").val($($this).html());
+	
+	if ($.trim($($this).data("val")) != "") {
+		$($this).parents(".combo-wrap").find(".combo-input").val($($this).data("val"));
+	} else {
+		$($this).parents(".combo-wrap").find(".combo-input").val($($this).html());
+	}
+	
 	$($this).parents(".combo-wrap").find(".options").hide("fold","swing",100);
 	
 	$(".combo-wrap").find(".options").removeClass("fold").hide().parents(".combo-wrap").find(".drop-select").html("&darr;");

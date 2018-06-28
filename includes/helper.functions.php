@@ -441,26 +441,52 @@ function parseAfterOp($html, $op, $opeq) {
 		case "Price":
 			$matches = array();
 			$re = '/[0-9,.]+/';
+			$matched = array();
 			preg_match_all($re, $html, $matches, PREG_SET_ORDER, 0);
-			$html = implode("", $matches);
+			foreach ($matches as $match) {
+				$matched[] = $match[0];
+			}
+			$html = (float) implode("", $matched);
 			break;
 		case "Alpha":
 			$matches = array();
 			$re = '/[a-zA-Z,.]+/';
+			$matched = array();
 			preg_match_all($re, $html, $matches, PREG_SET_ORDER, 0);
-			$html = implode(" ", $matches);
+			foreach ($matches as $match) {
+				$matched[] = $match[0];
+			}
+			$html = implode("", $matched);
 			break;
-		case "Numeric":
+		case "Numeric (int)":
 			$matches = array();
 			$re = '/[0-9,.]+/';
+			$matched = array();
 			preg_match_all($re, $html, $matches, PREG_SET_ORDER, 0);
-			$html = implode("", $matches);
+			foreach ($matches as $match) {
+				$matched[] = $match[0];
+			}
+			$html = (int) implode("", $matched);
+			break;
+		case "Numeric (float)":
+			$matches = array();
+			$re = '/[0-9,.]+/';
+			$matched = array();
+			preg_match_all($re, $html, $matches, PREG_SET_ORDER, 0);
+			foreach ($matches as $match) {
+				$matched[] = $match[0];
+			}
+			$html = (float) implode("", $matched);
 			break;
 		case "Alpha &amp; Numeric":
 			$matches = array();
 			$re = '/[a-zA-Z0-9]+/';
+			$matched = array();
 			preg_match_all($re, $html, $matches, PREG_SET_ORDER, 0);
-			$html = implode(" ", $matches);
+			foreach ($matches as $match) {
+				$matched[] = $match[0];
+			}
+			$html = implode("", $matched);
 			break;
 		case "URL Encode":
 			$html = urlencode(trim($html));
@@ -559,45 +585,137 @@ function runmap($offset, $mapCount, $json_config) {
 							// 		function parseAfterOp($html, $op, $opeq) {
 							$id = parseAfterOp($id, $jc_val["idop"], $jc_val["idopeq"]);
 							
+							// build fields
+							$build_fields = array();
+							$raw_fields = $jc_val["fields"];
+
+							foreach ($raw_fields as $keyin => $field) {
+								$this_field = "";
+								// function parseEntry($query, $url, $ht, $isContainer = false) {
+								$this_field = parseEntry($raw_fields[$keyin]["fieldsel"], $filez[$i], $container);
+//echo "this_field:";var_dump($this_field);
+								// function parseAfterOp($html, $op, $opeq) {
+								$this_field = parseAfterOp($this_field, $raw_fields[$keyin]["fieldop"], $raw_fields[$keyin]["fieldopeq"]);
+//echo "this_field2:";var_dump($this_field);								
+								$build_fields[$raw_fields[$keyin]["field-map"]] = $this_field;
+							}
+//echo "build:";var_dump($build_fields);								
+							
+							// query current id
+							$args = array(
+								'numberposts'	=> 1,
+								'meta_key'		=> 'wizard.build.id',
+								'meta_value'	=> $id
+							);
+
 							// verify if id exists
+							$the_query = new WP_Query( $args );
+							if ( $the_query->have_posts() ) {
+								// if id exists, update item
+								while ( $the_query->have_posts() ) : $the_query->the_post();
+									$my_post = array(
+										'ID' => get_the_ID(),
+										'post_type' => $jc_val["postType"]
+									);
+									$meta = array();
+									foreach ($build_fields as $kname => $val) {
+										if (substr($kname, 0, 1) != "_") {
+											$my_post[$kname] = $val;
+										} else {
+											$meta[$kname] = $val;
+										}
+									}
+
+									// create product category if doesn`t exist
+									if (isset($my_post["product_cat"])) {
+										wp_insert_term(
+										  $my_post["product_cat"], // the term 
+										  'product_cat', // the taxonomy
+										  array(
+											'description'=> $my_post["post_category"]
+										  )
+										);								
+									}
+									
+									// create post category if doesn`t exist
+									if (isset($my_post["post_category"])) {
+										wp_insert_term(
+										  $my_post["post_category"], // the term 
+										  'post_category', // the taxonomy
+										  array(
+											'description'=> $my_post["post_category"]
+										  )
+										);								
+									}
+									
+									
+									// Update the post into the database
+									wp_update_post( $my_post );
+									foreach($meta as $mk => $mv) {
+										update_post_meta(get_the_ID(), $mk, $mv);
+									}
+									
+									
+								endwhile;
+								wp_reset_postdata();
+
+							} else {
+								// if id doesnt exist, create item
+								// REQUIRED: post_title and post_content
+								$my_post = array(
+									'post_type' => $jc_val["postType"]
+								);
+								
+								$meta = array();
+								foreach ($build_fields as $kname => $val) {
+									if (substr($kname, 0, 1) != "_") {
+										$my_post[$kname] = $val;
+									} else {
+										$meta[$kname] = $val;
+									}
+								}
+
+								$pid = wp_insert_post($my_post);
+
+								// create category if doesn`t exist
+								if (isset($my_post["product_cat"])) {
+									wp_insert_term(
+									  $my_post["product_cat"], // the term 
+									  'product_cat', // the taxonomy
+									  array(
+										'description'=> $my_post["post_category"]
+									  )
+									);								
+								}
+								
+								// create post category if doesn`t exist
+								if (isset($my_post["post_category"])) {
+									wp_insert_term(
+									  $my_post["post_category"], // the term 
+									  'post_category', // the taxonomy
+									  array(
+										'description'=> $my_post["post_category"]
+									  )
+									);								
+								}
+								
+								// Update the post into the database
+								update_post_meta($pid, 'wizard.build.id', $id);
+								foreach($meta as $mk => $mv) {
+									update_post_meta($pid , $mk, $mv);
+								}
+
+									
+							}
 							
-							// if id doesnt exist, create item
-							
-							// if id exists, update item
-							
-						}
+						} // valid
 						
-					}
+					} // containers
 					
-				}
+				} // scraper / sql
 				
-			}
+			} // mappings group
 
-			/*
-			$args = array(
-				'meta_query' => array(
-					array(
-						'key' 		=> 'wizard.build.id',
-						'value'		=> '',
-						'compare' 	=> '='
-					)
-				)
-			);
-			
-			$the_query = new WP_Query( $args );
-			
-			if ( $the_query->have_posts() ) {
-				// found! update item
-				// // // while ( $the_query->have_posts() ) : $the_query->the_post();
-				// // // endwhile;
-				
-				wp_reset_postdata();
-
-			} else {
-				// not found... create item
-	
-			}
-			*/
 		} else {
 			return "EOQ";
 		}

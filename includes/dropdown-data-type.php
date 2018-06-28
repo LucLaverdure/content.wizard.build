@@ -4,7 +4,8 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <option>Date</option>
 <option>Price</option>
 <option>Alpha</option>
-<option>Numeric</option>
+<option>Numeric (int)</option>
+<option>Numeric (float)</option>
 <option>Alpha & Numeric</option>
 <option>URL Encode</option>
 <option>Capitalize</option>
