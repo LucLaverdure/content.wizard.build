@@ -729,7 +729,7 @@ function wiz_genstandardUrlFromInput($input, $origin_file = "") {
 			
 			$standardUrl = $parse["scheme"];
 			$standardUrl .= ($parse["host"] != "") ? "://".$parse["host"] : '';
-			$standardUrl .= ($parse_url["path"] != "") ? "/".$parse_url["path"] : '';
+			$standardUrl .= ($parse_url["path"] != "") ? $parse_url["path"] : '';
 			$standardUrl .= ($parse_url["query"] != "") ? "?".$parse_url["query"] : '';
 			$standardUrl .= ($parse_url["fragment"] != "") ? "#".$parse_url["fragment"] : '';
 		}
