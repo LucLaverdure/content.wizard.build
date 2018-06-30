@@ -2,12 +2,15 @@
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 ?><div class="progress-box">
 	<div class="key">
-		<span class="head-f">Licenced Tokens Left:</span>
-		<span class="tokens-count" id="counter">0</span>
+		<span class="head-f">My Account Type:</span>
+		<span class="tokens-count">Beggar</span>
+		<span style="display:none;" class="tokens-count" id="counter">0</span>
 	</div>
 	<div class="crawled">
 		<div class="head-f">Sanitized Downloads:</div>
-		<span class="crawled-count">0</span>
+		<span class="crawled-count">
+			<?php echo count(get_real_dirs()); ?>
+		</span>
 <img src="http://content.wizard.build/wp-content/plugins/content.wizard.build/includes/../spinner.gif" style="width:25px;margin-left:10px;display:inline-block;display:none;" class="crawlspin">
 	</div>
 	<div class="mapped">

@@ -16,6 +16,15 @@ function save_options() {
 	if (isset($_POST['mappings'])) {
 		update_option('wb_mappings', serialize($_POST['mappings']));
 	}
+	if (isset($_POST['paramRemoveGets'])) {
+		update_option('wb_RemoveGets', serialize($_POST['paramRemoveGets']));
+	}
+	if (isset($_POST['paramRemoveHashes'])) {
+		update_option('wb_RemoveHashes', serialize($_POST['paramRemoveHashes']));
+	}
+	if (isset($_POST['paramPostJS'])) {
+		update_option('wb_PostJS', serialize($_POST['paramPostJS']));
+	}
 	
 }
 
@@ -37,7 +46,7 @@ function getDirContents($dir, &$results = array()){
 
 
 function delete_cache_dir() {
-	$dir = __DIR__ . "/cache";
+	$dir = WIZBUI_PLUGIN_PATH . "cache";
 	$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
 	$files = new RecursiveIteratorIterator($it,
 				 RecursiveIteratorIterator::CHILD_FIRST);
@@ -100,97 +109,15 @@ function get_all_posts_fields() {
 	return $fields;
 }
 
-
-function whitelist_check($urls_to_add, $path_origin) {
-	// verify whitelist
-	$urls_to_add_parsed = array();
-	foreach ($urls_to_add as $urlX) {
-		if (trim($path_origin) != "") {
-			$urlX = pathme($path_origin, $urlX);
-		}
-		$pass = array();
-		$whitelist = get_whitelist();
-		if (count($whitelist) > 0) {
-			foreach ($whitelist as $val) {
-				if ((trim($urlX) != "") && (trim($val) != false)) {
-					if (strrpos(trim($urlX), trim($val)) !== false) {
-						$pass[] = $val;
-					}
-				}
-			}
-			if (count($pass) == count($whitelist)) {
-				$urls_to_add_parsed[] = trim($urlX);
-			}
-		} else {
-			$urls_to_add_parsed[] = trim($urlX);
-		}
-	}
-	return $urls_to_add_parsed;
-}
-
-function blacklist_check($urls_to_add, $path_origin) {
-	// verify blacklist
-	$urls_to_add_parsed = array();
-	foreach ($urls_to_add as $urlX) {
-		if (trim($path_origin) != "") {
-			$urlX = pathme($path_origin, $urlX);
-		}
-		$pass = true;
-		$blacklist = get_blacklist();
-		if (count($blacklist) > 0) {
-			foreach ($blacklist as $val) {
-				if ((trim($urlX) != "") && (trim($val) != false)) {
-					if (strrpos(trim($urlX), trim($val)) !== false) {
-						$pass = false;
-					}
-				}
-			}
-			if ($pass == true) {
-				$urls_to_add_parsed[] = trim($urlX);
-			}
-		} else {
-			$urls_to_add_parsed[] = trim($urlX);
-		}
-	}
-	return $urls_to_add_parsed;
-}
-
 function get_blacklist() {
-	$opt = get_option('wb_blacklist', null);
+	$opt = get_option('wb_blacklist', array());
 	return explode("\n", unserialize($opt));
-	/*
-	$blacklist = $_POST["blacklist"];
-	$blacklist = explode("\n", $blacklist);
-	if (count($blacklist) > 0) {
-		$list = array();
-		foreach($blacklist as $listed) {
-			if (trim($listed) != "") $list[] = $listed;
-		}
-		return $list;
-	} else {
-		return array();
-	}
-	*/
 }
 
 
 function get_whitelist() {
-	$opt = get_option('wb_whitelist', null);
+	$opt = get_option('wb_whitelist', array());
 	return explode("\n", unserialize($opt));
-	
-	/*
-	$whitelist = $_POST["whitelist"];
-	$whitelist = explode("\n", $whitelist);
-	if (count($whitelist) > 0) {
-		$list = array();
-		foreach($whitelist as $listed) {
-			if (trim($listed) != "") $list[] = $listed;
-		}
-		return $list;
-	} else {
-		return array();
-	}
-	*/
 }
 
 
@@ -219,19 +146,6 @@ function get_real_dirs() {
 		$dir_array[] = str_replace(WIZBUI_PLUGIN_PATH."cache/", '', $dirX);
 	}
 	return $dir_array;
-}
-
-function get_crawled_list() {
-	$list = explode("\n", @file_get_contents(__DIR__ . "/cache/crawled.txt"));
-	if (count($list)>0) {
-		$filtered = array();
-		foreach ($list as $line) {
-			if (trim($line) != "") $filtered[] = trim($line);
-		}
-		return $filtered;
-	} 
-	
-	return array();
 }
 
 function pathme($fromURL, $relURL) {
@@ -419,13 +333,14 @@ function parseAfterOp($html, $op, $opeq) {
 			$img = "";
 			foreach (pq($code) as $k => $thisf) {
 				$to_push = pq($thisf)->html();
-				$img = pq($thisf)->attr("src");
-				$img = str_replace("//", "http://", $img);
+				$img = trim(pq($thisf)->attr("src"));
+				if (substr($img,0,2)=="//") {
+					$img = str_replace("//", "/", $img);
+					$img = str_replace("http:/", "http://", $img);
+					$img = str_replace("https:/", "https://", $img);
+				}
 				$html = $img;
 			}
-			break;
-		case "imgcss":
-			// TODO: css funk
 			break;
 	}
 
@@ -478,7 +393,7 @@ function parseAfterOp($html, $op, $opeq) {
 			}
 			$html = (float) implode("", $matched);
 			break;
-		case "Alpha &amp; Numeric":
+		case "Alphanumeric":
 			$matches = array();
 			$re = '/[a-zA-Z0-9]+/';
 			$matched = array();
@@ -528,12 +443,14 @@ function validateOp($query, $url, $html, $op, $opeq) {
 			$re = '/[0-9,.]+/';
 			preg_match_all($re, $ret, $matches, PREG_SET_ORDER, 0);
 			$html = implode("", $matches);
+			if ( ((float) $html) >  ((float) $opeq) ) return true;
 			break;
 		case "numlt":
 			$matches = array();
 			$re = '/[0-9,.]+/';
 			preg_match_all($re, $ret, $matches, PREG_SET_ORDER, 0);
 			$html = implode("", $matches);
+			if ( ((float) $html) <  ((float) $opeq) ) return true;
 			break;
 	}
 	
@@ -787,4 +704,290 @@ function add_image($post_id, $image_url, $image_name) {
 	update_post_meta($post_id, '_thumbnail_id', $attach_id);
 }
 
+function wizbui_curlit($url) {
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)"); 
+	curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+	$output = curl_exec($ch);
+	curl_close($ch);
+	return $output;
+}
+
+function wiz_genstandardUrlFromInput($input, $origin_file = "") {
+	
+	$standardUrl = $input;
+
+	// relative path
+	if ((substr($standardUrl, 0, 1) == "/") && (substr($standardUrl,1,1) != "/")) {
+		if ($origin_file != "") {
+			//$base = str_replace(basename($origin_file), "", $origin_file);
+			$parse = parse_url($origin_file);
+			$parse_url = parse_url($standardUrl);
+			
+			$standardUrl = $parse["scheme"];
+			$standardUrl .= ($parse["host"] != "") ? "://".$parse["host"] : '';
+			$standardUrl .= ($parse_url["path"] != "") ? "/".$parse_url["path"] : '';
+			$standardUrl .= ($parse_url["query"] != "") ? "?".$parse_url["query"] : '';
+			$standardUrl .= ($parse_url["fragment"] != "") ? "#".$parse_url["fragment"] : '';
+		}
+	}
+
+	// starts with "//" add http
+	if (substr($standardUrl, 0, 2) == "//") {
+		$standardUrl = "http:".$standardUrl;
+	}
+
+	// doesnt starts with "http" add http://
+	if (substr($standardUrl, 0, 4) != "http") {
+		$standardUrl = "http://".$standardUrl;
+	}
+	
+	// prevent path hacks
+	$standardUrl = str_replace("../", "", $standardUrl);
+
+	// return url
+	return trim($standardUrl);
+}
+
+function wiz_setOptions($standardUrl) {
+	// remove get variables
+	$rget = unserialize(get_option('wb_RemoveGets', 'N'));
+	if ($rget=='Y') {
+		$standardUrl = strtok($standardUrl, '?');
+	}
+	
+	// remove hashes variables
+	$rhash = unserialize(get_option('wb_RemoveHashes', 'N'));
+	if ($rhash=='Y') {
+		$standardUrl = strtok($standardUrl, '#');
+	}
+	return trim($standardUrl);
+}
+
+function wiz_genFileFromstandardUrl($standardUrl) {
+	$standardUrl = str_replace("http", "http/", $standardUrl);
+	$standardUrl = str_replace("http/s", "https/", $standardUrl);
+	$standardUrl = str_replace(":/", "", $standardUrl);
+	$standardUrl = str_replace("//", "/", $standardUrl);
+	
+	$filename = explode("/", $standardUrl);
+	
+	$last = count($filename) - 1;
+	// if there is no "." after the last "/" or there is a total of 2 slashes (http://)
+	if ((strpos($filename[$last], ".") === false) || (count($filename) <= 3)) {
+		// add index file
+		$filename[] = "index.html";
+	}
+	$filename = implode("/", $filename);
+
+	// remove "://" from path, to create http / https folder then domain then files
+	$filename = str_replace("://", "", $filename);
+
+	// prevent path hacks
+	$filename = str_replace("../", "", $filename);
+	
+	// fix filenames for get query parameters
+	$filename = str_replace("?", "_", $filename);
+
+	// fix filenames for php files
+	$filename = str_replace(array(".php", ".php3", ".php4", ".php5", ".phtml"), ".html", $filename);
+
+	$filename = WIZBUI_PLUGIN_PATH . "cache/" . $filename;
+
+	return trim($filename);
+}
+
+function wiz_removeInputFromToCrawl($standardUrl) {
+	// remove from to crawl
+	$tocrawl = file_get_contents(WIZBUI_PLUGIN_PATH . "crawl.me.txt");
+	$tocrawl = explode("\n", $tocrawl);
+	foreach($tocrawl as $k => $tc) {
+		if ($tc == $standardUrl) {
+			unset($tocrawl[$k]);
+		}
+	}
+	$tocrawl = implode("\n", $tocrawl);
+	file_put_contents(WIZBUI_PLUGIN_PATH . "crawl.me.txt", $tocrawl);
+}
+
+function wiz_addInputToCrawled($standardUrl) {
+	file_put_contents(WIZBUI_PLUGIN_PATH . "crawled.txt", $standardUrl."\n", FILE_APPEND);
+}
+function wiz_in_crawled($standardUrl) {
+	// add to list of crawled urls
+	$crawled = file_get_contents(WIZBUI_PLUGIN_PATH . "crawled.txt");
+	$crawled = explode("\n", $crawled);
+	if (in_array($standardUrl, $crawled)) {
+		return true;
+	}
+	return false;
+}
+
+function wiz_validate_whitelist($standardUrl) {
+	// verify whitelist
+	$pass = array();
+	$whitelist = get_whitelist();
+	if (count($whitelist) > 0) {
+		foreach ($whitelist as $white_arg) {
+			if (($standardUrl != "") && (trim($white_arg) != false)) {
+				if (strrpos($standardUrl, trim($white_arg)) !== false) {
+					$pass[] = $white_arg;
+				}
+			}
+		}
+		if (count($pass) == count($whitelist)) {
+			return true;
+		}
+	} else {
+		return true;
+	}
+	return false;
+}
+
+function wiz_validate_blacklist($standardUrl) {
+	$pass = true;
+	$blacklist = get_blacklist();
+	if (count($blacklist) > 0) {
+		foreach ($blacklist as $black_arg) {
+			if (($standardUrl != "") && (trim($black_arg) != false)) {
+				if (strrpos($standardUrl, trim($black_arg)) !== false) {
+					return false;
+				}
+			}
+		}
+		return true;
+	} else {
+		return true;
+	}
+	return true;
+}
+
+function wiz_download($standardUrl, $file) {
+	if(!is_dir(dirname($file)))
+		mkdir(dirname($file), 0777, true);
+	
+	$output = wizbui_curlit($standardUrl);
+	file_put_contents($file, $output);
+	return $output;
+}
+
+function wiz_related_files($output, $filename, $url_origin) {
+	try {
+		
+		$urls_to_add = array();
+		
+		$ext = substr($filename, strrpos($filename, '.'));
+		if ($ext==".css") {
+			// TODO: get image urls
+		} elseif ($ext==".js") {
+			// TODO: nothing
+		} else {
+			/* get links (a href)
+			*  get meta links (link href)
+			*  get scripts (script src)
+			*  get images (img src)
+			**************************/
+
+			$doc = phpQuery::newDocument($output);
+
+			// get A HREF links
+			foreach(pq("a") as $links) {
+				$urls_to_add[] = pq($links)->attr("href");
+			}
+
+			// get LINK HREF links
+			foreach(pq("link") as $links) {
+				$urls_to_add[] = pq($links)->attr("href");
+			}
+
+			// get A SCRIPT SRC links
+			foreach(pq("script") as $links) {
+				$urls_to_add[] = pq($links)->attr("src");
+			}
+
+			// get A IMG SRC links
+			foreach(pq("img") as $links) {
+				$urls_to_add[] = pq($links)->attr("src");
+			}
+			
+		}
+		
+		$ret_urls = array();
+		foreach ($urls_to_add as $k => $urlta) {
+			$urlta = wiz_genstandardUrlFromInput($urlta, $url_origin);
+			if (!wiz_in_crawled($urlta)) {
+				if (wiz_validate_whitelist($urlta)) {
+					if (wiz_validate_blacklist($urlta)) {
+						$ret_urls[] = $urlta;
+					}
+				}
+			}
+			
+		}
+		
+		return $ret_urls;
+		
+	} catch (Exception $e) {
+		// meh, was prolly binary...
+		//echo $e->getMessage();
+		return array();
+		
+	}
+	
+	return array();
+}
+
+
+function save_related_files($related_files) {
+	foreach ($related_files as $_input) {
+		$urlx = wiz_genstandardUrlFromInput($_input);
+		if (!wiz_in_crawled($urlx)) {
+			file_put_contents(WIZBUI_PLUGIN_PATH . "crawl.me.txt", $urlx."\n", FILE_APPEND);
+		}
+	}
+}
+
+function wiz_create_req_folders_and_files() {
+	
+	// create cache folder if doesn`t exist
+	try {
+		$touch = WIZBUI_PLUGIN_PATH . "cache";
+		if(!is_dir(dirname($touch)))
+			mkdir(dirname($touch), 0777, true);
+	} catch (Exception $e) { 
+		// meh
+	}
+
+	try {
+		@chmod(WIZBUI_PLUGIN_PATH . "cache", 0777);
+	} catch (Exception $e) { 
+		// meh
+	}
+
+	try {
+		// create crawl.me.txt if doesn`t exist
+		$touch = WIZBUI_PLUGIN_PATH . "crawl.me.txt";
+		if (!file_exists($touch)) {
+			if (!file_exists(dirname($touch))) mkdir(dirname($touch), 0777, true);
+			touch($touch);
+		}
+	} catch (Exception $e) { 
+		// meh
+	}
+	
+	try {
+		// create crawl.me.txt if doesn`t exist
+		$touch = WIZBUI_PLUGIN_PATH . "crawled.txt";
+		if (!file_exists($touch)) {
+			if (!file_exists(dirname($touch))) mkdir(dirname($touch), 0777, true);
+			touch($touch);
+		}
+	} catch (Exception $e) { 
+		// meh
+	}
+	
+}
 ?>

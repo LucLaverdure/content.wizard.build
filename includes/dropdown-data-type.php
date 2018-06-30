@@ -6,7 +6,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <option>Alpha</option>
 <option>Numeric (int)</option>
 <option>Numeric (float)</option>
-<option>Alpha & Numeric</option>
+<option>Alphanumeric</option>
 <option>URL Encode</option>
 <option>Capitalize</option>
 <option>UPPERCASE</option>
