@@ -335,9 +335,7 @@ function parseAfterOp($html, $op, $opeq) {
 				$to_push = pq($thisf)->html();
 				$img = trim(pq($thisf)->attr("src"));
 				if (substr($img,0,2)=="//") {
-					$img = str_replace("//", "/", $img);
-					$img = str_replace("http:/", "http://", $img);
-					$img = str_replace("https:/", "https://", $img);
+					$img = "http://".substr($img, 2);
 				}
 				$html = $img;
 			}
@@ -804,10 +802,8 @@ function wiz_removeInputFromToCrawl($standardUrl) {
 	// remove from to crawl
 	$tocrawl = file_get_contents(WIZBUI_PLUGIN_PATH . "crawl.me.txt");
 	$tocrawl = explode("\n", $tocrawl);
-	foreach($tocrawl as $k => $tc) {
-		if ($tc == $standardUrl) {
-			unset($tocrawl[$k]);
-		}
+	if (count($tocrawl) > 0) {
+		unset($tocrawl[0]);
 	}
 	$tocrawl = implode("\n", $tocrawl);
 	file_put_contents(WIZBUI_PLUGIN_PATH . "crawl.me.txt", $tocrawl);
