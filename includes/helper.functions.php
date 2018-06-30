@@ -918,6 +918,7 @@ function wiz_related_files($output, $filename, $url_origin) {
 		$ret_urls = array();
 		foreach ($urls_to_add as $k => $urlta) {
 			$urlta = wiz_genstandardUrlFromInput($urlta, $url_origin);
+			$urlta = wiz_setOptions($urlta);
 			if (!wiz_in_crawled($urlta)) {
 				if (wiz_validate_whitelist($urlta)) {
 					if (wiz_validate_blacklist($urlta)) {
@@ -944,6 +945,7 @@ function wiz_related_files($output, $filename, $url_origin) {
 function save_related_files($related_files) {
 	foreach ($related_files as $_input) {
 		$urlx = wiz_genstandardUrlFromInput($_input);
+		$urlx = wiz_setOptions($urlx);
 		if (!wiz_in_crawled($urlx)) {
 			file_put_contents(WIZBUI_PLUGIN_PATH . "crawl.me.txt", $urlx."\n", FILE_APPEND);
 		}
