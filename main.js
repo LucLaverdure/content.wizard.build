@@ -183,7 +183,7 @@ function crawlUrl() {
 			error: function() {
 				window.crawledList.push(url);
 				$("#urls-errors").append(url+"\n");
-				console.log("error crawling url: "+url)
+
 				update_progress();
 			}
 		});
@@ -420,7 +420,7 @@ function setFrames() {
 	$(".output-picked").html("");
 	$(".output-picked-code").html("");
 		var doc = $("iframe").first()[0].contentWindow.document;
-		var $body = $('body', doc);
+		var $body = $('*', doc);
 		$body.on("click", function(e) { // assign a handler
 		
 			$("#combo-wrap .options", window.top.document).html("");
@@ -470,15 +470,29 @@ function setFrames() {
 
 function setTag() {
 	//var doc = $("iframe").first()[0].contentWindow.document;
-	var tested_output = parseEntry($("#taglist").val(), document.getElementById("magicframe").contentWindow.location.href, document.getElementById('magicframe').contentWindow.document.body.innerHTML);
+	/*
+	var tested_output = 
+	parseEntry($("#taglist").val(),
+	document.getElementById("magicframe").contentWindow.location.href, document.getElementById('magicframe').contentWindow.document.body.innerHTML);
+	*/
+	
+	$.get( document.getElementById("magicframe").contentWindow.location.href, function( data ) {
+		
+		var xml = data.outerHTML || new XMLSerializer().serializeToString(data);
+		
+		// parseEntry(query, url, ht, isContainer = false) {
+		var tested_output = parseEntry($("#taglist").val(),
+		document.getElementById("magicframe").contentWindow.location.href,
+		xml);
 
-	$("#tag").val($("#taglist").val());
+		$("#tag").val($("#taglist").val());
 
-	$(".output-picked").html(tested_output);
-	$(".output-picked-code").text(tested_output);
-	$(".filter-select-step").fadeIn("fast");
-	$(".sample-step").fadeIn("fast");
-
+		$(".output-picked").html(tested_output);
+		$(".output-picked-code").text(tested_output);
+		$(".filter-select-step").fadeIn("fast");
+		$(".sample-step").fadeIn("fast");
+		
+	});	
 }
 
 function comboclick($this) {
@@ -531,10 +545,14 @@ function parseEntry(query, url, ht, isContainer = false) {
 	q = query.match(re);
 	for (qq in q) {
 		var newjq = q[qq].replace("{{", '').replace("}}", '');
-		code = $('<div>'+ht+'</div>').find(newjq);
+
+		var code = $('<div>'+ht+'</div>').find(newjq);
+
 		appendHTML = '';
 		code.each(function() {
-			var to_push = $(this)[0].outerHTML;
+			//var to_push = $(this)[0].outerHTML;
+			var to_push = $(this)[0].outerHTML || new XMLSerializer().serializeToString($(this)[0]);
+
 			if (isContainer) {
 				container_array.push(to_push);
 			} else {
@@ -542,6 +560,7 @@ function parseEntry(query, url, ht, isContainer = false) {
 			}
 		});
 		query = query.replace(q[qq], appendHTML);
+
 	}
 	
 

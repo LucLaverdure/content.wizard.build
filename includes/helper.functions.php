@@ -455,7 +455,7 @@ function validateOp($query, $url, $html, $op, $opeq) {
 	return false;
 }
 
-function runmap($offset, $mapCount, $json_config) {
+function runmap($offset, $mapCount, $json_config, $file_offset = 0) {
 	// get crawled files
 
 	$path_init = WIZBUI_PLUGIN_PATH . "cache";
@@ -643,19 +643,34 @@ function runmap($offset, $mapCount, $json_config) {
 					} // containers
 					
 				} elseif (($jc_val["inputmethod"] == "csv") && ($ext == "csv")) {
-				
-					$row = 1;
+					$row = 0;
 					if (($handle = fopen($filez[$i], "r")) !== FALSE) {
 						while (($data = fgetcsv($handle, 0, $jc_val["separator"], $jc_val["enclosure"])) !== FALSE) {
 							
 							$firstline = $jc_val["line1parsed"];
 							
-							$num = count($data);
-							echo "<p> $num fields in line $row: <br /></p>\n";
-							$row++;
+							$num = count($data); // fields count on row $row
+
+							$row = $row + $file_offset;
+							
 							for ($c=0; $c < $num; $c++) {
-								echo $data[$c] . "<br />\n";
+								
+								// validate mapping
+								//		function validateOp($query, $url, $html, $op, $opeq) {
+								$valid = validateOp($jc_val["validator"], $filez[$i], $data, $jc_val["op"], $jc_val["opeq"]);
+								
+								// when validation passed
+								if ($valid) {
+									// get id
+									// 		function parseEntry($query, $url, $ht, $isContainer = false) {
+									$id = parseEntry($jc_val["idsel"], $filez[$i], $data);
+
+									//echo $data[$c] . "<br />\n";
+								}	
 							}
+							
+							
+	
 						}
 						fclose($handle);
 					}

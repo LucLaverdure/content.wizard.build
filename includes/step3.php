@@ -112,6 +112,10 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	
 	<input type="text" class="selector opeq" name="selector[]" placeholder="" value="" />
 </span>
+<span class="csv-show" style="display:none;">
+<br/><i>File must end with .csv in addition to the validator option. Validator runs for each line.</i>
+</span>
+
 </p>
 
 <p>
@@ -241,9 +245,9 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </div>
 </div>
 
-<p style="background:#cfc;padding:10px;">* Full selector sample: "static value %url% {{#id .class element[attribute=value]}} {{{regex}}}"</p>
-<p style="background:#cfc;padding:10px;">* CSV selector sample: "static value %filename% {{{regex}}} {A} {B} {field_name}"</p>
-
+<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* XML/HTML sample: "static value %url% {{#id .class element[attribute=value]}} {{{regex}}}"</p>
+<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* CSV  sample: "static value %filename% {{{regex}}} {A} {B} {field_name}"</p>
+<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* PHP sample: "?php:strtoupper({A})"</p>
 
 	<div class="save-wrapper">
 		<input type="button" name="save" value="Save Mappings" style="background-color:#009900;color: #fff;padding:20px;font-size:16px;" onclick="compileMappings();return false;"/>
