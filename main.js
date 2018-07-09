@@ -606,3 +606,15 @@ function initCrawler() {
 	window.scrollTo(0, 0);
 	return false;
 }
+
+function input_change($this) {
+	// csv selected
+	if ($($this).val() == "csv") {
+		$($this).parents(".fold").find(".csv-show").show();
+		$($this).parents(".fold").find(".csv-hide").hide();
+	} else {
+		$($this).parents(".fold").find(".csv-show").hide();
+		$($this).parents(".fold").find(".csv-hide").show();
+	}
+	
+}

@@ -467,9 +467,10 @@ function runmap($offset, $mapCount, $json_config) {
 	for ($i = $offset; $i <= ($offset + $mapCount - 1); ++$i) {
 
 		if (isset($filez[$i])) {
-
+			
 			$file_contents = file_get_contents($filez[$i]);
-		
+			$ext = pathinfo($filez[$i], PATHINFO_EXTENSION);
+			
 			// for each Mappings Group
 			foreach($json_config as $jc_key => $jc_val) {
 				
@@ -641,7 +642,33 @@ function runmap($offset, $mapCount, $json_config) {
 						
 					} // containers
 					
-				} // scraper / sql
+				} elseif (($jc_val["inputmethod"] == "csv") && ($ext == "csv")) {
+				
+					$row = 1;
+					if (($handle = fopen($filez[$i], "r")) !== FALSE) {
+						while (($data = fgetcsv($handle, 0, $jc_val["separator"], $jc_val["enclosure"])) !== FALSE) {
+							
+							$firstline = $jc_val["line1parsed"];
+							
+							$num = count($data);
+							echo "<p> $num fields in line $row: <br /></p>\n";
+							$row++;
+							for ($c=0; $c < $num; $c++) {
+								echo $data[$c] . "<br />\n";
+							}
+						}
+						fclose($handle);
+					}
+					
+				} elseif ($jc_val["inputmethod"] == "xls") {
+					
+					// old stuffs
+					
+				} elseif ($jc_val["inputmethod"] == "xlsx") {
+
+					// new stuffs
+					
+				}
 				
 			} // mappings group
 
@@ -821,6 +848,15 @@ function wiz_in_crawled($standardUrl) {
 	}
 	return false;
 }
+function wiz_in_to_crawl($standardUrl) {
+	// add to list of crawled urls
+	$crawled = file_get_contents(WIZBUI_PLUGIN_PATH . "crawl.me.txt");
+	$crawled = explode("\n", $crawled);
+	if (in_array($standardUrl, $crawled)) {
+		return true;
+	}
+	return false;
+}
 
 function wiz_validate_whitelist($standardUrl) {
 	// verify whitelist
@@ -942,7 +978,7 @@ function save_related_files($related_files) {
 	foreach ($related_files as $_input) {
 		$urlx = wiz_genstandardUrlFromInput($_input);
 		$urlx = wiz_setOptions($urlx);
-		if (!wiz_in_crawled($urlx)) {
+		if ((!wiz_in_crawled($urlx)) && (!wiz_in_to_crawl($urlx))) {
 			file_put_contents(WIZBUI_PLUGIN_PATH . "crawl.me.txt", $urlx."\n", FILE_APPEND);
 		}
 	}

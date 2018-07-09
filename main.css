@@ -28,6 +28,10 @@ body .admin-wrap .head {
 	display:inline-block;
 	width:500px;
 }
+.body input[type=checkbox] {
+	display:inline-block;
+	width:auto;
+}
 input, textarea, select {
 	border:1px solid #000 !important;
 }

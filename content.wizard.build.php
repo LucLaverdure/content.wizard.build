@@ -24,6 +24,8 @@ function wizbui_setup_menu(){
 function wizbui_callback(){
 	include_once(WIZBUI_PLUGIN_PATH . "queue.php");
 	include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
+	include_once(WIZBUI_PLUGIN_PATH . 'includes/helper.functions.php');
+	include_once(WIZBUI_PLUGIN_PATH . 'includes/upload.save.php');
 	include(WIZBUI_PLUGIN_PATH . "wizbui-admin-page.php");
 }
 

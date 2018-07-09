@@ -1,6 +1,13 @@
 <?php
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 ?><div class="card urls" style="display:none;">
+	<h2>Step 1 - Upload files manually</h2>
+	<p>HTML? CSV? XLS? XLSX?</p>
+	<form action="?page=content-wizard-build&action=wb_upload_hook" method="post" enctype="multipart/form-data"> 
+		<input type="file" name="fileupload[]" multiple="multiple" />
+		<input type="submit" name="uploadfield" value="Upload Files" style="color: #fff;padding:20px;font-size:16px;background: #00aa00;"/>
+	</form>
+	
 	<h2>Step 2 - Download data with crawler</h2>
 	<p>Crawl start entry URLs</p>
 

@@ -3,7 +3,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 ?><div class="progress-box">
 	<div class="key">
 		<span class="head-f">My Account Type:</span>
-		<span class="tokens-count">Beggar</span>
+		<span class="tokens-count">Free</span>
 		<span style="display:none;" class="tokens-count" id="counter">0</span>
 	</div>
 	<div class="crawled">

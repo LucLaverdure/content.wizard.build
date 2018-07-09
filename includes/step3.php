@@ -25,10 +25,10 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<span class="head">Input Method <span title="The only available option is 'Scraper' at the moment." class="info-ico">&#8505;</span></span>
 	<span class="body">
 	
-	<select name="inputmethod" class="selector input_type inputmethod" onchange="$(this).val('scraper');">
+	<select name="inputmethod" class="selector input_type inputmethod" onchange="return input_change(this);">
 		<option selected="selected" value="scraper" style="background: #ddffdd;">Scraper</option>
-		<option value="csv" style="background: #ffdddd;">CSV <i>(Coming Soon!)</i></option>
-		<option value="xlsx" style="background: #ffdddd;">Excel <i>(Coming Soon!)</i></option>
+		<option value="csv" style="background: #ddffdd;">CSV</option>
+		<option value="xlsx" style="background: #ddffdd;">XLSX</i></option>
 		<option value="sql" style="background: #ffdddd;">SQL <i>(Coming Soon!)</i></option>
 	</select>
 	</span>
@@ -52,8 +52,29 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	</span>
 </p>
 
-<p>
+<p class="csv-show" style="display:none;">
+<span class="head">First line <span title="Parameter fields can be used as {A}, {B} or {field_name}" class="info-ico">&#8505;</span></span>
+<span class="body">
+	<label><input class="line1parsed" name="line1parsed" type="checkbox" checked="checked" value="parsed"/> parsed into parameter fields</label>
+</span>
+</p>
 
+
+<p class="csv-show" style="display:none;">
+<span class="head">Delimiter Character <span title="Separate fields with specified characters." class="info-ico">&#8505;</span></span>
+<span class="body">
+	<input type="text" class="selector separator" name="separator[]" placeholder="," value="," />
+</span>
+</p>
+
+<p class="csv-show" style="display:none;">
+<span class="head">Enclosure Character <span title="Separate fields with specified characters." class="info-ico">&#8505;</span></span>
+<span class="body">
+	<input type="text" class="selector enclosure" name="separator[]" placeholder='"' value='"' />
+</span>
+</p>
+
+<p class="csv-hide">
 	<span class="head">Container Instance <span title="Use to parse multiple containers per page." class="info-ico">&#8505;</span></span>
 	<span class="body">
 		<input type="text" class="selector containerInstance" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{body}}" />
@@ -221,6 +242,8 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </div>
 
 <p style="background:#cfc;padding:10px;">* Full selector sample: "static value %url% {{#id .class element[attribute=value]}} {{{regex}}}"</p>
+<p style="background:#cfc;padding:10px;">* CSV selector sample: "static value %filename% {{{regex}}} {A} {B} {field_name}"</p>
+
 
 	<div class="save-wrapper">
 		<input type="button" name="save" value="Save Mappings" style="background-color:#009900;color: #fff;padding:20px;font-size:16px;" onclick="compileMappings();return false;"/>
