@@ -44,7 +44,6 @@ $(function() {
 		$(this).addClass("selected");
 		$(".card").hide();
 		$(".card." + $(this).data('tab')).fadeIn();
-		return false;
 	});
 
 	// test api key and colorize buttons based on key validity
@@ -75,13 +74,12 @@ $(function() {
 });
 
 function get_tab() {
-	if (parseInt($(".progress-box #counter").html()) >= 1) {
-		if (parseInt($(".progress-box .crawled-count").html()) >= 1) {
-			$('.nav a[data-tab=map]').click();
-		} else {
-			$('.nav a[data-tab=urls]').click();
-		}
-	} // else first tab
+	var cur_hash = window.location.hash;
+	if (cur_hash == "#browse") {
+		$(".nav .b").click();
+	} else if (cur_hash == "#map") {
+		$(".nav .m").click();
+	}
 }
 
 function quicksave_call() {
@@ -220,6 +218,22 @@ function compileMappings() {
 		container.push($(this).find(".idop").val());
 		container.push($(this).find(".idopeq").val());
 		
+		// db
+		container.push($(this).find(".dbhost").val());
+		container.push($(this).find(".dbuser").val());
+		container.push($(this).find(".dbpass").val());
+		container.push($(this).find(".dbname").val());
+		container.push($(this).find(".dbquery").val());
+
+		// csv || xlsx
+		if ($('.line1parsed').is(':checked')) {
+			container.push("Y");
+		} else {
+			container.push("N");
+		}
+		container.push($(this).find(".fielddelimiter").val());
+		container.push($(this).find(".enclosure").val());
+		
 		var fields = [];
 		$(this).find(".field-sub-wrap:visible").each(function() {
 			var field = [];
@@ -304,8 +318,37 @@ function decompileMappings($stringify) {
 				case 11:
 					$this_element.find(".idopeq").val(field);
 					break;
+				case 12:
+					$this_element.find(".dbhost").val(field);
+					break;
+				case 13:
+					$this_element.find(".dbuser").val(field);
+					break;
+				case 14:
+					$this_element.find(".dbpass").val(field);
+					break;
+				case 15:
+					$this_element.find(".dbname").val(field);
+					break;
+				case 16:
+					$this_element.find(".dbquery").val(field);
+					break;
+				case 17:
+					if (field=="Y") {
+						$this_element.find(".line1parsed").prop("checked", true);
+					} else {
+						$this_element.find(".line1parsed").prop("checked", false);
+					}
+					break;
+				case 18:
+					$this_element.find(".fielddelimiter").val(field);
+					break;
+				case 19:
+					$this_element.find(".enclosure").val(field);
+					break;
 			}
-			if (inc > 11) {
+			
+			if (inc > 19) {
 				if (Array.isArray(field)) {
 					$.each(field, function(ka, dig) { // row
 						$this_element.find(".fold").append(
@@ -335,6 +378,8 @@ function decompileMappings($stringify) {
 				}
 			}
 		});
+		// show / hide fields based on input method
+		input_change($this_element.find(".inputmethod"));
 	});
 }
 

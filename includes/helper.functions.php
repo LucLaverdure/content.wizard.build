@@ -211,8 +211,34 @@ function parseJsonConfig($jsonConfig) {
 				case 11:
 					$this_config["idopeq"] = $field; // expression of id op
 					break;
+				case 12:
+					$this_config["dbhost"] = $field; // expression of id op
+					break;
+				case 13:
+					$this_config["dbuser"] = $field; // expression of id op
+					break;
+				case 14:
+					$this_config["dbpass"] = $field; // expression of id op
+					break;
+				case 15:
+					$this_config["dbname"] = $field; // expression of id op
+					break;
+				case 16:
+					$this_config["dbquery"] = $field; // expression of id op
+					break;
+				case 17:
+					// TODO: ??
+					$this_config["line1parsed"] = $field; // expression of id op
+					break;
+				case 18:
+					$this_config["fielddelimiter"] = $field; // expression of id op
+					break;
+				case 19:
+					$this_config["enclosure"] = $field; // expression of id op
+					break;
 			}
-			if ($inc > 11) {
+
+			if ($inc > 19) {
 				if (is_array($field)) {
 					$this_config["fields"] = array();
 					foreach ($field as $ka => $dig) {

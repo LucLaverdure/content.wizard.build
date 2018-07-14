@@ -53,23 +53,23 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </p>
 
 <p class="db-show" style="display:none;">
-<span class="head">Database Server (IP / domain) <span title="Host of database server" class="info-ico">&#8505;</span></span>
+<span class="head">Database Server <span title="Host of database server" class="info-ico">&#8505;</span></span>
 <span class="body">
-	<input type="text" class="selector separator" name="separator[]" placeholder="localhost" value="localhost" />
+	<input type="text" class="selector dbhost" name="separator[]" placeholder="localhost" value="localhost" />
 </span>
 </p>
 
 <p class="db-show" style="display:none;">
 <span class="head">Database Username <span title="Username used to connect to database server" class="info-ico">&#8505;</span></span>
 <span class="body">
-	<input type="text" class="selector separator" name="separator[]" placeholder="root" value="root" />
+	<input type="text" class="selector dbuser" name="separator[]" placeholder="root" value="root" />
 </span>
 </p>
 
 <p class="db-show" style="display:none;">
 <span class="head">Database Password <span title="Password used to connect to database server" class="info-ico">&#8505;</span></span>
 <span class="body">
-	<input type="text" class="selector separator" name="separator[]" placeholder="" value="" />
+	<input type="text" class="selector dbpass" name="separator[]" placeholder="" value="" />
 </span>
 </p>
 
@@ -77,7 +77,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <p class="db-show" style="display:none;">
 <span class="head">Database Name <span title="Name of database on server" class="info-ico">&#8505;</span></span>
 <span class="body">
-	<input type="text" class="selector separator" name="separator[]" placeholder="wordpress_db" value="" />
+	<input type="text" class="selector dbname" name="separator[]" placeholder="wordpress_db" value="" />
 </span>
 </p>
 
@@ -85,7 +85,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <p class="db-show" style="display:none;">
 <span class="head">SQL Query <span title="MySQL query should return fields to be used" class="info-ico">&#8505;</span></span>
 <span class="body">
-	<input type="text" class="selector separator" name="separator[]" placeholder="SELECT * FROM products;" value="" />
+	<input type="text" class="selector dbquery" name="separator[]" placeholder="SELECT * FROM products;" value="" />
 </span>
 </p>
 
@@ -93,7 +93,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <p class="csv-show xlsx-show" style="display:none;">
 <span class="head">First line <span title="Parameter fields can be used as {A}, {B} or {field_name}" class="info-ico">&#8505;</span></span>
 <span class="body">
-	<label><input class="line1parsed" name="line1parsed" type="checkbox" checked="checked" value="parsed"/> parsed into parameter fields</label>
+	<label><input class="line1parsed" name="line1parsed" type="checkbox" checked="checked" value="Y"/> parsed into parameter fields</label>
 </span>
 </p>
 
@@ -101,7 +101,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <p class="csv-show" style="display:none;">
 <span class="head">Delimiter Character <span title="Separate fields with specified characters." class="info-ico">&#8505;</span></span>
 <span class="body">
-	<input type="text" class="selector separator" name="separator[]" placeholder="," value="," />
+	<input type="text" class="selector fielddelimiter" name="separator[]" placeholder="," value="," />
 </span>
 </p>
 
