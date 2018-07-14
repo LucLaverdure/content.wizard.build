@@ -26,10 +26,10 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<span class="body">
 	
 	<select name="inputmethod" class="selector input_type inputmethod" onchange="return input_change(this);">
-		<option selected="selected" value="scraper" style="background: #ddffdd;">Scraper</option>
-		<option value="csv" style="background: #ddffdd;">CSV</option>
-		<option value="xlsx" style="background: #ddffdd;">XLSX</i></option>
-		<option value="sql" style="background: #ffdddd;">SQL <i>(Coming Soon!)</i></option>
+		<option selected="selected" value="scraper">Scraper</option>
+		<option value="csv">CSV</option>
+		<option value="xlsx">XLSX</option>
+		<option value="sql">MySQL</option>
 	</select>
 	</span>
 </p>
@@ -51,6 +51,44 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	</select>
 	</span>
 </p>
+
+<p class="db-show" style="display:none;">
+<span class="head">Database Server (IP / domain) <span title="Host of database server" class="info-ico">&#8505;</span></span>
+<span class="body">
+	<input type="text" class="selector separator" name="separator[]" placeholder="localhost" value="localhost" />
+</span>
+</p>
+
+<p class="db-show" style="display:none;">
+<span class="head">Database Username <span title="Username used to connect to database server" class="info-ico">&#8505;</span></span>
+<span class="body">
+	<input type="text" class="selector separator" name="separator[]" placeholder="root" value="root" />
+</span>
+</p>
+
+<p class="db-show" style="display:none;">
+<span class="head">Database Password <span title="Password used to connect to database server" class="info-ico">&#8505;</span></span>
+<span class="body">
+	<input type="text" class="selector separator" name="separator[]" placeholder="" value="" />
+</span>
+</p>
+
+
+<p class="db-show" style="display:none;">
+<span class="head">Database Name <span title="Name of database on server" class="info-ico">&#8505;</span></span>
+<span class="body">
+	<input type="text" class="selector separator" name="separator[]" placeholder="wordpress_db" value="" />
+</span>
+</p>
+
+
+<p class="db-show" style="display:none;">
+<span class="head">SQL Query <span title="MySQL query should return fields to be used" class="info-ico">&#8505;</span></span>
+<span class="body">
+	<input type="text" class="selector separator" name="separator[]" placeholder="SELECT * FROM products;" value="" />
+</span>
+</p>
+
 
 <p class="csv-show xlsx-show" style="display:none;">
 <span class="head">First line <span title="Parameter fields can be used as {A}, {B} or {field_name}" class="info-ico">&#8505;</span></span>
@@ -74,7 +112,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </span>
 </p>
 
-<p class="csv-hide">
+<p class="csv-hide xlsx-hide">
 	<span class="head">Container Instance <span title="Use to parse multiple containers per page." class="info-ico">&#8505;</span></span>
 	<span class="body">
 		<input type="text" class="selector containerInstance" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{body}}" />

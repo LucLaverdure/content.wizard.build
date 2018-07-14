@@ -22,6 +22,9 @@ function wizbui_setup_menu(){
 	add_menu_page( 'Content Wizard Build', 'Wizard.Build', 'manage_options', 'content-wizard-build', 'wizbui_callback', plugin_dir_url( __FILE__ ) ."/wizard-white.png" );
 }
 function wizbui_callback(){
+	@wp_enqueue_style("filetree", plugin_dir_url( __FILE__ )."lib/jqueryFileTree.css");
+	@wp_enqueue_script("jqEasing", plugin_dir_url( __FILE__ )."lib/jquery.easing.js");
+	@wp_enqueue_script("filetreeJS", plugin_dir_url( __FILE__ )."lib/jqueryFileTree.js");
 	include_once(WIZBUI_PLUGIN_PATH . "queue.php");
 	include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
 	include_once(WIZBUI_PLUGIN_PATH . 'includes/helper.functions.php');
@@ -38,12 +41,9 @@ function admin_post_wb_save_hook_callback() {
 	include(WIZBUI_PLUGIN_PATH . "data.save.php");
 }
 
-// core Wizard.Build.Content Bulk Mappings scripts
-add_action( 'admin_post_wb_mappings_hook', 'admin_post_wb_mappings_hook_callback' );
-function admin_post_wb_mappings_hook_callback() {
-	include_once(WIZBUI_PLUGIN_PATH . "queue.php");
-	include_once(WIZBUI_PLUGIN_PATH . 'includes/helper.functions.php');
-	include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
-	include(WIZBUI_PLUGIN_PATH . "mappings.php");
+// lib - file browser
+add_action( 'admin_post_wb_browseme_hook', 'admin_post_wb_browseme_hook_callback' );
+function admin_post_wb_browseme_hook_callback() {
+	include_once(WIZBUI_PLUGIN_PATH . "lib/jqueryFileTree.php");
 }
 

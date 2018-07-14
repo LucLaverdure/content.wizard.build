@@ -27,6 +27,18 @@ $ = jQuery.noConflict();
 // on window finished loading
 $(function() {
 
+	// filetree - Data Browser
+	$('#filesNfolders').fileTree({
+		root: "../wp-content/plugins/content.wizard.build/cache/",
+		script: WB_PLUGIN_URL + "wp-admin/admin-post.php?action=wb_browseme_hook",
+		expandSpeed: 100
+		}, function(file) { 
+			$("#selectedFile .filename").text(file.replace("../wp-content/plugins/content.wizard.build/", ""));
+			$("#selectedFile").show();
+			$("#selectedFile .download").attr('href', file);
+		}
+	);
+
 	// navigation tabs
 	$(".nav a").on("click", function() {
 		$(".nav a").removeClass("selected");
@@ -643,5 +655,13 @@ function input_change($this) {
 		$($this).parents(".fold").find(".xlsx-show").hide();
 		$($this).parents(".fold").find(".xlsx-hide").show();
 	}
-	 
+
+	if ($($this).val() == "sql") {
+		$($this).parents(".fold").find(".db-show").show();
+		$($this).parents(".fold").find(".db-hide").hide();
+	} else {
+		$($this).parents(".fold").find(".db-show").hide();
+		$($this).parents(".fold").find(".db-hide").show();
+	}
+	
 }
