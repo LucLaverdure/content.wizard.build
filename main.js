@@ -636,4 +636,12 @@ function input_change($this) {
 		$($this).parents(".fold").find(".csv-hide").show();
 	}
 	
+	if ($($this).val() == "xlsx") {
+		$($this).parents(".fold").find(".xlsx-show").show();
+		$($this).parents(".fold").find(".xlsx-hide").hide();
+	} else {
+		$($this).parents(".fold").find(".xlsx-show").hide();
+		$($this).parents(".fold").find(".xlsx-hide").show();
+	}
+	 
 }

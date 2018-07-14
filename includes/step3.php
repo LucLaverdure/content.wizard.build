@@ -52,7 +52,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	</span>
 </p>
 
-<p class="csv-show" style="display:none;">
+<p class="csv-show xlsx-show" style="display:none;">
 <span class="head">First line <span title="Parameter fields can be used as {A}, {B} or {field_name}" class="info-ico">&#8505;</span></span>
 <span class="body">
 	<label><input class="line1parsed" name="line1parsed" type="checkbox" checked="checked" value="parsed"/> parsed into parameter fields</label>
@@ -114,6 +114,9 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </span>
 <span class="csv-show" style="display:none;">
 <br/><i>File must end with .csv in addition to the validator option. Validator runs for each line.</i>
+</span>
+<span class="xlsx-show" style="display:none;">
+<br/><i>File must end with .xlsx in addition to the validator option. Validator runs for each line.</i>
 </span>
 
 </p>
@@ -247,7 +250,8 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 <p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* XML/HTML sample: "static value %url% {{#id .class element[attribute=value]}} {{{regex}}}"</p>
 <p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* CSV  sample: "static value %filename% {{{regex}}} {A} {B} {field_name}"</p>
-<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* PHP sample: "?php:strtoupper({A})"</p>
+<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* XLSX  sample: "static value %sheetname% {{{regex}}} {A} {B} {field_name}"</p>
+<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* PHP sample: "?php return strtoupper("{A}") ?"</p>
 
 	<div class="save-wrapper">
 		<input type="button" name="save" value="Save Mappings" style="background-color:#009900;color: #fff;padding:20px;font-size:16px;" onclick="compileMappings();return false;"/>
