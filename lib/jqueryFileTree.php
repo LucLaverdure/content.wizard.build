@@ -28,14 +28,20 @@ if( file_exists($root . $_POST['dir']) ) {
 		// All dirs
 		foreach( $files as $file ) {
 			if( file_exists($root . $_POST['dir'] . $file) && $file != '.' && $file != '..' && is_dir($root . $_POST['dir'] . $file) ) {
-				echo "<li class=\"directory collapsed\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file) . "/\">" . htmlentities($file) . "</a></li>";
+
+				$filed = scandir($root . $_POST['dir'] . $file);
+				$counted = count($filed) - 2; // less "." and ".."
+				$short_path = str_replace("../wp-content/plugins/content.wizard.build/cache/","",$_POST['dir'].$file);
+			
+				echo "<li class=\"directory collapsed\"><input type=\"checkbox\" class=\"chkfile\" value=\"".htmlentities($short_path)."\"> <a onclick=\"$(this).prev().click();\" href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file) . "/\">" . htmlentities($file) . ' <span style="color:#ccc;font-size:16px;">('.$counted.')</span></a></li>';
 			}
 		}
 		// All files
 		foreach( $files as $file ) {
 			if( file_exists($root . $_POST['dir'] . $file) && $file != '.' && $file != '..' && !is_dir($root . $_POST['dir'] . $file) ) {
+				$short_path = str_replace("../wp-content/plugins/content.wizard.build/cache/","",$_POST['dir'].$file);
 				$ext = preg_replace('/^.*\./', '', $file);
-				echo "<li class=\"file ext_$ext\"><a href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file) . "\">" . htmlentities($file) . "</a></li>";
+				echo "<li class=\"file ext_$ext\"><input type=\"checkbox\" class=\"chkfile\" value=\"".htmlentities($short_path)."\"> <a onclick=\"$(this).prev().click();\" href=\"#\" rel=\"" . htmlentities($_POST['dir'] . $file) . "\">" . htmlentities($file) . "</a></li>";
 			}
 		}
 		echo "</ul>";	

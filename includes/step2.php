@@ -6,19 +6,20 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 	<div id="filesNfolders"></div>
 
-	<div id="selectedFile" style="display:none; margin-top:20px;padding:10px;">
+	<div id="selectedFile" style="padding:10px;">
 	
-		<span class="filename" style="background: #BDF;padding:10px;border: 1px solid #000;"></span>
-		
-		&mdash;
-		
-		<a href="" style="color:#a00;margin-right:20px;display:inline-block;">Delete</a>
-		
-		<a href="" target="_blank" class="button button-primary download" style="display:inline-block;">Download</a> 
-		
+		<p style="line-height:20px;">
+		With All Selected:
+		<br /><br />
+		<select class="with-sel">
+			<option value="del">Delete</option>
+		</select>
+
+		<input type="button" name="save" value="Confirm" style="font-size:16px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary with-sel-confirm" onclick="return quicksave_call();"/>
+		</p>
 	</div>
 	
 	<div class="save-wrapper tostep2">
-		<input type="button" name="save" value="Save And Continue > Step 2" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary" onclick="return quicksave_call();"/>
+		<input type="button" name="save" value="Continue to next step" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary" onclick="return quicksave_call();"/>
 	</div>
 </div>

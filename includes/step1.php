@@ -69,9 +69,5 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="crawlstop button button-primary"/>
 		</p>
 	</div>
-	<div class="">
-		<p>* Files &amp; URLs will be saved to</p>
-		<p><?php echo WIZBUI_PLUGIN_PATH; ?>cache</p>
-	</div>
 
 </div>

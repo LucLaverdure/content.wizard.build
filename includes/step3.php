@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </div>
 	
 <p>
-	<a href="#" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;float:none;" class="button button-primary add-ct add-ct-click">Add Content Type</a>
+	<a href="#" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;float:none;" class="button button-primary add-ct add-ct-click">Add Mappings Group</a>
 </p>
 
 <div class="box-container-wrapper" style="display:none;">
@@ -113,7 +113,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </p>
 
 <p class="csv-hide xlsx-hide">
-	<span class="head">Container Instance <span title="Use to parse multiple containers per page." class="info-ico">&#8505;</span></span>
+	<span class="head">Repeated Container <span title="Use to parse multiple containers per page." class="info-ico">&#8505;</span></span>
 	<span class="body">
 		<input type="text" class="selector containerInstance" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{body}}" />
 
@@ -287,8 +287,13 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </div>
 
 <p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* XML/HTML sample: "static value %url% {{#id .class element[attribute=value]}} {{{regex}}}"</p>
+
 <p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* CSV  sample: "static value %filename% {{{regex}}} {A} {B} {field_name}"</p>
+
 <p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* XLSX  sample: "static value %sheetname% {{{regex}}} {A} {B} {field_name}"</p>
+
+<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* SQL  sample: "static value {field_name}"</p>
+
 <p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* PHP sample: "?php return strtoupper("{A}") ?"</p>
 
 	<div class="save-wrapper">

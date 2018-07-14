@@ -356,9 +356,21 @@ body .admin-wrap .combo-wrap .options {
 body UL.jqueryFileTree A {
 	font-size: 16px;
 	margin-bottom: 5px;
+	margin-left: 20px;
 }
 
 body #filesNfolders {
 	border: 1px solid #000;
 	padding: 20px;
+}
+body UL.jqueryFileTree {
+	padding-left: 20px;
+}
+
+body UL.jqueryFileTree A {
+	display: inline-block;
+}
+
+body UL.jqueryFileTree .chkfile {
+	margin-left:-40px;
 }

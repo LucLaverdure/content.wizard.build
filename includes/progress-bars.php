@@ -2,12 +2,12 @@
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 ?><div class="progress-box">
 	<div class="key">
-		<span class="head-f">My Account Type:</span>
+		<span class="head-f">Plugin Cost:</span>
 		<span class="tokens-count">Free</span>
 		<span style="display:none;" class="tokens-count" id="counter">0</span>
 	</div>
 	<div class="crawled">
-		<div class="head-f">Sanitized Downloads:</div>
+		<div class="head-f">Cached Files:</div>
 		<span class="crawled-count">
 			<?php echo count(get_real_dirs()); ?>
 		</span>

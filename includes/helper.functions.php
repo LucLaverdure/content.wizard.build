@@ -999,6 +999,32 @@ function save_related_files($related_files) {
 	}
 }
 
+function wiz_recursive_del($dir) {
+	$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
+	$files = new RecursiveIteratorIterator($it,
+				 RecursiveIteratorIterator::CHILD_FIRST);
+	foreach($files as $file) {
+		if ($file->isDir()){
+			rmdir($file->getRealPath());
+		} else {
+			unlink($file->getRealPath());
+		}
+	}
+	rmdir($dir);
+}
+
+function wiz_del_files($filenames) {
+	foreach ($filenames as $k => $file) {
+		$long_filename = WIZBUI_PLUGIN_PATH . "cache/".$file;
+		$long_filename = str_replace("../", "", $long_filename);
+		if (is_dir($long_filename)) {
+			wiz_recursive_del($long_filename);
+		} elseif(file_exists($long_filename))  {
+			unlink($long_filename);
+		}
+	}
+}
+
 function wiz_create_req_folders_and_files() {
 	
 	// create cache folder if doesn`t exist

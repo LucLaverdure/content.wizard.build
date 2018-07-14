@@ -47,3 +47,9 @@ function admin_post_wb_browseme_hook_callback() {
 	include_once(WIZBUI_PLUGIN_PATH . "lib/jqueryFileTree.php");
 }
 
+// core Wizard.Build.Content Cache Kill
+add_action( 'admin_post_wb_delcache_hook', 'admin_post_wb_delcache_hook_callback' );
+function admin_post_wb_delcache_hook_callback() {
+	include_once(WIZBUI_PLUGIN_PATH . 'includes/helper.functions.php');
+	wiz_del_files($_POST["killcache"]);
+}
