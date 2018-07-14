@@ -463,7 +463,16 @@ $(document).on("click", "#savefilter", function() {
 
 
 function magicgo() {
-	$("#magicframe").attr("src", WB_PLUGIN_URL + "wp-content/plugins/content.wizard.build/cache/" + 	$("#magicfile").val());
+	
+	var ext = $("#magicfile").val().split('.').pop();
+	
+	if (ext=="xlsx") {
+		$("#magicframe").attr("src", WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_xlsx_hook&file=" + $("#magicfile").val());
+	} else if (ext=="csv") {
+		
+	} else {
+		$("#magicframe").attr("src", WB_PLUGIN_URL + "wp-content/plugins/content.wizard.build/cache/" + $("#magicfile").val());
+	}
 	$(".frame-step").fadeIn("fast");
 	$(".step-indicator").fadeIn("fast");
 
@@ -478,39 +487,56 @@ function setFrames() {
 		var doc = $("iframe").first()[0].contentWindow.document;
 		var $body = $('*', doc);
 		$body.on("click", function(e) { // assign a handler
-		
+			var ext = $("#magicfile").val().split('.').pop();
 			$("#combo-wrap .options", window.top.document).html("");
+			if (ext=="xlsx") {
+				$(e.target).each(function(ii,el) {
+					// by sheet letters
+					$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$(el).data("letterscol")+"}</a>");
+					
+					// by first row, col name
+					$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$.trim($(el).data("colname").toLowerCase())+"}</a>");
+					$("#taglist", window.top.document).val('{'+$.trim($(el).data("colname").toLowerCase())+'}');
+					
+					// by first row, col num
+					$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$(el).data("colnum")+"}</a>");
+				});
+			} else if (ext=="csv") {
+				
+			} else {
+				$(e.target).each(function(ii,el) {
+					var str = "";
+					
+					var tag = $(el).prop("tagName").toLowerCase();
+					if (typeof tag != "undefined") { str += tag}
+
+					var id = $(el).attr('id');
+					if (typeof id != "undefined") { str += "#" + id}
+
+					var cl = $(el).attr('class');
+					if (typeof cl != "undefined") { str += "." + cl.split(" ").join(".")}
+
+					$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{{'+str+"}}</a>");
+					$("#taglist", window.top.document).val('{{'+str+'}}');
+				})
+				$(e.target).parents().each(function(ii, el) {
+					var str = "";
+					
+					var tag = $(el).prop("tagName").toLowerCase();
+					if (typeof tag != "undefined") { str += tag}
+
+					var id = $(el).attr('id');
+					if (typeof id != "undefined") { str += "#" + id}
+
+					var cl = $(el).attr('class');
+					if (typeof cl != "undefined") { str += "." + cl.split(" ").join(".")}
+
+					$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{{'+str+"}}</a>");
+				});
+			}
+
 		
-			$(e.target).each(function(ii,el) {
-				var str = "";
-				
-				var tag = $(el).prop("tagName").toLowerCase();
-				if (typeof tag != "undefined") { str += tag}
 
-				var id = $(el).attr('id');
-				if (typeof id != "undefined") { str += "#" + id}
-
-				var cl = $(el).attr('class');
-				if (typeof cl != "undefined") { str += "." + cl.split(" ").join(".")}
-
-				$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{{'+str+"}}</a>");
-				$("#taglist", window.top.document).val('{{'+str+'}}');
-			})
-			$(e.target).parents().each(function(ii, el) {
-				var str = "";
-				
-				var tag = $(el).prop("tagName").toLowerCase();
-				if (typeof tag != "undefined") { str += tag}
-
-				var id = $(el).attr('id');
-				if (typeof id != "undefined") { str += "#" + id}
-
-				var cl = $(el).attr('class');
-				if (typeof cl != "undefined") { str += "." + cl.split(" ").join(".")}
-
-				$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{{'+str+"}}</a>");
-			});
-			
 			$("#taglist", window.top.document).show();
 			$("#wizsetter", window.top.document).show();
 			$("#combo-wrap .options", window.top.document).hide("slide","swing",100);

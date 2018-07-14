@@ -288,9 +288,9 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 <p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* XML/HTML sample: "static value %url% {{#id .class element[attribute=value]}} {{{regex}}}"</p>
 
-<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* CSV  sample: "static value %filename% {{{regex}}} {A} {B} {field_name}"</p>
+<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* CSV  sample: "static value %filename% {{{regex}}} {A} {B} {field_name} {column number}"</p>
 
-<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* XLSX  sample: "static value %sheetname% {{{regex}}} {A} {B} {field_name}"</p>
+<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* XLSX  sample: "static value %sheetname% {{{regex}}} {A} {B} {field_name} {column number}"</p>
 
 <p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* SQL  sample: "static value {field_name}"</p>
 
@@ -303,4 +303,3 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	</div>
 	
 </div>
-
