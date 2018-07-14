@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </div>
 	
 <p>
-	<a href="#" class="add-ct add-ct-click">Add Content Type</a>
+	<a href="#" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;float:none;" class="button button-primary add-ct add-ct-click">Add Content Type</a>
 </p>
 
 <div class="box-container-wrapper" style="display:none;">
@@ -234,15 +234,15 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<select class="selector fieldopeq">
 		<?php include "dropdown-data-type.php"; ?>
 	</select>
-	<a href="#" class="del">Delete</a>
+	<a href="#" class="del" style="color:#a00;">Delete</a>
 </span>
 </p>
 
 </div>
 </div>
 	<div class="ct-opt">
-		<a href="#" class="add-ct add-field">Add Field</a>
-		<a href="#" class="add-ct del-field">Delete Content Type</a>
+		<a href="#" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary add-ct add-field">Add Field</a>
+		<a href="#" class="del-field" style="margin-right:20px;color:#a00;line-height:40px;">Delete Content Type</a>
 	</div>
 </div>
 </div>
@@ -254,9 +254,9 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* PHP sample: "?php return strtoupper("{A}") ?"</p>
 
 	<div class="save-wrapper">
-		<input type="button" name="save" value="Save Mappings" style="background-color:#009900;color: #fff;padding:20px;font-size:16px;" onclick="compileMappings();return false;"/>
+		<input type="button" name="save" value="Save Mappings" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary" onclick="compileMappings();return false;"/>
 
-		<input type="button" name="run" value="Save Mappings & Run Import" style="background-color:#000099;color: #fff;padding:20px;font-size:16px;" onclick="mappings_run(0);return false;"/>
+		<input type="button" name="run" value="Save Mappings & Run Import" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary" onclick="mappings_run(0);return false;"/>
 	</div>
 	
 </div>

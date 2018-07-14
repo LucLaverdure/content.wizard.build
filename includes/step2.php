@@ -5,7 +5,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<p>XML? HTML? CSV? XLSX? ZIP?</p>
 	<form action="?page=content-wizard-build&action=wb_upload_hook" method="post" enctype="multipart/form-data"> 
 		<input type="file" name="fileupload[]" multiple="multiple" />
-		<input type="submit" name="uploadfield" value="Upload Files" style="color: #fff;padding:20px;font-size:16px;background: #00aa00;"/>
+		<input type="submit" name="uploadfield" value="Upload Files" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary"/>
 	</form>
 	
 	<h2>Step 2 - Download data with crawler</h2>
@@ -63,11 +63,10 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	
 	<div class="save-wrapper tostep2">
 		<p>
-			<input type="submit" name="save" value="Delete ALL cached data" style="color: #fff;padding:20px;font-size:16px;" class="red"/>
-		</p>
-		<p>
-		<input class="crawlnow" type="button" name="save" value="Crawl URLs" onclick="return initCrawler();" style="color: #fff;padding:20px;font-size:16px;background: #00aa00;"/>
-		<input class="crawlstop" type="button" name="save" value="Stop crawler" onclick="window.location='';" style="color: #fff;padding:20px;font-size:16px;background: #00aa00;"/>
+		<input type="button" name="save" value="Crawl URLs" onclick="return initCrawler();" 
+		style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="crawlnow button button-primary"/>
+		<input type="button" name="save" value="Stop crawler" onclick="window.location='';" 
+		style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="crawlstop button button-primary"/>
 		</p>
 	</div>
 	<div class="">

@@ -12,6 +12,6 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<p>* You can upgrade your account @ <a target="_blank" href="http://shop.wizard.build">Shop.Wizard.Build</a>.</p>
 
 	<div class="save-wrapper tostep2">
-		<input type="button" name="save" value="Save And Continue > Step 2" style="color: #fff;padding:20px;font-size:16px;background: #00cc00;" onclick="return quicksave_call();"/>
+		<input type="button" name="save" value="Save And Continue > Step 2" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary" onclick="return quicksave_call();"/>
 	</div>
 </div>

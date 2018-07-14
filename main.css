@@ -62,9 +62,6 @@ input, textarea, select {
 .add-ct.add-ct-click {
 	margin-top:20px;
 }
-.add-ct.del-field {
-	background: #aa3333;
-}
 .add-ct:hover {
 	color:#fff;
 }
