@@ -48,13 +48,13 @@
 				<div class="options" style="position:absolute;top:43px;left:0;display:none;">
 				</div>
 			</div>
-			<input type="button" onclick="setTag();" id="wizsetter" value="Test Filter" />
+			<input type="button" class="button button-primary" onclick="setTag();" id="wizsetter" value="Test Filter" />
 		</div>
 		
 		<div class="filter-select-step" style="display:none;">
 			<h3>Filter</h3>
 			<input id="tag" type="text" style="width:400px;margin-bottom:20px;">
-			<input type="button" id="savefilter" value="Save" />
+			<input type="button" class="button button-primary" id="savefilter" value="Save" />
 		</div>
 	</div>
 	<div class="frame-step" style="display:none;">

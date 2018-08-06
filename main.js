@@ -102,7 +102,6 @@ function quicksave_call() {
 
 function crawlUrl() {
 	
-	if (!($("input[name=jsenabled]").is(":checked"))) {
 		// no post js crawl
 		$(".crawlspin").show();
 		$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_save_hook",
@@ -134,70 +133,7 @@ function crawlUrl() {
 			});
 		  }
 		);		
-	} else {
-		/*
-		var new_url = "http://content.wizard.build/authme.php?run&key=" +
-		$("#apikey").val() + "&url=" + encodeURIComponent(url);
-		
-		// TODO: Premium post JS
-		$.ajax({
-			dataType: 'html',
-			url: new_url,
-			success: function(data, textStatus, jqXHR) {
-				setInProgress();
-				$(".crawlspin").show();
-				$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_save_hook",
-				  {
-					url: url,
-					data: data,
-					path: path,
-					whitelist: $("#whitelist").val(),
-					blacklist: $("#blacklist").val(),
-					apikey: $("#apikey").val(),
-					paramRemoveGets: ($("input[name=removegets]").is(":checked")) ? "Y" : "N",
-					paramRemoveHashes: ($("input[name=removehashes]").is(":checked")) ? "Y" : "N",
-					paramPostJS: ($("input[name=jsenabled]").is(":checked")) ? "Y" : "N"
-				  },
-				  function() {
-					window.crawledList.push(url);
-					$("#urls-done").append(url+"\n");
-					update_progress();
-					$.ajax({
-						url: WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_get_hook",
-						dataType: 'json',
-						data: {path: encodeURIComponent(path)},
-						context: document.body,
-						success: function(data, textStatus, jqXHR) {
-							if (data.to_crawl.length > 0) {							
-								$('#urls').val(data.to_crawl.join("\n"));
-								window.crawlList = data.to_crawl;
-							} else {
-								setStopped();							
-							}
-							if (data.crawled.length > 0) {
-								$('#urls-done').val(data.crawled.join("\n"))
-								window.crawledList = data.crawled;
-							}
-							setStopped();							
-							update_progress();
-						},
-						error: function() {
-							$('#urls').val("");
-							setStopped();
-						}
-					});
-				  }
-				);
-			},
-			error: function() {
-				window.crawledList.push(url);
-				$("#urls-errors").append(url+"\n");
 
-				update_progress();
-			}
-		});
-		*/
-	}
 }
 
 function compileMappings() {
@@ -492,14 +428,21 @@ function setFrames() {
 			if (ext=="xlsx") {
 				$(e.target).each(function(ii,el) {
 					// by sheet letters
-					$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$(el).data("letterscol")+"}</a>");
 					
-					// by first row, col name
-					$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$.trim($(el).data("colname").toLowerCase())+"}</a>");
-					$("#taglist", window.top.document).val('{'+$.trim($(el).data("colname").toLowerCase())+'}');
-					
-					// by first row, col num
-					$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$(el).data("colnum")+"}</a>");
+					if (typeof $(el).data("sheetname") != "undefined") {
+						$("#taglist", window.top.document).val($.trim($(el).data("sheetname").toLowerCase()));
+						$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">'+$.trim($(el).data("sheetname").toLowerCase())+"</a>");
+					} else {
+						
+						$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$(el).data("letterscol")+"}</a>");
+						
+						// by first row, col name
+						$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$.trim($(el).data("colname").toLowerCase())+"}</a>");
+						$("#taglist", window.top.document).val('{'+$.trim($(el).data("colname").toLowerCase())+'}');
+						
+						// by first row, col num
+						$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$(el).data("colnum")+"}</a>");
+					}
 				});
 			} else if (ext=="csv") {
 				
@@ -744,26 +687,21 @@ function input_change($this) {
 	if ($($this).val() == "csv") {
 		$($this).parents(".fold").find(".csv-show").show();
 		$($this).parents(".fold").find(".csv-hide").hide();
-	} else {
-		$($this).parents(".fold").find(".csv-show").hide();
-		$($this).parents(".fold").find(".csv-hide").show();
 	}
 	
 	if ($($this).val() == "xlsx") {
 		$($this).parents(".fold").find(".xlsx-show").show();
 		$($this).parents(".fold").find(".xlsx-hide").hide();
-	} else {
-		$($this).parents(".fold").find(".xlsx-show").hide();
-		$($this).parents(".fold").find(".xlsx-hide").show();
 	}
 
 	if ($($this).val() == "sql") {
 		$($this).parents(".fold").find(".db-show").show();
 		$($this).parents(".fold").find(".db-hide").hide();
-	} else {
-		$($this).parents(".fold").find(".db-show").hide();
-		$($this).parents(".fold").find(".db-hide").show();
 	}
-	
-}
 
+	if ($($this).val() == "scraper") {
+		$($this).parents(".fold").find(".scraper-show").show();
+		$($this).parents(".fold").find(".scraper-hide").hide();
+	}
+
+}

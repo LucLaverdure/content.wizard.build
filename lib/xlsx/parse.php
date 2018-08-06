@@ -42,7 +42,7 @@ function preview_xlsx($file) {
 	if ( $xlsx = SimpleXLSX::parse($file)) {
 		$sheets = $xlsx->sheetNames();
 		foreach ($sheets as $sheetnum => $sheet) {
-			echo "<h3>".$sheet."</h3>";
+			echo '<h3 data-sheetname="%sheetname%">'.$sheet."</h3>";
 			list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
 			$ret = $xlsx->rows($sheetnum);
 			echo '<table class="xlsx-preview" style="width:100%;border:1px solid #000;">';

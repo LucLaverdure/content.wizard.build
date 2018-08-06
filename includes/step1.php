@@ -52,14 +52,6 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		/> Remove Hash parameters from URLs (#hash_state)</label>
 	</p>
 	</div>
-
-	<div style="clear:left;padding-top:0;">
-	<p>
-		<label style="font-size:20px;"><input type="checkbox" name="jsenabled" value="Y"
-		<?php $opt = unserialize(get_option('wb_PostJS', 'N')); if ($opt != 'N') { echo 'checked="checked"'; } ?>
-		/> Enable Post Javascript Crawl (Slows Performance)</label>
-	</p>
-	</div>
 	
 	<div class="save-wrapper tostep2">
 		<p>
@@ -69,5 +61,4 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="crawlstop button button-primary"/>
 		</p>
 	</div>
-
 </div>

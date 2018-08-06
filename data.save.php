@@ -4,7 +4,6 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
 
-
 function wiz_parseInput($input) {
 	// gen $standardUrl
 	//echo "input"; var_dump($input);

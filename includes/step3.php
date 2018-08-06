@@ -52,21 +52,21 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	</span>
 </p>
 
-<p class="db-show" style="display:none;">
+<p class="db-show csv-hide xlsx-hide scraper-hide" style="display:none;">
 <span class="head">Database Server <span title="Host of database server" class="info-ico">&#8505;</span></span>
 <span class="body">
 	<input type="text" class="selector dbhost" name="separator[]" placeholder="localhost" value="localhost" />
 </span>
 </p>
 
-<p class="db-show" style="display:none;">
+<p class="db-show csv-hide xlsx-hide scraper-hide" style="display:none;">
 <span class="head">Database Username <span title="Username used to connect to database server" class="info-ico">&#8505;</span></span>
 <span class="body">
 	<input type="text" class="selector dbuser" name="separator[]" placeholder="root" value="root" />
 </span>
 </p>
 
-<p class="db-show" style="display:none;">
+<p class="db-show csv-hide xlsx-hide scraper-hide" style="display:none;">
 <span class="head">Database Password <span title="Password used to connect to database server" class="info-ico">&#8505;</span></span>
 <span class="body">
 	<input type="text" class="selector dbpass" name="separator[]" placeholder="" value="" />
@@ -74,7 +74,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </p>
 
 
-<p class="db-show" style="display:none;">
+<p class="db-show csv-hide xlsx-hide scraper-hide" style="display:none;">
 <span class="head">Database Name <span title="Name of database on server" class="info-ico">&#8505;</span></span>
 <span class="body">
 	<input type="text" class="selector dbname" name="separator[]" placeholder="wordpress_db" value="" />
@@ -82,7 +82,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </p>
 
 
-<p class="db-show" style="display:none;">
+<p class="db-show csv-hide xlsx-hide scraper-hide" style="display:none;">
 <span class="head">SQL Query <span title="MySQL query should return fields to be used" class="info-ico">&#8505;</span></span>
 <span class="body">
 	<input type="text" class="selector dbquery" name="separator[]" placeholder="SELECT * FROM products;" value="" />
@@ -90,7 +90,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </p>
 
 
-<p class="csv-show xlsx-show" style="display:none;">
+<p class="csv-show xlsx-show db-hide scraper-hide" style="display:none;">
 <span class="head">First line <span title="Parameter fields can be used as {A}, {B} or {field_name}" class="info-ico">&#8505;</span></span>
 <span class="body">
 	<label><input class="line1parsed" name="line1parsed" type="checkbox" checked="checked" value="Y"/> parsed into parameter fields</label>
@@ -98,21 +98,21 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </p>
 
 
-<p class="csv-show" style="display:none;">
+<p class="csv-show db-hide xlsx-hide scraper-hide" style="display:none;">
 <span class="head">Delimiter Character <span title="Separate fields with specified characters." class="info-ico">&#8505;</span></span>
 <span class="body">
 	<input type="text" class="selector fielddelimiter" name="separator[]" placeholder="," value="," />
 </span>
 </p>
 
-<p class="csv-show" style="display:none;">
+<p class="csv-show db-hide xlsx-hide scraper-hide" style="display:none;">
 <span class="head">Enclosure Character <span title="Separate fields with specified characters." class="info-ico">&#8505;</span></span>
 <span class="body">
 	<input type="text" class="selector enclosure" name="separator[]" placeholder='"' value='"' />
 </span>
 </p>
 
-<p class="csv-hide xlsx-hide">
+<p class="csv-hide xlsx-hide db-hide scraper-show">
 	<span class="head">Repeated Container <span title="Use to parse multiple containers per page." class="info-ico">&#8505;</span></span>
 	<span class="body">
 		<input type="text" class="selector containerInstance" name="selector[]" placeholder="{{#id .class element[attr=value]}}" value="{{body}}" />
@@ -150,10 +150,10 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	
 	<input type="text" class="selector opeq" name="selector[]" placeholder="" value="" />
 </span>
-<span class="csv-show" style="display:none;">
+<span class="csv-show db-hide xlsx-hide scraper-hide" style="display:none;">
 <br/><i>File must end with .csv in addition to the validator option. Validator runs for each line.</i>
 </span>
-<span class="xlsx-show" style="display:none;">
+<span class="xlsx-show db-hide csv-hide scraper-hide" style="display:none;">
 <br/><i>File must end with .xlsx in addition to the validator option. Validator runs for each line.</i>
 </span>
 
@@ -288,11 +288,11 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 <p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* XML/HTML sample: "static value %url% {{#id .class element[attribute=value]}} {{{regex}}}"</p>
 
-<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* CSV  sample: "static value %filename% {{{regex}}} {A} {B} {field_name} {column number}"</p>
+<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* CSV  sample: "static value %filename% {{{regex}}} {A} {B} {{field_name}} {column number}"</p>
 
-<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* XLSX  sample: "static value %sheetname% {{{regex}}} {A} {B} {field_name} {column number}"</p>
+<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* XLSX  sample: "static value %sheetname% {{{regex}}} {A} {B} {{field_name}} {column number}"</p>
 
-<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* SQL  sample: "static value {field_name}"</p>
+<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* SQL  sample: "static value {{field_name}} {column_number}"</p>
 
 <p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* PHP sample: "?php return strtoupper("{A}") ?"</p>
 
