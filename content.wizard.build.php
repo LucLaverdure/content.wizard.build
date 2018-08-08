@@ -57,7 +57,7 @@ function admin_post_wb_delcache_hook_callback() {
 // core XLSX view
 add_action( 'admin_post_wb_xlsx_hook', 'admin_post_wb_xlsx_hook_callback' );
 function admin_post_wb_xlsx_hook_callback() {
-	include_once(WIZBUI_PLUGIN_PATH . "lib/xlsx/parse.php");
+	include_once(WIZBUI_PLUGIN_PATH . "includes/parse.php");
 	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]);
 	$_REQUEST["file"] = WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"];
 	preview_xlsx($_REQUEST["file"]);
@@ -66,7 +66,7 @@ function admin_post_wb_xlsx_hook_callback() {
 // core CSV View
 add_action( 'admin_post_wb_csv_hook', 'admin_post_wb_csv_hook_callback' );
 function admin_post_wb_csv_hook_callback() {
-	include_once(WIZBUI_PLUGIN_PATH . "lib/xlsx/parse.php");
+	include_once(WIZBUI_PLUGIN_PATH . "includes/parse.php");
 	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]);
 	$_REQUEST["file"] = WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"];
 	preview_csv($_REQUEST["file"]);

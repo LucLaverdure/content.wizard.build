@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
-require_once __DIR__ . '/simplexlsx.class.php';
+require_once __DIR__ . '/../lib/xlsx/simplexlsx.class.php';
 
 function convertToNumberingScheme($number) {
 	$baseChar = 66;//"A";
