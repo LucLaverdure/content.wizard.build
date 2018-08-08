@@ -54,11 +54,20 @@ function admin_post_wb_delcache_hook_callback() {
 	wiz_del_files($_POST["killcache"]);
 }
 
-// core Wizard.Build.Content Cache Kill
+// core XLSX view
 add_action( 'admin_post_wb_xlsx_hook', 'admin_post_wb_xlsx_hook_callback' );
 function admin_post_wb_xlsx_hook_callback() {
 	include_once(WIZBUI_PLUGIN_PATH . "lib/xlsx/parse.php");
 	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]);
 	$_REQUEST["file"] = WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"];
 	preview_xlsx($_REQUEST["file"]);
+}
+
+// core CSV View
+add_action( 'admin_post_wb_csv_hook', 'admin_post_wb_csv_hook_callback' );
+function admin_post_wb_csv_hook_callback() {
+	include_once(WIZBUI_PLUGIN_PATH . "lib/xlsx/parse.php");
+	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]);
+	$_REQUEST["file"] = WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"];
+	preview_csv($_REQUEST["file"]);
 }

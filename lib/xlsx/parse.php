@@ -66,4 +66,29 @@ function preview_xlsx($file) {
 		echo SimpleXLSX::parse_error();
 	}
 }
+
+function preview_csv($file) {
+	$csv = array_map('str_getcsv', file($file));
+
+	$header_col_names = array();
+	//var_dump($csv);
+
+	echo '<table class="xlsx-preview" style="width:100%;border:1px solid #000;">';
+
+	foreach($csv as $i => $row) {
+		echo '<tr>';
+		foreach ($row as $col => $cell) {
+			if ($i==0) {
+				// 1st line
+				$header_col_names[$col] = $row[$col];
+			}
+			echo '<td data-letterscol="'.convertToNumberingScheme($col).'" data-colname="'.$header_col_names[$col].'" data-colnum="'.$col.'" style="border-right:1px solid #000;border-bottom:1px solid #000;">'.$row[$col]."</td>";					
+			echo "\n";
+		}
+		echo '</tr>';
+	}
+
+	echo '</table>';
+}
+
 ?>

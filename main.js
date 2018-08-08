@@ -405,7 +405,7 @@ function magicgo() {
 	if (ext=="xlsx") {
 		$("#magicframe").attr("src", WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_xlsx_hook&file=" + $("#magicfile").val());
 	} else if (ext=="csv") {
-		
+		$("#magicframe").attr("src", WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_csv_hook&file=" + $("#magicfile").val());
 	} else {
 		$("#magicframe").attr("src", WB_PLUGIN_URL + "wp-content/plugins/content.wizard.build/cache/" + $("#magicfile").val());
 	}
@@ -425,7 +425,7 @@ function setFrames() {
 		$body.on("click", function(e) { // assign a handler
 			var ext = $("#magicfile").val().split('.').pop();
 			$("#combo-wrap .options", window.top.document).html("");
-			if (ext=="xlsx") {
+			if (ext=="xlsx" || ext=="csv") {
 				$(e.target).each(function(ii,el) {
 					// by sheet letters
 					
@@ -444,8 +444,6 @@ function setFrames() {
 						$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$(el).data("colnum")+"}</a>");
 					}
 				});
-			} else if (ext=="csv") {
-				
 			} else {
 				$(e.target).each(function(ii,el) {
 					var str = "";
@@ -609,7 +607,7 @@ $(document).on("click", ".with-sel-confirm", function() {
 				filenames.push($this.val());
 			});
 
-			$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_delcache_hook", {
+			$(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_delcache_hook", {
 				killcache: filenames
 			},
 			function(data) {
