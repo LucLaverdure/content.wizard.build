@@ -71,7 +71,6 @@ function preview_csv($file) {
 	$csv = array_map('str_getcsv', file($file));
 
 	$header_col_names = array();
-	//var_dump($csv);
 
 	echo '<table class="xlsx-preview" style="width:100%;border:1px solid #000;">';
 

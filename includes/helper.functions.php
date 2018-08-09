@@ -274,8 +274,11 @@ function parseJsonConfig($jsonConfig) {
 	
 } // function
 
-function parseEntry($query, $url, $ht, $isContainer = false) {
+// query, url, html (data), return container array?, file offset
+function parseEntry($query, $url, $ht, $isContainer = false, $firstLineFields = array()) {
 	
+	$ext = substr($url, strrpos($url, '.'));
+
 	$container_array = array();
 	
 	// parse regex expressions (triple brackets)
@@ -308,31 +311,91 @@ function parseEntry($query, $url, $ht, $isContainer = false) {
 		
 		$query = str_replace($qq, $getzeros, $query);
 	}
-	
-	// parse jquery expressions (double brackets)
-	$q = array();
-	preg_match_all('/{{.*}}/U', $query, $q, PREG_SET_ORDER, 0);
-	
-	foreach ($q as $n => $qq) {
-		$qq = $qq[0];
+
+	if ($ext == ".csv") {
+		// CSV: filename, {col letter}, {{col by field name}}, {col number}
+
+		// cols by field name
+		// firstLineFields
+		$q = array();
+		preg_match_all('/{{.*}}/U', $query, $q, PREG_SET_ORDER, 0);
 		
-		$newjq = str_replace("{{", '', $qq);
-		$newjq = str_replace("}}", '', $newjq);
-		$doc = phpQuery::newDocument('<div>'.$ht.'</div>'); 
-		
-		$code = $doc->find($newjq);
-		$appendHTML = '';
-		foreach (pq($code) as $k => $thisf) {
-			$to_push = pq($thisf)->html();
-			if ($isContainer) {
-				$container_array[] = $to_push;
-			} else {
-				$appendHTML .= $to_push;
+		foreach ($q as $n => $qq) {
+			$qq = $qq[0];
+			
+			$newjq = str_replace("{{", '', $qq);
+			$newjq = str_replace("}}", '', $newjq);
+
+			$search_arr = array_search($newjq, $firstLineFields);
+			$appendHTML = "";
+			if ($search_arr !== false) {
+				$appendHTML = $ht[$search_arr];
 			}
+
+			$query = str_replace($qq, $appendHTML, $query);
 		}
-		$query = str_replace($qq, $appendHTML, $query);
+		
+
+		// cols by number or letters
+		$q = array();
+		preg_match_all('/{.*}/U', $query, $q, PREG_SET_ORDER, 0);
+		
+		foreach ($q as $n => $qq) {
+			// if is_numeric, col number, else col letter
+			$qq = $qq[0];
+			
+			$newjq = str_replace("{", '', $qq);
+			$newjq = str_replace("}", '', $newjq);
+			$appendHTML = "";
+			if (is_numeric($newjq)) {
+				// col number
+				$col_num = $newjq;
+				$appendHTML = $ht[$col_num];
+			} else {
+				// col letter
+				var_dump($newjq);
+				$col_num = convert2ColumnIndex($newjq);
+				var_dump($col_num);
+				var_dump($ht);
+				if (isset($ht[$col_num])) {
+					$appendHTML = $ht[$col_num];
+				}
+			}
+			//firstLineFields
+			$query = str_replace($qq, $appendHTML, $query);
+		}	
+
+
+	} elseif ($ext == ".xlsx") {
+		// XLSX: sheetname, {col letter}, {{col by field name}}, {col number}
+		
+	} else {
+		// parse jquery expressions (double brackets)
+		$q = array();
+		preg_match_all('/{{.*}}/U', $query, $q, PREG_SET_ORDER, 0);
+		
+		foreach ($q as $n => $qq) {
+			$qq = $qq[0];
+			
+			$newjq = str_replace("{{", '', $qq);
+			$newjq = str_replace("}}", '', $newjq);
+			$doc = phpQuery::newDocument('<div>'.$ht.'</div>'); 
+			
+			$code = $doc->find($newjq);
+			$appendHTML = '';
+			foreach (pq($code) as $k => $thisf) {
+				$to_push = pq($thisf)->html();
+				if ($isContainer) {
+					$container_array[] = $to_push;
+				} else {
+					$appendHTML .= $to_push;
+				}
+			}
+			$query = str_replace($qq, $appendHTML, $query);
+		}
 	}
-	
+
+	// SQL: {{field name}}, {col number}
 
 	// parse %url%
 	$ret = str_replace("%url%", $url, $query);
@@ -342,6 +405,26 @@ function parseEntry($query, $url, $ht, $isContainer = false) {
 		return $container_array;
 	}
 	return $ret;
+}
+
+function convert2ColumnIndex($columnName) {
+	$columnName = strtoupper($columnName);
+	$value = 0;
+	for ($i = 0, $k = strlen($columnName) - 1; $i < strlen($columnName); $i++, $k--) {
+		$alpabetIndex = ((int) substr($columnName, $i, 1)) - 64;
+		$delta = 0;
+		// last column simply add it
+		if ($k == 0) {
+			$delta = $alpabetIndex - 1;
+		} else { // aggregate
+			if ($alpabetIndex == 0)
+				$delta = (26 * $k);
+			else
+				$delta = ($alpabetIndex * 26 * $k);					
+		}
+		$value += $delta;
+	}
+	return $value;
 }
 
 function parseAfterOp($html, $op, $opeq) {
@@ -480,8 +563,7 @@ function validateOp($query, $url, $html, $op, $opeq) {
 	
 	return false;
 }
-
-function runmap($offset, $mapCount, $json_config, $file_offset = 0) {
+function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = false) {
 	// get crawled files
 
 	$path_init = WIZBUI_PLUGIN_PATH . "cache";
@@ -669,34 +751,41 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0) {
 					} // containers
 					
 				} elseif (($jc_val["inputmethod"] == "csv") && ($ext == "csv")) {
+
+					// CSV Parsing
+
 					$row = 0;
+					$row_init = $row + $file_offset;
+					$line_fields = array();
 					if (($handle = fopen($filez[$i], "r")) !== FALSE) {
 						while (($data = fgetcsv($handle, 0, $jc_val["separator"], $jc_val["enclosure"])) !== FALSE) {
 							
+							// get first line fields
 							$firstline = $jc_val["line1parsed"];
-							
-							$num = count($data); // fields count on row $row
+							if ( ($firstline == "Y") && ($row == 0) )  {
+								$line_fields = $data;
+							}
 
-							$row = $row + $file_offset;
+							// get each row with offset
+							if ($row >= $row_init) {
 							
-							for ($c=0; $c < $num; $c++) {
-								
+								$fields_count = count($data); // fields count on row $row
+
 								// validate mapping
 								//		function validateOp($query, $url, $html, $op, $opeq) {
 								$valid = validateOp($jc_val["validator"], $filez[$i], $data, $jc_val["op"], $jc_val["opeq"]);
-								
+
 								// when validation passed
 								if ($valid) {
 									// get id
 									// 		function parseEntry($query, $url, $ht, $isContainer = false) {
-									$id = parseEntry($jc_val["idsel"], $filez[$i], $data);
+									$id = parseEntry($jc_val["idsel"], $filez[$i], $data, false, $line_fields);
 
-									//echo $data[$c] . "<br />\n";
+									var_dump($id);
 								}	
 							}
 							
-							
-	
+							$row++;
 						}
 						fclose($handle);
 					}

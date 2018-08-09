@@ -71,3 +71,17 @@ function admin_post_wb_csv_hook_callback() {
 	$_REQUEST["file"] = WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"];
 	preview_csv($_REQUEST["file"]);
 }
+
+// core set Mappings
+add_action( 'admin_post_wb_map_hook', 'admin_post_wb_map_hook_callback' );
+function admin_post_wb_map_hook_callback() {
+	include_once(WIZBUI_PLUGIN_PATH . "mappings.php");
+}
+
+// core preview Mappings
+add_action( 'admin_post_wb_map_preview_hook', 'admin_post_wb_map_preview_hook_callback' );
+function admin_post_wb_map_preview_hook_callback() {
+	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]);
+	$_REQUEST["file"] = WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"];
+	include_once(WIZBUI_PLUGIN_PATH . "mappings.php");
+}
