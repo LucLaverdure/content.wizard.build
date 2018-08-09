@@ -507,6 +507,12 @@ function setTag() {
 			console.log(err.message);
 		}
 
+		try {
+			xml = data;
+		} catch (err) {
+			console.log(err.message);
+		}
+
 		// parseEntry(query, url, ht, isContainer = false) {
 		preview_entry($("#taglist").val(), document.getElementById("magicframe").contentWindow.location.href, xml);
 		
@@ -537,12 +543,13 @@ function toggleSelOptions($this) {
 }
 
 function preview_entry(query, url, ht, isContainer = false) {
-	//var mappings = compileMappings();
+	var mappings = compileMappings();
 	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_map_preview_hook", {
 			query: query,
 			file: url,
 			ht: ht,
-			preview: "true"
+			preview: "true",
+			config: mappings
 		},
 		function(data) {
 			var tested_output = data;

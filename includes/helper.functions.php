@@ -275,8 +275,11 @@ function parseJsonConfig($jsonConfig) {
 } // function
 
 // query, url, html (data), return container array?, file offset
-function parseEntry($query, $url, $ht, $isContainer = false, $firstLineFields = array()) {
-	
+function parseEntry($query, $url, $ht, $isContainer = false, $jconfig) {
+	$jconfig = $jconfig[0];
+
+	global $latest_first_line;
+
 	$ext = substr($url, strrpos($url, '.'));
 
 	$container_array = array();
@@ -315,8 +318,15 @@ function parseEntry($query, $url, $ht, $isContainer = false, $firstLineFields = 
 	if ($ext == ".csv") {
 		// CSV: filename, {col letter}, {{col by field name}}, {col number}
 
+		parse_str($url, $this_file);
+
+		$handle = fopen("../cache/".$this_file["file"], "r");
+		
+		$latest_first_line = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);
+
+		var_dump($latest_first_line);
+
 		// cols by field name
-		// firstLineFields
 		$q = array();
 		preg_match_all('/{{.*}}/U', $query, $q, PREG_SET_ORDER, 0);
 		
@@ -326,7 +336,7 @@ function parseEntry($query, $url, $ht, $isContainer = false, $firstLineFields = 
 			$newjq = str_replace("{{", '', $qq);
 			$newjq = str_replace("}}", '', $newjq);
 
-			$search_arr = array_search($newjq, $firstLineFields);
+			$search_arr = array_search($newjq, $latest_first_line);
 			$appendHTML = "";
 			if ($search_arr !== false) {
 				$appendHTML = $ht[$search_arr];
@@ -407,24 +417,15 @@ function parseEntry($query, $url, $ht, $isContainer = false, $firstLineFields = 
 	return $ret;
 }
 
-function convert2ColumnIndex($columnName) {
-	$columnName = strtoupper($columnName);
-	$value = 0;
-	for ($i = 0, $k = strlen($columnName) - 1; $i < strlen($columnName); $i++, $k--) {
-		$alpabetIndex = ((int) substr($columnName, $i, 1)) - 64;
-		$delta = 0;
-		// last column simply add it
-		if ($k == 0) {
-			$delta = $alpabetIndex - 1;
-		} else { // aggregate
-			if ($alpabetIndex == 0)
-				$delta = (26 * $k);
-			else
-				$delta = ($alpabetIndex * 26 * $k);					
-		}
-		$value += $delta;
-	}
-	return $value;
+// AA to 26
+function convert2ColumnIndex($letters) {
+    $num = 0;
+    $arr = array_reverse(str_split($letters));
+
+    for ($i = 0; $i < count($arr); $i++) {
+        $num += (ord(strtolower($arr[$i])) - 96) * (pow(26,$i));
+    }
+    return $num;
 }
 
 function parseAfterOp($html, $op, $opeq) {
