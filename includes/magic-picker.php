@@ -58,7 +58,7 @@
 		</div>
 	</div>
 	<div class="frame-step" style="display:none;">
-		<iframe id="magicframe" src="" style="width:100%;height:450px;"></iframe>
+		<iframe id="magicframe" src="" style="width:100%;height:420px;"></iframe>
 	</div>
 	
 </div>

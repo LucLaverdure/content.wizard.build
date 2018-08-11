@@ -1,6 +1,20 @@
 <?php
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
-?><?php
+
+
+function selector_val(&$item) {
+	$ret = "";
+	$chars = str_split($item);
+	foreach ($chars as $i) {
+		if (ctype_alnum($i)) {
+			$ret .= $i;
+		} else {
+			if ($ret != "") $ret .= "_";
+		}
+	}
+	$item = trim(strtolower($ret));
+	return $item;
+}
 
 function save_options() {
 	
@@ -320,12 +334,11 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig) {
 
 		parse_str($url, $this_file);
 
-		$handle = fopen("../cache/".$this_file["file"], "r");
-		
+		$handle = fopen(__DIR__."/../cache/".$this_file["file"], "r");
+
 		$latest_first_line = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);
-
-		var_dump($latest_first_line);
-
+		array_walk($latest_first_line, 'selector_val');
+		
 		// cols by field name
 		$q = array();
 		preg_match_all('/{{.*}}/U', $query, $q, PREG_SET_ORDER, 0);
@@ -335,16 +348,18 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig) {
 			
 			$newjq = str_replace("{{", '', $qq);
 			$newjq = str_replace("}}", '', $newjq);
+			$newjq = selector_val($newjq);
 
 			$search_arr = array_search($newjq, $latest_first_line);
 			$appendHTML = "";
-			if ($search_arr !== false) {
-				$appendHTML = $ht[$search_arr];
+			if (in_array($newjq, $latest_first_line)) {
+				while ($data = fgetcsv($handle, 0, $jconfig[17], $jconfig[18])) {
+					$appendHTML .= $data[$search_arr]."\n";
+				}
 			}
 
 			$query = str_replace($qq, $appendHTML, $query);
 		}
-		
 
 		// cols by number or letters
 		$q = array();
@@ -356,25 +371,27 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig) {
 			
 			$newjq = str_replace("{", '', $qq);
 			$newjq = str_replace("}", '', $newjq);
+			$newjq = selector_val($newjq);
+
 			$appendHTML = "";
 			if (is_numeric($newjq)) {
 				// col number
 				$col_num = $newjq;
-				$appendHTML = $ht[$col_num];
+				while ($data = fgetcsv($handle, 0, $jconfig[17], $jconfig[18])) {
+					$appendHTML .= $data[$col_num]."\n";
+				}
 			} else {
 				// col letter
-				var_dump($newjq);
-				$col_num = convert2ColumnIndex($newjq);
-				var_dump($col_num);
-				var_dump($ht);
-				if (isset($ht[$col_num])) {
-					$appendHTML = $ht[$col_num];
+				$col_num = convert2ColumnIndex($newjq) - 1;
+				while ($data = fgetcsv($handle, 0, $jconfig[17], $jconfig[18])) {
+					$appendHTML .= $data[$col_num]."\n";
 				}
 			}
 			//firstLineFields
 			$query = str_replace($qq, $appendHTML, $query);
 		}	
 
+		fclose($handle);
 
 	} elseif ($ext == ".xlsx") {
 		// XLSX: sheetname, {col letter}, {{col by field name}}, {col number}

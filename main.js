@@ -363,13 +363,16 @@ $(document).on("click", ".wiz-pick", function() {
 	$(".output-picked-code").html("");
 	$("#magicframe").attr("src","");
 
+	window.scrollTo(0, 0);
+
 	$( ".magic-pick" ).dialog({
 		title: "Magic Selection",
 		width: ($(window).width() * .8),
-		height: ($(window).height() * .9),
+		height: 850,
 		modal: true,
 		resizable: false,
 		draggable: false,
+		position: { my: "center", at: "center", of: window },
 		beforeClose: function() {
 			$("#magicfile").val("");
 			$(".test-select-step").hide();
@@ -415,6 +418,31 @@ function magicgo() {
 	setFrames();
 }
 
+function ctype_alnum (text) { 
+	const regex = /^[a-z0-9]+$/i;
+	const str = text;
+	let m;
+	
+	if ((m = regex.exec(str)) !== null) {
+		// The result can be accessed through the `m`-variable.
+		return true;
+	}	  
+	return false;
+}
+
+function selector_val(item) {
+	var ret = "";
+	var chars = item.split("");
+	for (i in chars) {
+		if (ctype_alnum(chars[i])) {
+			ret += chars[i];
+		} else {
+			if (ret != "") ret += "_";
+		}
+	}
+	return $.trim(ret.toLowerCase());
+}
+
 function setFrames() {
 
 	setTimeout( function() {
@@ -430,7 +458,7 @@ function setFrames() {
 					// by sheet letters
 					
 					if (typeof $(el).data("sheetname") != "undefined") {
-						$("#taglist", window.top.document).val($.trim($(el).data("sheetname").toLowerCase()));
+						$("#taglist", window.top.document).val(selector_val($(el).data("sheetname")));
 						$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">'+$.trim($(el).data("sheetname").toLowerCase())+"</a>");
 					} else {
 						
@@ -438,7 +466,7 @@ function setFrames() {
 						
 						// by first row, col name
 						$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{{'+$.trim($(el).data("colname").toLowerCase())+"}}</a>");
-						$("#taglist", window.top.document).val('{{'+$.trim($(el).data("colname").toLowerCase())+'}}');
+						$("#taglist", window.top.document).val('{{'+selector_val($(el).data("colname").toLowerCase())+'}}');
 						
 						// by first row, col num
 						$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$(el).data("colnum")+"}</a>");

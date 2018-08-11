@@ -311,13 +311,13 @@ body .admin-wrap .combo-wrap .options {
 }
 .output-tabs {
 	float:right;
-	max-width:300px;
+	max-width:400px;
     margin-top: 14px;
 	margin-right:20px;
 }
 .output-tabs a {
 	float:right;
-	width:100px;
+	width:150px;
 	text-align:center;
 	background: #acacac;
 	display:inline-block;
