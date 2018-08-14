@@ -7,10 +7,10 @@ include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.
 
 if (is_admin()) {
 	
-	// function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = false) 
 	if ($_POST["preview"]=="true") {
-		//function query, $url, $ht, $isContainer = false, $jconfig
 		$_POST["config"] = json_decode(stripslashes($_POST["config"]), true);
+		
+		//function query, $url, $ht, $isContainer = false, $jconfig
 		echo parseEntry($_POST["query"], $_POST["file"], $_POST["ht"], false, $_POST["config"]);
 	} else {
 		$offset = $_POST["offset"];
@@ -18,6 +18,8 @@ if (is_admin()) {
 		$queue_size = 35;
 		$json_config = $_POST["config"];
 		$parseConfig = parseJsonConfig($json_config);
+
+		// function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = false) 
 		runmap($offset, $queue_size, $parseConfig, $file_offset);
 	}
 

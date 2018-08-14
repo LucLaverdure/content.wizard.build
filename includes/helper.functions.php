@@ -360,10 +360,12 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig) {
 
 			$query = str_replace($qq, $appendHTML, $query);
 		}
+		fclose($handle);
 
 		// cols by number or letters
 		$q = array();
 		preg_match_all('/{.*}/U', $query, $q, PREG_SET_ORDER, 0);
+
 		
 		foreach ($q as $n => $qq) {
 			// if is_numeric, col number, else col letter
@@ -377,24 +379,29 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig) {
 			if (is_numeric($newjq)) {
 				// col number
 				$col_num = $newjq;
+				$handle = fopen(__DIR__."/../cache/".$this_file["file"], "r");
 				while ($data = fgetcsv($handle, 0, $jconfig[17], $jconfig[18])) {
 					$appendHTML .= $data[$col_num]."\n";
 				}
+				fclose($handle);
 			} else {
 				// col letter
-				$col_num = convert2ColumnIndex($newjq) - 1;
+				$col_num = convert2ColumnIndex($newjq);
+				$handle = fopen(__DIR__."/../cache/".$this_file["file"], "r");
 				while ($data = fgetcsv($handle, 0, $jconfig[17], $jconfig[18])) {
 					$appendHTML .= $data[$col_num]."\n";
 				}
+				fclose($handle);
 			}
 			//firstLineFields
 			$query = str_replace($qq, $appendHTML, $query);
 		}	
 
-		fclose($handle);
 
 	} elseif ($ext == ".xlsx") {
 		// XLSX: sheetname, {col letter}, {{col by field name}}, {col number}
+		
+
 		
 	} else {
 		// parse jquery expressions (double brackets)
@@ -440,9 +447,9 @@ function convert2ColumnIndex($letters) {
     $arr = array_reverse(str_split($letters));
 
     for ($i = 0; $i < count($arr); $i++) {
-        $num += (ord(strtolower($arr[$i])) - 96) * (pow(26,$i));
+        $num += (ord(strtolower($arr[$i])) - 96) * (pow(26, $i));
     }
-    return $num;
+    return $num - 1;
 }
 
 function parseAfterOp($html, $op, $opeq) {

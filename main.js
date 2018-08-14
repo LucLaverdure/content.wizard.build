@@ -583,7 +583,7 @@ function preview_entry(query, url, ht, isContainer = false) {
 			var tested_output = data;
 			$("#tag").val($("#taglist").val());
 			$(".output-picked").html(tested_output);
-			$(".output-picked-code").text(tested_output);
+			$(".output-picked-code").text(tested_output).wrap("<pre></pre>");
 			$(".filter-select-step").fadeIn("fast");
 			$(".sample-step").fadeIn("fast");
 		}
