@@ -7,8 +7,8 @@ include_once "includes/helper.functions.php";
 
 <style>
 	<?php
-	// CSS file only for this page
-	include "main.css";
+		// CSS file only for this page
+		include "main.css";
 	?>
 </style>
 

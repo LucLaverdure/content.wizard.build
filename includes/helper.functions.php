@@ -289,10 +289,10 @@ function parseJsonConfig($jsonConfig) {
 } // function
 
 // query, url, html (data), return container array?, file offset
-function parseEntry($query, $url, $ht, $isContainer = false, $jconfig) {
+function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
 	$jconfig = $jconfig[0];
 
-	global $latest_first_line;
+	global $latest_first_line, $csvdata, $this_file;
 
 	$ext = substr($url, strrpos($url, '.'));
 
@@ -301,6 +301,23 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig) {
 	// parse regex expressions (triple brackets)
 	$q = array();
 	preg_match_all('/{{{.*}}}/U', $query, $q, PREG_SET_ORDER, 0);
+
+	$handle = "";
+
+	$ht = file_get_contents($url);
+
+	// file open
+	if ($ext == ".csv") {
+		parse_str($url, $this_file);
+		$handle = fopen(__DIR__."/../cache/".$this_file["file"], "r");
+		$latest_first_line = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);
+		if ($offset > 0) {
+			for ($i = 0; $i < $offset; ++$i) {
+				$dump = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);
+			}
+		}
+		$csvdata = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);		
+	}
 
 	foreach ($q as $n => $qq) {
 		$qq = $qq[0];
@@ -332,11 +349,6 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig) {
 	if ($ext == ".csv") {
 		// CSV: filename, {col letter}, {{col by field name}}, {col number}
 
-		parse_str($url, $this_file);
-
-		$handle = fopen(__DIR__."/../cache/".$this_file["file"], "r");
-
-		$latest_first_line = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);
 		array_walk($latest_first_line, 'selector_val');
 		
 		// cols by field name
@@ -353,14 +365,11 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig) {
 			$search_arr = array_search($newjq, $latest_first_line);
 			$appendHTML = "";
 			if (in_array($newjq, $latest_first_line)) {
-				while ($data = fgetcsv($handle, 0, $jconfig[17], $jconfig[18])) {
-					$appendHTML .= $data[$search_arr]."\n";
-				}
+				$appendHTML .= $csvdata[$search_arr];
 			}
 
 			$query = str_replace($qq, $appendHTML, $query);
 		}
-		fclose($handle);
 
 		// cols by number or letters
 		$q = array();
@@ -379,20 +388,14 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig) {
 			if (is_numeric($newjq)) {
 				// col number
 				$col_num = $newjq;
-				$handle = fopen(__DIR__."/../cache/".$this_file["file"], "r");
-				while ($data = fgetcsv($handle, 0, $jconfig[17], $jconfig[18])) {
-					$appendHTML .= $data[$col_num]."\n";
-				}
-				fclose($handle);
+				$appendHTML .= $csvdata[$col_num];
+
 			} else {
 				// col letter
 				$col_num = convert2ColumnIndex($newjq);
-				$handle = fopen(__DIR__."/../cache/".$this_file["file"], "r");
-				while ($data = fgetcsv($handle, 0, $jconfig[17], $jconfig[18])) {
-					$appendHTML .= $data[$col_num]."\n";
-				}
-				fclose($handle);
+				$appendHTML .= $csvdata[$col_num];
 			}
+
 			//firstLineFields
 			$query = str_replace($qq, $appendHTML, $query);
 		}	
@@ -414,7 +417,7 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig) {
 			$newjq = str_replace("{{", '', $qq);
 			$newjq = str_replace("}}", '', $newjq);
 			$doc = phpQuery::newDocument('<div>'.$ht.'</div>'); 
-			
+
 			$code = $doc->find($newjq);
 			$appendHTML = '';
 			foreach (pq($code) as $k => $thisf) {
