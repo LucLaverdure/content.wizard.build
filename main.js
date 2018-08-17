@@ -440,7 +440,9 @@ function selector_val(item) {
 			if (ret != "") ret += "_";
 		}
 	}
-	return $.trim(ret.toLowerCase());
+	ret = $.trim(ret.replace(/_/g," "));
+	ret = ret.replace(/ /g,"_")
+	return ret.toLowerCase();
 }
 
 function setFrames() {

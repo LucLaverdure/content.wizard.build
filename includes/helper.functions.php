@@ -12,7 +12,11 @@ function selector_val(&$item) {
 			if ($ret != "") $ret .= "_";
 		}
 	}
-	$item = trim(strtolower($ret));
+
+	$ret = trim(str_replace("_"," ", $ret)); 
+	$ret = str_replace(" ","_", $ret); 
+	$item = strtolower($ret);
+
 	return $item;
 }
 
@@ -403,7 +407,32 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 	} elseif ($ext == ".xlsx") {
 		// XLSX: sheetname, {col letter}, {{col by field name}}, {col number}
-		
+
+		$header_col_names = array();
+
+		if ( $xlsx = SimpleXLSX::parse($url)) {
+			$sheets = $xlsx->sheetNames();
+			foreach ($sheets as $sheetnum => $sheet) {
+				echo '<h3 data-sheetname="%sheetname%">'.$sheet."</h3>";
+				list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
+				$ret = $xlsx->rows($sheetnum);
+				echo '<table class="xlsx-preview" style="width:100%;border:1px solid #000;">';
+				foreach ($ret as $key => $row) {
+					echo '<tr>';
+					for ( $col = 0; $col < $num_cols; $col++ ) {
+						
+						if ($key==0) {
+							// 1st line
+							$header_col_names[$col] = $row[$col];
+						}
+						
+						echo '<td data-letterscol="'.convertToNumberingScheme($col).'" data-colname="'.$header_col_names[$col].'" data-colnum="'.$col.'" style="border-right:1px solid #000;border-bottom:1px solid #000;">'.$row[$col]."</td>";
+					}
+					echo '</tr>';
+				}
+				echo '</table>';
+			}
+		}	
 
 		
 	} else {

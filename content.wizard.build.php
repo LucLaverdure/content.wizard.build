@@ -83,6 +83,7 @@ function admin_post_wb_map_hook_callback() {
 add_action( 'admin_post_wb_map_preview_hook', 'admin_post_wb_map_preview_hook_callback' );
 function admin_post_wb_map_preview_hook_callback() {
 	include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
+	include_once(WIZBUI_PLUGIN_PATH . "includes/parse.php");
 	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]);
 	$_REQUEST["file"] = WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"];
 	include_once(WIZBUI_PLUGIN_PATH . "mappings.php");
