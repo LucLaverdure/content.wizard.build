@@ -322,6 +322,66 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 		}
 		$csvdata = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);
 	
+	// DB Query
+	} elseif ($ext == ".dboquery") {
+
+		// parse field name
+		$q = array();
+		preg_match_all('/{{.*}}/U', $query, $q, PREG_SET_ORDER, 0);
+		
+		foreach ($q as $n => $qq) {
+			$qq = $qq[0];
+			
+			$newjq = str_replace("{{", '', $qq);
+			$newjq = str_replace("}}", '', $newjq);
+
+			$servername = $jconfig[11];
+			$username = $jconfig[12];
+			$password = $jconfig[13];
+			$dbname = $jconfig[14];
+			$sql = $jconfig[15];
+	
+			// Create connection
+			$conn = new mysqli($servername, $username, $password, $dbname);
+			// Check connection
+			if ($conn->connect_error) {
+				die("Connection failed: " . $conn->connect_error);
+			}
+			
+			$result = $conn->query($sql);
+			
+			if ($result->num_rows > 0) {
+	
+				$row_count = 0;
+				// output data of each row
+				while($row = $result->fetch_assoc()) {
+	
+					for ($i = 0; $i < $offset; ++$i) {
+						$row = $result->fetch_assoc();
+					}
+	
+					$col_count = 0;
+					foreach ($row as $k => $item) {
+
+						if ($k == $newjq) {
+							$appendHTML = $item;
+							break 2;
+						}
+						$col_count++;
+					}
+					
+					$row_count++;
+				}
+	
+			} 
+			$conn->close();
+				
+
+			$query = str_replace($qq, $appendHTML, $query);
+		}
+		
+
+
 	// XLSX File
 	} elseif ($ext == ".xlsx") {
 		$current_sheet = "";
@@ -543,6 +603,25 @@ echo "It spent " . rutime($ru, $rustart, "stime") .
 	// parse %url%
 	$ret = str_replace("%url%", $url, $query);
 	
+
+	// parse php expressions
+	$q = array();
+	preg_match_all('/\<\?php.*\?\>/U', $query, $q, PREG_SET_ORDER, 0);
+	
+	foreach ($q as $n => $qq) {
+		$qq = $qq[0];
+		
+		$newjq = str_replace("<?php", '', $qq);
+		$newjq = str_replace("?>", '', $newjq);
+
+		$newjq = stripslashes($newjq);
+		$newjq = html_entity_decode($newjq);
+		$ret_val = eval("return ".$newjq.";");
+		$query = str_replace($qq, $ret_val, $query);
+	}
+
+	$ret = $query;
+
 	// ret remaining
 	if ($isContainer) {
 		return $container_array;

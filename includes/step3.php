@@ -69,7 +69,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 <p class="db-show csv-hide xlsx-hide scraper-hide" style="display:none;">
 <span class="head">Database Password <span title="Password used to connect to database server" class="info-ico">&#8505;</span></span>
 <span class="body">
-	<input type="text" class="selector dbpass" name="separator[]" placeholder="" value="" />
+	<input type="password" class="selector dbpass" name="separator[]" placeholder="" value="" />
 </span>
 </p>
 
@@ -294,7 +294,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 <p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* SQL  sample: "static value {{field_name}} {column_number}"</p>
 
-<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* PHP sample: "?php return strtoupper("{A}") ?"</p>
+<p style="background:#cfc;padding:10px;font-family:'Courier New', Courier, monospace;">* PHP sample: "&lt;?php strtoupper("{A}") ?&gt;"</p>
 
 	<div class="save-wrapper">
 		<input type="button" name="save" value="Save Mappings" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary" onclick="compileMappings();return false;"/>

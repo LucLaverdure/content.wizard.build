@@ -363,6 +363,37 @@ $(document).on("click", ".wiz-pick", function() {
 	$(".output-picked-code").html("");
 	$("#magicframe").attr("src","");
 
+	var mappings = JSON.parse(compileMappings());
+
+	var sql_mappings = [];
+
+	$.each(mappings, function(key, field) {
+
+		console.log(field);
+
+		// get dbo fields
+		if (field[0] == "sql") {
+			// 12: user, 11: host, 14: db name, 15: query
+			var config_line = field[12] + "@" + field[11] + " (" + field[14] + ") query: " + field[15] + ".dboquery";
+			sql_mappings.push(config_line);
+		}
+
+	});
+
+
+	$("#magicfile option").each(function() {
+		if ($(this).html().indexOf("dboquery") !== -1) {
+			$(this).remove();
+		}
+	});
+
+
+	var counter = 0;
+	$.each(sql_mappings, function(key, dboquery) {
+		$("#magicfile option:first").after('<option value="'+counter+'.dboquery">' + dboquery + '</option>');
+		counter++;
+	});
+
 	window.scrollTo(0, 0);
 
 	$( ".magic-pick" ).dialog({
@@ -406,12 +437,19 @@ function magicgo() {
 	var ext = $("#magicfile").val().split('.').pop();
 	
 	if (ext=="xlsx") {
+		// excel file
 		$("#magicframe").attr("src", WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_xlsx_hook&file=" + $("#magicfile").val());
+	} else if (ext=="dboquery") {
+		// db query
+		$("#magicframe").attr("src", WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_db_hook&file=" + $("#magicfile").val());
 	} else if (ext=="csv") {
+		// csv file
 		$("#magicframe").attr("src", WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_csv_hook&file=" + $("#magicfile").val());
 	} else {
+		// html / xml / other
 		$("#magicframe").attr("src", WB_PLUGIN_URL + "wp-content/plugins/content.wizard.build/cache/" + $("#magicfile").val());
 	}
+
 	$(".frame-step").fadeIn("fast");
 	$(".step-indicator").fadeIn("fast");
 
@@ -473,6 +511,15 @@ function setFrames() {
 						// by first row, col num
 						$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$(el).data("colnum")+"}</a>");
 					}
+				});
+			} else if (ext=="dboquery") {
+				$(e.target).each(function(ii,el) {
+					// by first row, col name
+					$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{{'+selector_val($(el).data("colname").toLowerCase())+"}}</a>");
+					$("#taglist", window.top.document).val('{{'+selector_val($(el).data("colname").toLowerCase())+'}}');
+					
+					// by first row, col num
+					$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$(el).data("colnum")+"}</a>");
 				});
 			} else {
 				$(e.target).each(function(ii,el) {

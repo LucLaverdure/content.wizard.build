@@ -31,7 +31,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	</div>
 		
 	<div style="width:90%;">
-		<div style="margin:20px 0;"><strong>Blacklist</strong> (url must NOT match all lines):</div>
+		<div style="margin:20px 0;"><strong>Blacklist</strong> (url must NOT match any line):</div>
 		<div>
 	<textarea id="blacklist" type="text" name="blacklist" placeholder="i.e. zip" wrap="off" style="height:250px;width:90%;"><?php $opt = get_option('wb_blacklist', null); if ($opt !==  null) { echo unserialize($opt); $_POST["blacklist"] = unserialize($opt); } ?></textarea></span>
 		</div>

@@ -72,6 +72,16 @@ function admin_post_wb_csv_hook_callback() {
 	preview_csv($_REQUEST["file"]);
 }
 
+
+// core DB View
+add_action( 'admin_post_wb_db_hook', 'admin_post_wb_db_hook_callback' );
+function admin_post_wb_db_hook_callback() {
+	include_once(WIZBUI_PLUGIN_PATH . "includes/parse.php");
+	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]);
+	$_REQUEST["file"] = WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"];
+	preview_db($_REQUEST["file"]);
+}
+
 // core set Mappings
 add_action( 'admin_post_wb_map_hook', 'admin_post_wb_map_hook_callback' );
 function admin_post_wb_map_hook_callback() {
