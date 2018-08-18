@@ -297,9 +297,9 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 	$jconfig = $jconfig[0];
 
 	global $latest_first_line, $csvdata, $this_file;
-
+	$csvdata = array();
 	$ext = substr($url, strrpos($url, '.'));
-
+	$latest_first_line = array();
 	$container_array = array();
 	
 	// parse regex expressions (triple brackets)
@@ -308,11 +308,11 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 	$handle = "";
 
-	$ht = file_get_contents($url);
-
+	parse_str($url, $this_file);
 	// file open
+
+	// csv file
 	if ($ext == ".csv") {
-		parse_str($url, $this_file);
 		$handle = fopen(__DIR__."/../cache/".$this_file["file"], "r");
 		$latest_first_line = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);
 		if ($offset > 0) {
@@ -320,9 +320,58 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 				$dump = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);
 			}
 		}
-		$csvdata = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);		
+		$csvdata = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);
+	
+	// XLSX File
+	} elseif ($ext == ".xlsx") {
+		$current_sheet = "";
+		$offset_counter = 0;
+		
+//$rustart = getrusage();
+		
+		if ( $xlsx = SimpleXLSX::parse(__DIR__."/../cache/".$this_file["file"])) {
+		
+			function rutime($ru, $rus, $index) {
+				return ($ru["ru_$index.tv_sec"]*1000 + intval($ru["ru_$index.tv_usec"]/1000))
+				 -  ($rus["ru_$index.tv_sec"]*1000 + intval($rus["ru_$index.tv_usec"]/1000));
+			}
+					
+			$sheets = $xlsx->sheetNames();
+			foreach ($sheets as $sheetnum => $sheet) {
+				$current_sheet = $sheet;
+				list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
+				$ret = $xlsx->rows($sheetnum);
+				foreach ($ret as $key => $row) {
+					if ( ($offset_counter==0) || ($offset_counter == ($offset + 1)) ) {
+						for ( $col = 0; $col < $num_cols; $col++ ) {
+							if ($key == 0) {
+								// 1st line
+								$latest_first_line[$col] = $row[$col];
+								array_walk($latest_first_line, 'selector_val');
+							} else {
+								if ($offset_counter >= $offset + 1) {
+									$csvdata[$col] = $row[$col];
+								}
+							}
+						}
+					} 
+					$offset_counter++;
+				}
+			}
+		}
+/*
+$ru = getrusage();
+echo "This process used " . rutime($ru, $rustart, "utime") .
+" ms for its computations\n";
+echo "It spent " . rutime($ru, $rustart, "stime") .
+" ms in system calls\n";
+*/
+
+	} else {
+		$ht = file_get_contents($url);
 	}
 
+	// Regex parsing
 	foreach ($q as $n => $qq) {
 		$qq = $qq[0];
 		
@@ -408,31 +457,59 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 	} elseif ($ext == ".xlsx") {
 		// XLSX: sheetname, {col letter}, {{col by field name}}, {col number}
 
-		$header_col_names = array();
+		// cols by field name
+		$q = array();
+		preg_match_all('/{{.*}}/U', $query, $q, PREG_SET_ORDER, 0);
 
-		if ( $xlsx = SimpleXLSX::parse($url)) {
-			$sheets = $xlsx->sheetNames();
-			foreach ($sheets as $sheetnum => $sheet) {
-				echo '<h3 data-sheetname="%sheetname%">'.$sheet."</h3>";
-				list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
-				$ret = $xlsx->rows($sheetnum);
-				echo '<table class="xlsx-preview" style="width:100%;border:1px solid #000;">';
-				foreach ($ret as $key => $row) {
-					echo '<tr>';
-					for ( $col = 0; $col < $num_cols; $col++ ) {
-						
-						if ($key==0) {
-							// 1st line
-							$header_col_names[$col] = $row[$col];
-						}
-						
-						echo '<td data-letterscol="'.convertToNumberingScheme($col).'" data-colname="'.$header_col_names[$col].'" data-colnum="'.$col.'" style="border-right:1px solid #000;border-bottom:1px solid #000;">'.$row[$col]."</td>";
-					}
-					echo '</tr>';
-				}
-				echo '</table>';
+		foreach ($q as $n => $qq) {
+			$qq = $qq[0];
+			
+			$newjq = str_replace("{{", '', $qq);
+			$newjq = str_replace("}}", '', $newjq);
+			$newjq = selector_val($newjq);
+			$appendHTML = "";
+			$search_arr = array_search($newjq, $latest_first_line);
+			if (in_array($newjq, $latest_first_line)) {
+				$appendHTML .= $csvdata[$search_arr];
 			}
-		}	
+
+			$query = str_replace($qq, $appendHTML, $query);
+
+		}
+
+		// letter col: convertToNumberingScheme($col)
+		// col name: $header_col_names[$col]
+		// col number: $col
+
+
+		// cols by number or letters
+		$q = array();
+		preg_match_all('/{.*}/U', $query, $q, PREG_SET_ORDER, 0);
+
+		foreach ($q as $n => $qq) {
+			// if is_numeric, col number, else col letter
+			$qq = $qq[0];
+			
+			$newjq = str_replace("{", '', $qq);
+			$newjq = str_replace("}", '', $newjq);
+			$newjq = selector_val($newjq);
+
+			$appendHTML = "";
+			if (is_numeric($newjq)) {
+				// col number
+				$col_num = $newjq;
+				$appendHTML .= $csvdata[$col_num];
+
+			} else {
+				// col letter
+				$col_num = convert2ColumnIndex($newjq);
+				$appendHTML .= $csvdata[$col_num];
+			}
+
+			//firstLineFields
+			$query = str_replace($qq, $appendHTML, $query);
+		}
+
 
 		
 	} else {
@@ -838,7 +915,7 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 									// 		function parseEntry($query, $url, $ht, $isContainer = false) {
 									$id = parseEntry($jc_val["idsel"], $filez[$i], $data, false, $line_fields);
 
-									var_dump($id);
+									//var_dump($id);
 								}	
 							}
 							

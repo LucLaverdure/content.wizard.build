@@ -11,7 +11,7 @@ if (is_admin()) {
 		$_POST["config"] = json_decode(stripslashes($_POST["config"]), true);
 		
 		//function query, $url, $ht, $isContainer = false, $jconfig
-		echo html_entity_decode(stripslashes(parseEntry($_POST["query"], $_POST["file"], $_POST["ht"], false, $_POST["config"], true)));
+		echo html_entity_decode(stripslashes(parseEntry($_POST["query"], $_POST["file"], "", false, $_POST["config"], true)));
 	} else {
 		$offset = $_POST["offset"];
 		$file_offset = $_POST["file_offset"];

@@ -467,7 +467,7 @@ function setFrames() {
 						$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{'+$(el).data("letterscol")+"}</a>");
 						
 						// by first row, col name
-						$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{{'+$.trim($(el).data("colname").toLowerCase())+"}}</a>");
+						$("#combo-wrap .options", window.top.document).append('<a href="#" onclick="comboclick(this);return false;">{{'+selector_val($(el).data("colname").toLowerCase())+"}}</a>");
 						$("#taglist", window.top.document).val('{{'+selector_val($(el).data("colname").toLowerCase())+'}}');
 						
 						// by first row, col num
@@ -571,7 +571,6 @@ function preview_entry(query, url, ht, isContainer = false) {
 	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_map_preview_hook", {
 			query: query,
 			file: url,
-			ht: ht,
 			preview: "true",
 			config: mappings
 		},
