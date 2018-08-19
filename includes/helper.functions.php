@@ -380,6 +380,64 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 			$query = str_replace($qq, $appendHTML, $query);
 		}
 		
+		// cols by number
+		$q = array();
+		preg_match_all('/{.*}/U', $query, $q, PREG_SET_ORDER, 0);
+
+		
+		foreach ($q as $n => $qq) {
+			// if is_numeric, col number, else col letter
+			$qq = $qq[0];
+			
+			$newjq = str_replace("{", '', $qq);
+			$newjq = str_replace("}", '', $newjq);
+			$newjq = selector_val($newjq);
+
+			$servername = $jconfig[11];
+			$username = $jconfig[12];
+			$password = $jconfig[13];
+			$dbname = $jconfig[14];
+			$sql = $jconfig[15];
+	
+			// Create connection
+			$conn = new mysqli($servername, $username, $password, $dbname);
+			// Check connection
+			if ($conn->connect_error) {
+				die("Connection failed: " . $conn->connect_error);
+			}
+			
+			$result = $conn->query($sql);
+			
+			if ($result->num_rows > 0) {
+	
+				$row_count = 0;
+				// output data of each row
+				while($row = $result->fetch_assoc()) {
+	
+					for ($i = 0; $i < $offset; ++$i) {
+						$row = $result->fetch_assoc();
+					}
+	
+					$col_count = 0;
+					foreach ($row as $k => $item) {
+
+						if ($col_count == $newjq) {
+							$appendHTML = $item;
+							break 2;
+						}
+						$col_count++;
+					}
+					
+					$row_count++;
+				}
+	
+			} 
+			$conn->close();
+				
+
+			$query = str_replace($qq, $appendHTML, $query);
+		}	
+
 
 
 	// XLSX File
@@ -776,6 +834,7 @@ function validateOp($query, $url, $html, $op, $opeq) {
 	
 	return false;
 }
+
 function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = false) {
 	// get crawled files
 

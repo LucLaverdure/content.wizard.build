@@ -10,8 +10,13 @@ if (is_admin()) {
 	if ($_POST["preview"]=="true") {
 		$_POST["config"] = json_decode(stripslashes($_POST["config"]), true);
 		
-		//function query, $url, $ht, $isContainer = false, $jconfig
+
+				//for($i = 0; $i < 10; $i++) { // speed test
+		//function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
 		echo html_entity_decode(stripslashes(parseEntry($_POST["query"], $_POST["file"], "", false, $_POST["config"], true)));
+				//}
+
+
 	} else {
 		$offset = $_POST["offset"];
 		$file_offset = $_POST["file_offset"];
