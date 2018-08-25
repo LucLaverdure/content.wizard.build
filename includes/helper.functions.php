@@ -924,8 +924,14 @@ function update_item($the_query, $build_fields, $jc_val) {
 			}
 		}
 		
+		ob_start();
+		var_dump($my_post);
+		$obout = ob_get_clean();
+		logme("-----Updating [".$jc_val["postType"]."]: (".$obout.")");
+	
 		// create product category if doesn`t exist
 		if (isset($my_post["product_cat"])) {
+			logme("-----Creating Category: ".$my_post["product_cat"]);
 			wp_insert_term(
 				$my_post["product_cat"], // the term 
 				'product_cat', // the taxonomy
@@ -935,15 +941,22 @@ function update_item($the_query, $build_fields, $jc_val) {
 			);								
 		}
 		
+		logme("-----Creating Category: ".$my_post["post_category"]);
+
 		// create post category if doesn`t exist
 		if (isset($my_post["post_category"])) {
-			wp_insert_term(
-				$my_post["post_category"], // the term 
-				'post_category', // the taxonomy
-				array(
-				'description'=> $my_post["post_category"]
-				)
-			);								
+
+			$cats = explode(",", $my_post["post_category"]);
+			$cats_ids = array();
+			foreach($cats as $cat) {
+				$term_id = term_exists($cat);
+				if ($term_id > 0) {
+					$cats_ids[] = $term_id;
+				} else {
+					$cats_ids[] = wp_create_category($cat);
+				}
+			}
+			wp_set_post_categories(get_the_ID(), $cats_ids, true);
 		}
 		
 		
@@ -954,6 +967,7 @@ function update_item($the_query, $build_fields, $jc_val) {
 		}
 		
 		if (isset($my_post["thumbnail"])) {
+			logme("-----Adding Image: url(".$my_post["thumbnail"].")");
 			add_image(get_the_ID(), $my_post["thumbnail"], basename($my_post["thumbnail"]));
 		}
 		
@@ -961,7 +975,7 @@ function update_item($the_query, $build_fields, $jc_val) {
 	wp_reset_postdata();
 }
 
-function create_item($the_query, $build_fields, $jc_val) {
+function create_item($the_query, $build_fields, $jc_val, $id) {
 
 	// if id doesnt exist, create item
 	// REQUIRED: post_title and post_content
@@ -1006,14 +1020,18 @@ function create_item($the_query, $build_fields, $jc_val) {
 	
 	// create post category if doesn`t exist
 	if (isset($my_post["post_category"])) {
-		logme("-----Creating Category: ".$my_post["post_category"]);
-		wp_insert_term(
-			$my_post["post_category"], // the term 
-			'post_category', // the taxonomy
-			array(
-			'description'=> $my_post["post_category"]
-			)
-		);								
+
+		$cats = explode(",", $my_post["post_category"]);
+		$cats_ids = array();
+		foreach($cats as $cat) {
+			$term_id = term_exists($cat);
+			if ($term_id > 0) {
+				$cats_ids[] = $term_id;
+			} else {
+				$cats_ids[] = wp_create_category($cat);
+			}
+		}
+		wp_set_post_categories($pid, $cats_ids, true);
 	}
 	
 	ob_start();
@@ -1149,7 +1167,7 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 								if ($the_query !== false) {
 									update_item($the_query, $build_fields, $jc_val);
 								} else {
-									create_item($the_query, $build_fields, $jc_val);
+									create_item($the_query, $build_fields, $jc_val, $id);
 								}
 
 							} // valid
@@ -1200,7 +1218,7 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 								update_item($the_query, $build_fields, $jc_val);
 							} else {
 								logme("----id doesn't exists: Create item.");
-								create_item($the_query, $build_fields, $jc_val);
+								create_item($the_query, $build_fields, $jc_val, $id);
 							}
 
 						} else {
