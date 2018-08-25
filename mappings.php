@@ -23,12 +23,13 @@ if (is_admin()) {
 		$offset = $_POST["offset"];
 		$file_offset = $_POST["file_offset"];
 		$queue_size = 35;
-
+		
 		$parseConfig = parseJsonConfig($_POST["config"]);
-
+		var_dump($parseConfig);
 		//var_dump($offset, $file_offset, $queue_size, $json_config, $parseConfig);
 
 		// function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = false) 
+		//runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = false) {
 		runmap($offset, $queue_size, $parseConfig, $file_offset);
 	}
 

@@ -16,6 +16,9 @@
 
 	window.magicfield = [];
 
+	window.file_offset = 0;
+	window.offset = 0;
+
 // sleep function
 function sleep (time) {
 	return new Promise((resolve) => setTimeout(resolve, time));
@@ -376,8 +379,6 @@ $(document).on("click", ".wiz-pick", function() {
 
 	$.each(mappings, function(key, field) {
 
-		console.log(field);
-
 		// get dbo fields
 		if (field[0] == "sql") {
 			// 12: user, 11: host, 14: db name, 15: query
@@ -724,6 +725,7 @@ function mappings_run(offset, mapped = false, file_offset = 0) {
 	} else {
 		mappings = mapped;
 	}
+	console.log(mappings);
 	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_map_hook", {
 			config: mappings,
 			runmappings: true,
@@ -731,26 +733,32 @@ function mappings_run(offset, mapped = false, file_offset = 0) {
 			file_offset: file_offset
 		},
 		function(data) {
-
-			// exit code single file complete
-			if ($.trim(data).indexOf("{{{{{EOF}}}}}") !== -1) {
-				file_offset = 0;
-				offset = offset + 1;
-			} else {
-				file_offset = file_offset + 35;
-			}
-
-			// exit code all files have been parsed
-			if ($.trim(data).indexOf("{{{{{EOQ}}}}}") !== -1) {
+			console.log(data);
+			data = $.parseJSON(data);
+		
+			if (data.process ==  "next") {
+				// proceed to next items in file
+				data.file_offset += 35;
+			} else if (data.process ==  "eof") {
+				// proceed to next file
+				data.file_offset = 0;
+				data.offset++;
+			} else if (data.process ==  "eoq") {
+				// stop queue all files have been parsed
 				$(".mapspin").hide();
 				$(".stop-button-map").hide();
 				$(".wbmsg").html("All content migrated!").fadeIn();
 				return;
 			}
-			
-			// else, continue
+
 			sleep(window.delay).then(() => {
-				mappings_run(offset, mappings, file_offset);
+				/*
+					$map_params_ret["config"] = $json_config;
+					$map_params_ret["file_offset"] = $file_offset;
+					$map_params_ret["offset"] = $offset;
+					$map_params_ret["process"] = "next";				
+				*/
+				mappings_run(data.offset, data, data.file_offset);
 			});
 
 		}

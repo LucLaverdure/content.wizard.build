@@ -193,9 +193,15 @@ function pathme($fromURL, $relURL) {
 }
 
 function parseJsonConfig($jsonConfig) {
+	$decodeConfig = "";
+	if (!is_array($jsonConfig)) {
+		$decodeConfig = stripslashes($jsonConfig);
+	}
 
-	$decodeConfig = json_decode(stripslashes($jsonConfig), true);
+	$decodeConfig = json_decode($jsonConfig);
 	$outputConfig = array();
+
+	if ( (!isset($decodeConfig)) || (count($decodeConfig) == 0) ) return;
 
 	// load data
 	foreach ($decodeConfig as $k => $main) { // main
@@ -311,7 +317,7 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 	$obout = ob_get_clean();
 	logme("----config: ".$obout);
 
-	global $latest_first_line, $csvdata, $this_file;
+	global $latest_first_line, $csvdata;
 	$csvdata = array();
 	$ext = substr($url, strrpos($url, '.'));
 	$latest_first_line = array();
@@ -323,12 +329,10 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 	$handle = "";
 
-	parse_str($url, $this_file);
-	// file open
-
 	// csv file
 	if ($ext == ".csv") {
-		$handle = fopen(__DIR__."/../cache/".$this_file["file"], "r");
+		$handle = fopen($url, "r");
+
 		$latest_first_line = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
 		if ($offset > 0) {
 			for ($i = 0; $i < $offset; ++$i) {
@@ -462,7 +466,7 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 		
 //$rustart = getrusage();
 		
-		if ( $xlsx = SimpleXLSX::parse(__DIR__."/../cache/".$this_file["file"])) {
+		if ( $xlsx = SimpleXLSX::parse($url)) {
 		/*
 			function rutime($ru, $rus, $index) {
 				return ($ru["ru_$index.tv_sec"]*1000 + intval($ru["ru_$index.tv_usec"]/1000))
@@ -603,7 +607,9 @@ echo "It spent " . rutime($ru, $rustart, "stime") .
 			$appendHTML = "";
 			$search_arr = array_search($newjq, $latest_first_line);
 			if (in_array($newjq, $latest_first_line)) {
-				$appendHTML .= $csvdata[$search_arr];
+				if (isset($csvdata[$search_arr])) {
+					 $appendHTML .= $csvdata[$search_arr];
+				}
 			}
 
 			$query = str_replace($qq, $appendHTML, $query);
@@ -736,6 +742,20 @@ function parseAfterOp($html, $op, $opeq) {
 				$html = $img;
 			}
 			break;
+		case "imgsearch":
+			try {
+				var_dump($html);
+				$json = wizbui_curlit("https://api.qwant.com/api/search/images?count=1&q=".$html."&t=images&safesearch=1&locale=en_CA&uiv=4");
+
+				$decoded = json_decode($json);
+				if ($decoded->status != "error") {
+					$html = stripslashes($decoded["data"]["result"]["items"][0]["media"]);
+				}
+			} catch (Exception $e) {
+				logme("[Error] - " . $e->getMessage());
+			}
+
+			break;
 	}
 
 	
@@ -814,6 +834,9 @@ function parseAfterOp($html, $op, $opeq) {
 			break;
 		case "SHA1 Hash":
 			$html = sha1(trim($html));
+			break;
+		case "Image Download":
+			// add thumbnail
 			break;
 	}
 	
@@ -941,14 +964,13 @@ function update_item($the_query, $build_fields, $jc_val) {
 			);								
 		}
 		
-		logme("-----Creating Category: ".$my_post["post_category"]);
 
 		// create post category if doesn`t exist
 		if (isset($my_post["post_category"])) {
-
 			$cats = explode(",", $my_post["post_category"]);
 			$cats_ids = array();
 			foreach($cats as $cat) {
+				logme("-----Creating Category: ".$cat);
 				$term_id = term_exists($cat);
 				if ($term_id > 0) {
 					$cats_ids[] = $term_id;
@@ -968,6 +990,7 @@ function update_item($the_query, $build_fields, $jc_val) {
 		
 		if (isset($my_post["thumbnail"])) {
 			logme("-----Adding Image: url(".$my_post["thumbnail"].")");
+			// add_image($post_id, $image_url, $image_name) {
 			add_image(get_the_ID(), $my_post["thumbnail"], basename($my_post["thumbnail"]));
 		}
 		
@@ -1053,6 +1076,15 @@ function create_item($the_query, $build_fields, $jc_val, $id) {
 	}
 }
 function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = false) {
+
+	var_dump($json_config);
+
+	$map_params_ret = array();
+	$map_params_ret["config"] = $json_config;
+	$map_params_ret["file_offset"] = $file_offset;
+	$map_params_ret["offset"] = $offset;
+	$map_params_ret["process"] = "next";
+
 	// get crawled files
 
 	logme("----------------------------------------------------------------------------");
@@ -1083,7 +1115,11 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 			for ($fset = $file_offset; $fset <= ($file_offset + $mapCount); ++$fset) {
 				
 				$ext = pathinfo($filez[$i], PATHINFO_EXTENSION);
-				
+
+				if ( (!isset($json_config)) || (!is_array($json_config)) ) {
+					return;
+				} 
+
 				// for each Mappings Group
 				foreach($json_config as $jc_key => $jc_val) {
 
@@ -1098,11 +1134,11 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 						$cap = count($fp);
 					} elseif (($jc_val["inputmethod"] == "xlsx") && ($ext == "xlsx")) {
 						// amount of rows
-						if ( $xlsx = SimpleXLSX::parse(__DIR__."/../cache/".$filez[$i])) {
+						if ( $xlsx = SimpleXLSX::parse($filez[$i])) {
 							$sheets = $xlsx->sheetNames();
 							foreach ($sheets as $sheetnum => $sheet) {
 								list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
-								$cap += $xlsx->rows($sheetnum);
+								$cap += $num_rows;
 							}
 						}
 					} elseif (($jc_val["inputmethod"] == "sql") && ($ext == "dboquery")) {
@@ -1124,10 +1160,12 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 						
 						$cap = $result->num_rows;
 					}
-
+					$fset = (int) $fset;
+					$cap = (int) $cap;
 					if ($fset > $cap) {
 						logme("-File exit.");
-						echo "{{{{{EOF}}}}}";
+						$map_params_ret["process"] = "eof";
+						echo json_encode($map_params_ret, JSON_FORCE_OBJECT);
 						return;
 					}
 					logme("--Parsing Row: (".$fset."/".$cap.")");
@@ -1214,10 +1252,10 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 							$the_query = wp_id_exists($id, $jc_val);
 
 							if ($the_query !== false) {
-								logme("----id exists: Update item.");
+								logme("----wiz id exists: Update item.");
 								update_item($the_query, $build_fields, $jc_val);
 							} else {
-								logme("----id doesn't exists: Create item.");
+								logme("----wiz id doesn't exists: Create item.");
 								create_item($the_query, $build_fields, $jc_val, $id);
 							}
 
@@ -1232,8 +1270,9 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 
 			} // file offset
 		} else {
-			// if file doesn't exist
-			echo "{{{{{EOQ}}}}}";
+			// if file doesn't exist, end queue
+			$map_params_ret["process"] = "eoq";
+			echo json_encode($map_params_ret, JSON_FORCE_OBJECT);
 			return;
 		}
 	} // foreach file
@@ -1247,7 +1286,13 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 function add_image($post_id, $image_url, $image_name) {
 // Add Featured Image to Post
     //$image_url        = 'http://s.wordpress.org/style/images/wp-header-logo.png'; // Define the image URL here
-    //$image_name       = 'wp-header-logo.png';
+	//$image_name       = 'wp-header-logo.png';
+	
+	if (trim($image_url) == "") {
+		logme("Error: No image url provided for thumbnail...");
+		return;
+	}
+
 	$image_url = strtok($image_url, '?');
 	$image_name = strtok($image_name, '?');
     $upload_dir       = wp_upload_dir(); // Set upload folder

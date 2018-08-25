@@ -123,6 +123,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 			<option value="text" selected="selected">Text (Strip HTML Tags)</option>
 			<option value="html">HTML (Keep HTML Tags)</option>
 			<option value="imgsrc">Image (get IMG SRC attribute)</option>
+			<option value="imgsearch">Image (1st result from web search) </option>
 		</select>
 		
 		<select class="selector containeropeq">
@@ -171,6 +172,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		<option value="text" selected="selected">Text (Strip HTML Tags)</option>
 		<option value="html">HTML (Keep HTML Tags)</option>
 		<option value="imgsrc">Image (get IMG SRC attribute)</option>
+		<option value="imgsearch">Image (1st result from web search) </option>
 	</select>
 	
 	<select class="selector idopeq">
@@ -267,6 +269,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		<option value="text" selected="selected">Text (Strip HTML Tags)</option>
 		<option value="html">HTML (Keep HTML Tags)</option>
 		<option value="imgsrc">Image (get IMG SRC attribute)</option>
+		<option value="imgsearch">Image (1st result from web search) </option>
 	</select>
 	
 	<select class="selector fieldopeq">
