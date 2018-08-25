@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 			<?php echo count(get_real_dirs()); ?>
 		</span>
 <img src="http://content.wizard.build/wp-content/plugins/content.wizard.build/includes/../spinner.gif" style="width:25px;margin-left:10px;display:inline-block;display:none;" class="crawlspin">
+<div class="stop-button-crawl" style="display:none;"><a class="button" href="">Stop Crawling</a></div>
 	</div>
 	<div class="mapped">
 		<span class="head-f">Mapped content:</span>
@@ -33,6 +34,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 ?>	
 		</span>
 		<img src="http://content.wizard.build/wp-content/plugins/content.wizard.build/includes/../spinner.gif" style="width:25px;margin-left:10px;display:inline-block;display:none;" class="mapspin">
+		<div class="stop-button-map" style="display:none;"><a class="button" href="">Stop Mapping</a></div>
 	</div>
 </div>
 <div class="need-tokens" style="clear:left;display:none;color:#990000;padding:40px 0 20px  0;width:800px;max-width:100%;">

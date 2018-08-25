@@ -46,6 +46,7 @@ $(function() {
 		$(".card." + $(this).data('tab')).fadeIn();
 	});
 
+
 	// test api key and colorize buttons based on key validity
 	$("#apikey").on("input click", function() {
 		$this = $(this);
@@ -104,6 +105,7 @@ function crawlUrl() {
 	
 		// no post js crawl
 		$(".crawlspin").show();
+		$(".stop-button-crawl").show();
 		$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_save_hook",
 		  {
 			url: $("#urls").val(),
@@ -127,6 +129,7 @@ function crawlUrl() {
 							crawlUrl($("#urls").val());
 						});
 					} else {
+						$(".stop-button-crawl").hide();
 						$(".crawlspin").hide();
 					}
 				}
@@ -677,8 +680,10 @@ $(document).on("click", ".output-tabs a", function() {
 	return false;
 });
 
+
 function mappings_run(offset, mapped = false) {
 	$(".mapspin").show();
+	$(".stop-button-map").show();
 	$(".mapped-count").html(offset);
 	var mappings = "";
 	if (mapped == false) {
@@ -695,6 +700,7 @@ function mappings_run(offset, mapped = false) {
 			// exit code
 			if ($.trim(data).indexOf("EOQ") !== -1) {
 				$(".mapspin").hide();
+				$(".stop-button-map").hide();
 				$(".wbmsg").html("All content migrated!").fadeIn();
 				return;
 			}
@@ -739,3 +745,4 @@ function input_change($this) {
 	}
 
 }
+

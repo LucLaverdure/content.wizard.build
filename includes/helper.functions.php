@@ -844,11 +844,11 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 	}
 	$filez = getDirContents($path_init);
 	
+	// for each file
 	for ($i = $offset; $i <= ($offset + $mapCount - 1); ++$i) {
 
 		if (isset($filez[$i])) {
 			
-			$file_contents = file_get_contents($filez[$i]);
 			$ext = pathinfo($filez[$i], PATHINFO_EXTENSION);
 			
 			// for each Mappings Group
@@ -861,8 +861,8 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 				if ($jc_val["inputmethod"] == "scraper") {
 					
 					// get containers
-					// 		function parseEntry($query, $url, $ht, $isContainer = false) {
-					$containers = parseEntry($jc_val["containerInstance"], $filez[$i], $file_contents, true);
+					// 		function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
+					$containers = parseEntry($jc_val["containerInstance"], $filez[$i], "", true, $jc_val);
 					foreach ($containers as $container) {
 
 						// adjust container
@@ -887,7 +887,7 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 
 							foreach ($raw_fields as $keyin => $field) {
 								$this_field = "";
-								// function parseEntry($query, $url, $ht, $isContainer = false) {
+								//	function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
 								$this_field = parseEntry($raw_fields[$keyin]["fieldsel"], $filez[$i], $container);
 
 								// function parseAfterOp($html, $op, $opeq) {
@@ -1024,7 +1024,10 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 					
 				} elseif (($jc_val["inputmethod"] == "csv") && ($ext == "csv")) {
 
+
 					// CSV Parsing
+					
+					// 		function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
 
 					$row = 0;
 					$row_init = $row + $file_offset;
@@ -1080,6 +1083,11 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 	}
 }
 
+
+/*
+	Free luck image search:
+	https://api.qwant.com/api/search/images?count=1&q=luc%20laverdure&t=images&safesearch=1&locale=en_CA&uiv=4
+*/
 function add_image($post_id, $image_url, $image_name) {
 // Add Featured Image to Post
     //$image_url        = 'http://s.wordpress.org/style/images/wp-header-logo.png'; // Define the image URL here

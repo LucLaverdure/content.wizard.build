@@ -374,3 +374,11 @@ body UL.jqueryFileTree A {
 body UL.jqueryFileTree .chkfile {
 	margin-left:-40px;
 }
+
+body .stop-button-crawl a.button, body .stop-button-map  a.button {
+	display:block;
+	background: #aa0000 !important;
+	margin-top: 15px;
+	color: #fff !important;
+	font-weight:bold;
+}
