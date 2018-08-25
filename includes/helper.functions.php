@@ -1,6 +1,15 @@
 <?php
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
+function logme($string) {
+
+	$filename = WIZBUI_PLUGIN_PATH . "logs.txt";
+
+	$log = date("Y-m-d H:i:s") . " - " . str_replace(array("\n", "\r"), "", $string) . "\n";
+
+	file_put_contents($filename, $log, FILE_APPEND);
+}
+
 
 function selector_val(&$item) {
 	$ret = "";
@@ -294,7 +303,13 @@ function parseJsonConfig($jsonConfig) {
 
 // query, url, html (data), return container array?, file offset
 function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
-	$jconfig = $jconfig[0];
+
+	if ($is_preview) $jconfig = $jconfig[0];
+
+	ob_start();
+	var_dump($jconfig);
+	$obout = ob_get_clean();
+	logme("----config: ".$obout);
 
 	global $latest_first_line, $csvdata, $this_file;
 	$csvdata = array();
@@ -314,17 +329,17 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 	// csv file
 	if ($ext == ".csv") {
 		$handle = fopen(__DIR__."/../cache/".$this_file["file"], "r");
-		$latest_first_line = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);
+		$latest_first_line = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
 		if ($offset > 0) {
 			for ($i = 0; $i < $offset; ++$i) {
-				$dump = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);
+				$dump = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
 			}
 		}
-		$csvdata = fgetcsv($handle, 0, $jconfig[17], $jconfig[18]);
+		$csvdata = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
 	
 	// DB Query
-	} elseif ($ext == ".dboquery") {
-
+	} elseif ($jconfig["inputmethod"] == "sql") {
+		
 		// parse field name
 		$q = array();
 		preg_match_all('/{{.*}}/U', $query, $q, PREG_SET_ORDER, 0);
@@ -335,11 +350,11 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 			$newjq = str_replace("{{", '', $qq);
 			$newjq = str_replace("}}", '', $newjq);
 
-			$servername = $jconfig[11];
-			$username = $jconfig[12];
-			$password = $jconfig[13];
-			$dbname = $jconfig[14];
-			$sql = $jconfig[15];
+			$servername = $jconfig["dbhost"];
+			$username = $jconfig["dbuser"];
+			$password = $jconfig["dbpass"];
+			$dbname = $jconfig["dbname"];
+			$sql = $jconfig["dbquery"];
 	
 			// Create connection
 			$conn = new mysqli($servername, $username, $password, $dbname);
@@ -393,12 +408,12 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 			$newjq = str_replace("}", '', $newjq);
 			$newjq = selector_val($newjq);
 
-			$servername = $jconfig[11];
-			$username = $jconfig[12];
-			$password = $jconfig[13];
-			$dbname = $jconfig[14];
-			$sql = $jconfig[15];
-	
+			$servername = $jconfig["dbhost"];
+			$username = $jconfig["dbuser"];
+			$password = $jconfig["dbpass"];
+			$dbname = $jconfig["dbname"];
+			$sql = $jconfig["dbquery"];
+
 			// Create connection
 			$conn = new mysqli($servername, $username, $password, $dbname);
 			// Check connection
@@ -441,7 +456,7 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 
 	// XLSX File
-	} elseif ($ext == ".xlsx") {
+	} elseif (($ext == ".xlsx") || ($ext == ".xls")) {
 		$current_sheet = "";
 		$offset_counter = 0;
 		
@@ -572,7 +587,7 @@ echo "It spent " . rutime($ru, $rustart, "stime") .
 		}	
 
 
-	} elseif ($ext == ".xlsx") {
+	} elseif (($ext == ".xlsx") || ($ext == ".xls")) {
 		// XLSX: sheetname, {col letter}, {{col by field name}}, {col number}
 
 		// cols by field name
@@ -659,7 +674,7 @@ echo "It spent " . rutime($ru, $rustart, "stime") .
 	// SQL: {{field name}}, {col number}
 
 	// parse %url%
-	$ret = str_replace("%url%", $url, $query);
+	$query = str_replace("%url%", str_replace(WIZBUI_PLUGIN_PATH."cache/", "", $url), $query);
 	
 
 	// parse php expressions
@@ -699,6 +714,7 @@ function convert2ColumnIndex($letters) {
 }
 
 function parseAfterOp($html, $op, $opeq) {
+
 	// Apply first transformation
 	switch ($op) {
 		case "text":
@@ -804,8 +820,19 @@ function parseAfterOp($html, $op, $opeq) {
 	return $html;
 }
 
-function validateOp($query, $url, $html, $op, $opeq) {
-	$ret = parseEntry($query, $url, $html);	
+function validateOp($query, $url, $html, $op, $opeq, $config,  $file_offset = 0) {
+
+
+	//	function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
+	$ret = parseEntry($query, $url, $html, false, $config, false, $file_offset);
+
+	logme("----Expression returned (".$ret.")");
+
+	if ($html == "") {
+		
+		$html = $ret;
+
+	}
 	switch ($op) {
 		case "notnull":
 			if (trim($ret) != "") return true;
@@ -835,252 +862,363 @@ function validateOp($query, $url, $html, $op, $opeq) {
 	return false;
 }
 
+
+// returns parsed fields to 
+function build_fields($jc_val, $url, $file_offset) {
+	$build_fields = array();
+	$raw_fields = $jc_val["fields"];
+
+	foreach ($raw_fields as $keyin => $field) {
+		$this_field = "";
+		//	function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
+		$this_field = parseEntry($raw_fields[$keyin]["fieldsel"], $url, "", false, $jc_val, false, $file_offset);
+
+		// function parseAfterOp($html, $op, $opeq) {
+		$this_field = parseAfterOp($this_field, $raw_fields[$keyin]["fieldop"], $raw_fields[$keyin]["fieldopeq"]);
+
+		$build_fields[$raw_fields[$keyin]["field-map"]] = $this_field;
+	}
+
+	return $build_fields;
+}
+
+
+function wp_id_exists($id, $jc_val) {
+	// query current id
+	$args = array(
+		'posts_per_page'   => -1,
+		'post_type'     => $jc_val["postType"],
+		'meta_query'    => array(
+			array(
+				'key'       => 'wizard_build_id',
+				'value'     => array($id),
+				'compare'   => 'IN'
+			)
+		)
+	);
+	$the_query = new WP_Query($args);
+
+	// verify if id exists
+	if ( $the_query->have_posts() ) {
+		return $the_query;
+	}
+
+	return false;
+
+}
+
+function update_item($the_query, $build_fields, $jc_val) {
+	// if id exists, update item
+	while ( $the_query->have_posts() ) : $the_query->the_post();
+		$my_post = array(
+			'ID' => get_the_ID(),
+			'post_type' => $jc_val["postType"]
+		);
+
+		$meta = array();
+		foreach ($build_fields as $kname => $val) {
+			if (substr($kname, 0, 1) != "_") {
+				$my_post[$kname] = $val;
+			} else {
+				$meta[$kname] = $val;
+			}
+		}
+		
+		// create product category if doesn`t exist
+		if (isset($my_post["product_cat"])) {
+			wp_insert_term(
+				$my_post["product_cat"], // the term 
+				'product_cat', // the taxonomy
+				array(
+				'description'=> $my_post["post_category"]
+				)
+			);								
+		}
+		
+		// create post category if doesn`t exist
+		if (isset($my_post["post_category"])) {
+			wp_insert_term(
+				$my_post["post_category"], // the term 
+				'post_category', // the taxonomy
+				array(
+				'description'=> $my_post["post_category"]
+				)
+			);								
+		}
+		
+		
+		// Update the post into the database
+		wp_update_post( $my_post );
+		foreach($meta as $mk => $mv) {
+			update_post_meta(get_the_ID(), $mk, $mv);
+		}
+		
+		if (isset($my_post["thumbnail"])) {
+			add_image(get_the_ID(), $my_post["thumbnail"], basename($my_post["thumbnail"]));
+		}
+		
+	endwhile;
+	wp_reset_postdata();
+}
+
+function create_item($the_query, $build_fields, $jc_val) {
+
+	// if id doesnt exist, create item
+	// REQUIRED: post_title and post_content
+	$my_post = array(
+		'post_type' => $jc_val["postType"]
+	);
+	
+	$meta = array();
+	foreach ($build_fields as $kname => $val) {
+		if (substr($kname, 0, 1) != "_") {
+			$my_post[$kname] = $val;
+		} else {
+			$meta[$kname] = $val;
+		}
+	}
+
+	ob_start();
+	var_dump($my_post);
+	$obout = ob_get_clean();
+	logme("-----Creating [".$jc_val["postType"]."]: (".$obout.")");
+
+	$pid = wp_insert_post($my_post);
+
+	if ($pid == 0) {
+		logme("-----Failed to create item: All items need a `post_title` and a `post_content` field...");
+		return;
+	}
+
+	logme("-----WP_ID generated: ".$pid);
+
+	// create category if doesn`t exist
+	if (isset($my_post["product_cat"])) {
+		logme("-----Creating Category: ".$my_post["product_cat"]);
+		wp_insert_term(
+			$my_post["product_cat"], // the term 
+			'product_cat', // the taxonomy
+			array(
+			'description'=> $my_post["post_category"]
+			)
+		);								
+	}
+	
+	// create post category if doesn`t exist
+	if (isset($my_post["post_category"])) {
+		logme("-----Creating Category: ".$my_post["post_category"]);
+		wp_insert_term(
+			$my_post["post_category"], // the term 
+			'post_category', // the taxonomy
+			array(
+			'description'=> $my_post["post_category"]
+			)
+		);								
+	}
+	
+	ob_start();
+	var_dump($meta);
+	$obout = ob_get_clean();
+	logme("-----Updating meta info: ".$obout);
+
+	// Update the post into the database
+	update_post_meta($pid, 'wizard_build_id', $id);
+	foreach($meta as $mk => $mv) {
+		update_post_meta($pid , $mk, $mv);
+	}
+
+
+	if (isset($my_post["thumbnail"])) {								
+		logme("-----Adding Image: url(".$my_post["thumbnail"].")");
+		//add_image($post_id, $image_url, $image_name)
+		add_image($pid, $my_post["thumbnail"], basename($my_post["thumbnail"]));
+	}
+}
 function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = false) {
 	// get crawled files
+
+	logme("----------------------------------------------------------------------------");
+
+	logme("Mappings initialized (Row offset: ".$file_offset.", File offset: ".$offset.")");
 
 	$path_init = WIZBUI_PLUGIN_PATH . "cache";
 	if(!file_exists(dirname($path_init))) {
 		@mkdir(dirname($path_init), 0777, true);
 	}
 	$filez = getDirContents($path_init);
-	
+
+	ob_start();
+	var_dump($filez);
+	$obout = ob_get_clean();
+	logme("File Tree: ".$obout);
+
+	$filez[] = "placeholder.dboquery";
+	logme("Added placeholder for DB: ".$obout);
+
 	// for each file
 	for ($i = $offset; $i <= ($offset + $mapCount - 1); ++$i) {
 
+		// when file exists
 		if (isset($filez[$i])) {
-			
-			$ext = pathinfo($filez[$i], PATHINFO_EXTENSION);
-			
-			// for each Mappings Group
-			foreach($json_config as $jc_key => $jc_val) {
+			logme("-File open: ".$filez[$i]);
+			// for each row (file offset)
+			for ($fset = $file_offset; $fset <= ($file_offset + $mapCount); ++$fset) {
 				
-
-				$containers = array(); //  instance containers
+				$ext = pathinfo($filez[$i], PATHINFO_EXTENSION);
 				
-				// Scraper Method
-				if ($jc_val["inputmethod"] == "scraper") {
-					
-					// get containers
-					// 		function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
-					$containers = parseEntry($jc_val["containerInstance"], $filez[$i], "", true, $jc_val);
-					foreach ($containers as $container) {
+				// for each Mappings Group
+				foreach($json_config as $jc_key => $jc_val) {
 
-						// adjust container
-						// 		function parseAfterOp($html, $op, $opeq) {
-						$container = parseAfterOp($container, $jc_val["containerop"], $jc_val["containeropeq"]);
-						// validate mapping
-						//		function validateOp($query, $url, $html, $op, $opeq) {
-						$valid = validateOp($jc_val["validator"], $filez[$i], $container, $jc_val["op"], $jc_val["opeq"]);
+					// get cap of file
+					$cap = 0;
+					if ($jc_val["inputmethod"] == "scraper") {
+						// amount of containers
+						$cap = count(parseEntry($jc_val["containerInstance"], $filez[$i], "", true, $jc_val, false, $fset));
+					} elseif (($jc_val["inputmethod"] == "csv") && ($ext == "csv")) {
+						// amount of rows
+						$fp = file($filez[$i]);
+						$cap = count($fp);
+					} elseif (($jc_val["inputmethod"] == "xlsx") && ($ext == "xlsx")) {
+						// amount of rows
+						if ( $xlsx = SimpleXLSX::parse(__DIR__."/../cache/".$filez[$i])) {
+							$sheets = $xlsx->sheetNames();
+							foreach ($sheets as $sheetnum => $sheet) {
+								list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
+								$cap += $xlsx->rows($sheetnum);
+							}
+						}
+					} elseif (($jc_val["inputmethod"] == "sql") && ($ext == "dboquery")) {
+						// amount of rows
+						$servername = $jc_val["dbhost"];
+						$username = $jc_val["dbuser"];
+						$password = $jc_val["dbpass"];
+						$dbname = $jc_val["dbname"];
+						$sql = $jc_val["dbquery"];
+							
+						// Create connection
+						$conn = new mysqli($servername, $username, $password, $dbname);
+						// Check connection
+						if ($conn->connect_error) {
+							die("Connection failed: " . $conn->connect_error);
+						}
 						
+						$result = $conn->query($sql);
+						
+						$cap = $result->num_rows;
+					}
+
+					if ($fset > $cap) {
+						logme("-File exit.");
+						echo "{{{{{EOF}}}}}";
+						return;
+					}
+					logme("--Parsing Row: (".$fset."/".$cap.")");
+				
+
+					$containers = array(); //  instance containers
+				
+					// Scraper Method
+					if ($jc_val["inputmethod"] == "scraper") {
+						
+						// get containers
+						// 		function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
+						$containers = parseEntry($jc_val["containerInstance"], $filez[$i], "", true, $jc_val, false, $fset);
+						foreach ($containers as $container) {
+
+							// adjust container
+							// 		function parseAfterOp($html, $op, $opeq) {
+							$container = parseAfterOp($container, $jc_val["containerop"], $jc_val["containeropeq"]);
+							// validate mapping
+							//		function validateOp($query, $url, $html, $op, $opeq, $config,  $file_offset = 0) {
+							$valid = validateOp($jc_val["validator"], $filez[$i], $container, $jc_val["op"], $jc_val["opeq"], $jc_val, $fset);
+							
+							// when validation passed
+							if ($valid) {
+								// get id
+								// 		function parseEntry($query, $url, $ht, $isContainer = false) {
+								$id = parseEntry($jc_val["idsel"], $filez[$i], $container, false, $jc_val, false, $fset);
+
+								// 		function parseAfterOp($html, $op, $opeq) {
+								$id = parseAfterOp($id, $jc_val["idop"], $jc_val["idopeq"]);
+								
+								// build fields
+								$build_fields = build_fields($jc_val, $filez[$i], $fset);
+								
+								$the_query = wp_id_exists($id, $jc_val);
+
+								if ($the_query !== false) {
+									update_item($the_query, $build_fields, $jc_val);
+								} else {
+									create_item($the_query, $build_fields, $jc_val);
+								}
+
+							} // valid
+							
+						} // containers
+						
+					} elseif (
+						(($jc_val["inputmethod"] == "csv") && ($ext == "csv")) ||
+						(($jc_val["inputmethod"] == "xlsx") && ($ext == "xlsx")) ||
+						(($jc_val["inputmethod"] == "sql") && ($ext == "dboquery"))
+					) {
+
+						logme("---Input = (".$jc_val["inputmethod"].")");
+
+						// CSV Parsing
+						
+						// validate mapping
+
+						//	validateOp($query, $url, $html, $op, $opeq, $config,  $file_offset = 0) {
+						$valid = validateOp($jc_val["validator"], $filez[$i], "", $jc_val["op"], $jc_val["opeq"], $jc_val, $fset);
+
+						logme("---Validation try `".$jc_val["validator"]."` is `".$jc_val["op"]."` of `".$jc_val["opeq"]."`)");
+					
 						// when validation passed
 						if ($valid) {
+
+							logme("----Pass");
+
 							// get id
-							// 		function parseEntry($query, $url, $ht, $isContainer = false) {
-							$id = parseEntry($jc_val["idsel"], $filez[$i], $container);
 
-							// 		function parseAfterOp($html, $op, $opeq) {
+							//	function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
+							$id = parseEntry($jc_val["idsel"], $filez[$i], "", false, $jc_val, false, $fset);
+
+							logme("----id expression: ". $jc_val["idsel"]);
+
+							// 	function parseAfterOp($html, $op, $opeq) {
 							$id = parseAfterOp($id, $jc_val["idop"], $jc_val["idopeq"]);
-							
+
+							logme("----id formatted: ". $id);
+									
 							// build fields
-							$build_fields = array();
-							$raw_fields = $jc_val["fields"];
+							$build_fields = build_fields($jc_val, $filez[$i], $fset);
 
-							foreach ($raw_fields as $keyin => $field) {
-								$this_field = "";
-								//	function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
-								$this_field = parseEntry($raw_fields[$keyin]["fieldsel"], $filez[$i], $container);
+							$the_query = wp_id_exists($id, $jc_val);
 
-								// function parseAfterOp($html, $op, $opeq) {
-								$this_field = parseAfterOp($this_field, $raw_fields[$keyin]["fieldop"], $raw_fields[$keyin]["fieldopeq"]);
-
-								$build_fields[$raw_fields[$keyin]["field-map"]] = $this_field;
-							}
-
-							
-							// query current id
-
-							$args = array(
-								'posts_per_page'   => -1,
-								'post_type'     => $jc_val["postType"],
-								'meta_query'    => array(
-									array(
-										'key'       => 'wizard_build_id',
-										'value'     => array($id),
-										'compare'   => 'IN'
-									)
-								)
-							);
-							$the_query = new WP_Query($args);
-
-							// verify if id exists
-							if ( $the_query->have_posts() ) {
-
-								// if id exists, update item
-								while ( $the_query->have_posts() ) : $the_query->the_post();
-									$my_post = array(
-										'ID' => get_the_ID(),
-										'post_type' => $jc_val["postType"]
-									);
-									$meta = array();
-									foreach ($build_fields as $kname => $val) {
-										if (substr($kname, 0, 1) != "_") {
-											$my_post[$kname] = $val;
-										} else {
-											$meta[$kname] = $val;
-										}
-									}
-									
-									// create product category if doesn`t exist
-									if (isset($my_post["product_cat"])) {
-										wp_insert_term(
-										  $my_post["product_cat"], // the term 
-										  'product_cat', // the taxonomy
-										  array(
-											'description'=> $my_post["post_category"]
-										  )
-										);								
-									}
-									
-									// create post category if doesn`t exist
-									if (isset($my_post["post_category"])) {
-										wp_insert_term(
-										  $my_post["post_category"], // the term 
-										  'post_category', // the taxonomy
-										  array(
-											'description'=> $my_post["post_category"]
-										  )
-										);								
-									}
-									
-									
-									// Update the post into the database
-									wp_update_post( $my_post );
-									foreach($meta as $mk => $mv) {
-										update_post_meta(get_the_ID(), $mk, $mv);
-									}
-									
-									if (isset($my_post["thumbnail"])) {
-										add_image(get_the_ID(), $my_post["thumbnail"], basename($my_post["thumbnail"]));
-									}
-									
-								endwhile;
-								wp_reset_postdata();
-
+							if ($the_query !== false) {
+								logme("----id exists: Update item.");
+								update_item($the_query, $build_fields, $jc_val);
 							} else {
-								// if id doesnt exist, create item
-								// REQUIRED: post_title and post_content
-								$my_post = array(
-									'post_type' => $jc_val["postType"]
-								);
-								
-								$meta = array();
-								foreach ($build_fields as $kname => $val) {
-									if (substr($kname, 0, 1) != "_") {
-										$my_post[$kname] = $val;
-									} else {
-										$meta[$kname] = $val;
-									}
-								}
-
-								$pid = wp_insert_post($my_post);
-
-								// create category if doesn`t exist
-								if (isset($my_post["product_cat"])) {
-									wp_insert_term(
-									  $my_post["product_cat"], // the term 
-									  'product_cat', // the taxonomy
-									  array(
-										'description'=> $my_post["post_category"]
-									  )
-									);								
-								}
-								
-								// create post category if doesn`t exist
-								if (isset($my_post["post_category"])) {
-									wp_insert_term(
-									  $my_post["post_category"], // the term 
-									  'post_category', // the taxonomy
-									  array(
-										'description'=> $my_post["post_category"]
-									  )
-									);								
-								}
-								
-								// Update the post into the database
-								update_post_meta($pid, 'wizard_build_id', $id);
-								foreach($meta as $mk => $mv) {
-									update_post_meta($pid , $mk, $mv);
-								}
-							
-								if (isset($my_post["thumbnail"])) {								
-									add_image($pid, $my_post["thumbnail"], basename($my_post["thumbnail"]));
-								}
-								
+								logme("----id doesn't exists: Create item.");
+								create_item($the_query, $build_fields, $jc_val);
 							}
 
-						} // valid
-						
-					} // containers
-					
-				} elseif (($jc_val["inputmethod"] == "csv") && ($ext == "csv")) {
-
-
-					// CSV Parsing
-					
-					// 		function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
-
-					$row = 0;
-					$row_init = $row + $file_offset;
-					$line_fields = array();
-					if (($handle = fopen($filez[$i], "r")) !== FALSE) {
-						while (($data = fgetcsv($handle, 0, $jc_val["separator"], $jc_val["enclosure"])) !== FALSE) {
-							
-							// get first line fields
-							$firstline = $jc_val["line1parsed"];
-							if ( ($firstline == "Y") && ($row == 0) )  {
-								$line_fields = $data;
-							}
-
-							// get each row with offset
-							if ($row >= $row_init) {
-							
-								$fields_count = count($data); // fields count on row $row
-
-								// validate mapping
-								//		function validateOp($query, $url, $html, $op, $opeq) {
-								$valid = validateOp($jc_val["validator"], $filez[$i], $data, $jc_val["op"], $jc_val["opeq"]);
-
-								// when validation passed
-								if ($valid) {
-									// get id
-									// 		function parseEntry($query, $url, $ht, $isContainer = false) {
-									$id = parseEntry($jc_val["idsel"], $filez[$i], $data, false, $line_fields);
-
-									//var_dump($id);
-								}	
-							}
-							
-							$row++;
+						} else {
+							// validation fail
+							logme("----Fail");
 						}
-						fclose($handle);
-					}
-					
-				} elseif ($jc_val["inputmethod"] == "xls") {
-					
-					// old stuffs
-					
-				} elseif ($jc_val["inputmethod"] == "xlsx") {
 
-					// new stuffs
-					
-				}
-				
-			} // mappings group
+					} // file type
+			
+				} // mappings group
 
+			} // file offset
 		} else {
-			echo "EOQ";
+			// if file doesn't exist
+			echo "{{{{{EOQ}}}}}";
+			return;
 		}
-	}
+	} // foreach file
 }
 
 

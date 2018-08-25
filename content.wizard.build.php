@@ -86,6 +86,7 @@ function admin_post_wb_db_hook_callback() {
 add_action( 'admin_post_wb_map_hook', 'admin_post_wb_map_hook_callback' );
 function admin_post_wb_map_hook_callback() {
 	include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
+	include_once(WIZBUI_PLUGIN_PATH . "includes/parse.php");
 	include_once(WIZBUI_PLUGIN_PATH . "mappings.php");
 }
 
@@ -97,4 +98,13 @@ function admin_post_wb_map_preview_hook_callback() {
 	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]);
 	$_REQUEST["file"] = WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"];
 	include_once(WIZBUI_PLUGIN_PATH . "mappings.php");
+}
+
+// core get new logs
+add_action( 'admin_post_wb_logs_hook', 'admin_post_wb_logs_hook_callback' );
+function admin_post_wb_logs_hook_callback() {
+	$logs = WIZBUI_PLUGIN_PATH . "logs.txt";
+	if (file_exists($logs)) {
+		echo htmlentities(file_get_contents($logs)) ;
+	}
 }

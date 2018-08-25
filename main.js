@@ -44,6 +44,8 @@ $(function() {
 		$(this).addClass("selected");
 		$(".card").hide();
 		$(".card." + $(this).data('tab')).fadeIn();
+		var objDiv = document.getElementById("logs");
+		objDiv.scrollTop = objDiv.scrollHeight;
 	});
 
 
@@ -78,6 +80,8 @@ function get_tab() {
 	var cur_hash = window.location.hash;
 	if (cur_hash == "#browse") {
 		$(".nav .b").click();
+		var objDiv = document.getElementById("logs");
+		objDiv.scrollTop = objDiv.scrollHeight;
 	} else if (cur_hash == "#map") {
 		$(".nav .m").click();
 	}
@@ -200,7 +204,7 @@ function compileMappings() {
 			  },
 			  function() {
 					window.scrollTo(0,0);
-					$(".wbmsg").html("Saved content mappings.").fadeIn();
+					$(".wbmsg").html("Saved content mappings configuration.").fadeIn();
 			  }
 	)
 	
@@ -439,7 +443,7 @@ function magicgo() {
 	
 	var ext = $("#magicfile").val().split('.').pop();
 	
-	if (ext=="xlsx") {
+	if ((ext=="xlsx") || (ext == "xls")) {
 		// excel file
 		$("#magicframe").attr("src", WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_xlsx_hook&file=" + $("#magicfile").val());
 	} else if (ext=="dboquery") {
@@ -496,7 +500,7 @@ function setFrames() {
 		$body.on("click", function(e) { // assign a handler
 			var ext = $("#magicfile").val().split('.').pop();
 			$("#combo-wrap .options", window.top.document).html("");
-			if (ext=="xlsx" || ext=="csv") {
+			if (ext=="xlsx" || ext=="csv" || ext=="xls") {
 				$(e.target).each(function(ii,el) {
 					// by sheet letters
 					
@@ -667,6 +671,35 @@ $(document).on("click", ".with-sel-confirm", function() {
 	}
 });
 
+function refresh_FNF() {
+	$('#filesNfolders').html("");
+	$('#filesNfolders').fileTree({
+		root: "../wp-content/plugins/content.wizard.build/cache/",
+		script: WB_PLUGIN_URL + "wp-admin/admin-post.php?action=wb_browseme_hook",
+		expandSpeed: 100
+		}, function(file) { 
+			$("#selectedFile").show();
+			$("#selectedFile .download").attr('href', file);
+		}
+	);
+	return false;
+}
+
+function refresh_logs() {
+	$('#logs pre').html("");
+	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_logs_hook", {
+	},
+	function(data) {
+		$('#logs pre').text(data);
+		var objDiv = document.getElementById("logs");
+		objDiv.scrollTop = objDiv.scrollHeight;
+	}
+);
+return false;
+}
+
+
+
 $(document).on("click", ".output-tabs a", function() {
 	$(".output-tabs a").removeClass("selected");
 	$(this).addClass("selected");
@@ -681,7 +714,7 @@ $(document).on("click", ".output-tabs a", function() {
 });
 
 
-function mappings_run(offset, mapped = false) {
+function mappings_run(offset, mapped = false, file_offset = 0) {
 	$(".mapspin").show();
 	$(".stop-button-map").show();
 	$(".mapped-count").html(offset);
@@ -691,14 +724,24 @@ function mappings_run(offset, mapped = false) {
 	} else {
 		mappings = mapped;
 	}
-	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_mappings_hook", {
+	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_map_hook", {
 			config: mappings,
 			runmappings: true,
-			offset: offset
+			offset: offset,
+			file_offset: file_offset
 		},
 		function(data) {
-			// exit code
-			if ($.trim(data).indexOf("EOQ") !== -1) {
+
+			// exit code single file complete
+			if ($.trim(data).indexOf("{{{{{EOF}}}}}") !== -1) {
+				file_offset = 0;
+				offset = offset + 1;
+			} else {
+				file_offset = file_offset + 35;
+			}
+
+			// exit code all files have been parsed
+			if ($.trim(data).indexOf("{{{{{EOQ}}}}}") !== -1) {
 				$(".mapspin").hide();
 				$(".stop-button-map").hide();
 				$(".wbmsg").html("All content migrated!").fadeIn();
@@ -706,10 +749,10 @@ function mappings_run(offset, mapped = false) {
 			}
 			
 			// else, continue
-			offset = offset + 35;
 			sleep(window.delay).then(() => {
-				mappings_run(offset, mappings);
+				mappings_run(offset, mappings, file_offset);
 			});
+
 		}
 	);
 	
@@ -729,7 +772,7 @@ function input_change($this) {
 		$($this).parents(".fold").find(".csv-hide").hide();
 	}
 	
-	if ($($this).val() == "xlsx") {
+	if (($($this).val() == "xlsx") || ($($this).val() == "xls")) {
 		$($this).parents(".fold").find(".xlsx-show").show();
 		$($this).parents(".fold").find(".xlsx-hide").hide();
 	}
