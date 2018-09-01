@@ -52,21 +52,6 @@ $(function() {
 	// test api key and colorize buttons based on key validity
 	$("#apikey").on("input click", function() {
 		$this = $(this);
-		/*
-		// check wizard package
-		$.ajax({
-			url: "http://content.wizard.build/authme.php?key="+$.trim($this.val()),
-			dataType: 'text',
-			context: document.body,
-			success: function(data, textStatus, jqXHR) {
-				if (parseInt($.trim($(".progress-box #counter").html())) <= 0) {
-					// TODO: set wizard level
-					window.scrollTo(0, 0);
-					return false;
-				}
-			}
-		});
-		*/
 	});
 	
 	$("#apikey").click();
@@ -143,7 +128,7 @@ function crawlUrl() {
 
 }
 
-function compileMappings() {
+function compileMappings(autosave = true) {
 	
 	var c_array = [];
 	$(".box-map .box-container").each(function() {
@@ -197,17 +182,17 @@ function compileMappings() {
 	
 	var ret = JSON.stringify($stringify);
 	
-	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_save_hook",
-			  {
-				mappings: ret,
-				quicksave: "true"
-			  },
-			  function() {
-					window.scrollTo(0,0);
-					$(".wbmsg").html("Saved content mappings configuration.").fadeIn();
-			  }
-	)
-	
+	if (autosave) {
+		$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_save_hook",
+				{
+					mappings: ret,
+					quicksave: "true"
+				},
+				function() {
+						$(".wbmsg").html("Saved content mappings configuration.").fadeIn();
+				}
+		)
+	}
 	return ret;
 }
 
@@ -619,7 +604,7 @@ function toggleSelOptions($this) {
 }
 
 function preview_entry(query, url, ht, isContainer = false) {
-	var mappings = compileMappings();
+	var mappings = compileMappings(false);
 	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_map_preview_hook", {
 			query: query,
 			file: url,
@@ -688,7 +673,7 @@ function refresh_logs() {
 	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_logs_hook", {
 	},
 	function(data) {
-		$('#logs pre').text(data);
+		$('#logs pre').html(data);
 		var objDiv = document.getElementById("logs");
 		objDiv.scrollTop = objDiv.scrollHeight;
 	}
@@ -711,34 +696,36 @@ $(document).on("click", ".output-tabs a", function() {
 	return false;
 });
 
+function mappings_run_init(offset, mapped = false) {
+	
+	// scroll to top and save
+	window.scrollTo(0, 0);
+	mappings = compileMappings();
+	
+	// start at 0 offset
+	mappings_run(0, mapped);
+}
 
-function mappings_run(offset, mapped = false, file_offset = 0) {
+function mappings_run(offset, mapped = false) {
 	$(".mapspin").show();
 	$(".stop-button-map").show();
 	$(".mapped-count").html(offset);
 	var mappings = "";
 	if (mapped == false) {
-		mappings = compileMappings();
+		mappings = compileMappings(false);
 	} else {
 		mappings = mapped;
 	}
 	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_map_hook", {
 			config: mappings,
 			runmappings: true,
-			offset: offset,
-			file_offset: file_offset
+			offset: offset
 		},
 		function(data) {
 			data = $.parseJSON(data);
+			//data.offset += 35;
 		
-			if (data.process ==  "next") {
-				// proceed to next items in file
-				data.file_offset += 35;
-			} else if (data.process ==  "eof") {
-				// proceed to next file
-				data.file_offset = 0;
-				data.offset++;
-			} else if (data.process ==  "eoq") {
+			if (data.process ==  "stop") {
 				// stop queue all files have been parsed
 				$(".mapspin").hide();
 				$(".stop-button-map").hide();
@@ -747,15 +734,10 @@ function mappings_run(offset, mapped = false, file_offset = 0) {
 			}
 
 			sleep(window.delay).then(() => {
-				/*
-					$map_params_ret["config"] = $json_config;
-					$map_params_ret["file_offset"] = $file_offset;
-					$map_params_ret["offset"] = $offset;
-					$map_params_ret["process"] = "next";				
-				*/
-				mappings_run(data.offset, data, data.file_offset);
+				mappings_run(data.offset, false);
+				return false;
 			});
-
+			return false;
 		}
 	);
 	
