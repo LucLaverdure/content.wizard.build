@@ -24,12 +24,23 @@ if (is_admin()) {
 		$file_offset = $_POST["file_offset"];
 		$queue_size = 35;
 		
+		ob_start();
+		var_dump($_POST["config"]);
+		$obout = ob_get_clean();
+		logme("config 1: ".$obout);
+
 		$parseConfig = parseJsonConfig($_POST["config"]);
+
+		ob_start();
 		var_dump($parseConfig);
+		$obout = ob_get_clean();
+		logme("config 2: ".$obout);
+	
 		//var_dump($offset, $file_offset, $queue_size, $json_config, $parseConfig);
 
 		// function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = false) 
 		//runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = false) {
+
 		runmap($offset, $queue_size, $parseConfig, $file_offset);
 	}
 

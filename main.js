@@ -16,9 +16,6 @@
 
 	window.magicfield = [];
 
-	window.file_offset = 0;
-	window.offset = 0;
-
 // sleep function
 function sleep (time) {
 	return new Promise((resolve) => setTimeout(resolve, time));
@@ -725,7 +722,6 @@ function mappings_run(offset, mapped = false, file_offset = 0) {
 	} else {
 		mappings = mapped;
 	}
-	console.log(mappings);
 	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_map_hook", {
 			config: mappings,
 			runmappings: true,
@@ -733,7 +729,6 @@ function mappings_run(offset, mapped = false, file_offset = 0) {
 			file_offset: file_offset
 		},
 		function(data) {
-			console.log(data);
 			data = $.parseJSON(data);
 		
 			if (data.process ==  "next") {

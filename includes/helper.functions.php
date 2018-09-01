@@ -196,10 +196,17 @@ function parseJsonConfig($jsonConfig) {
 	$decodeConfig = "";
 	if (!is_array($jsonConfig)) {
 		$decodeConfig = stripslashes($jsonConfig);
+		$decodeConfig = html_entity_decode($decodeConfig);
 	}
 
-	$decodeConfig = json_decode($jsonConfig);
+	$decodeConfig = json_decode($decodeConfig, true);
 	$outputConfig = array();
+
+	ob_start();
+	var_dump($decodeConfig);
+	$obout = ob_get_clean();
+	logme("config 3: ".$obout);
+
 
 	if ( (!isset($decodeConfig)) || (count($decodeConfig) == 0) ) return;
 
@@ -310,19 +317,25 @@ function parseJsonConfig($jsonConfig) {
 // query, url, html (data), return container array?, file offset
 function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
 
-	if ($is_preview) $jconfig = $jconfig[0];
+	if ($is_preview && isset($jconfig[0])) $jconfig = $jconfig[0];
 
 	ob_start();
 	var_dump($jconfig);
 	$obout = ob_get_clean();
-	logme("----config: ".$obout);
+	logme("----entry config: ".$obout);
 
 	global $latest_first_line, $csvdata;
 	$csvdata = array();
 	$ext = substr($url, strrpos($url, '.'));
 	$latest_first_line = array();
 	$container_array = array();
-	
+
+	$parts = parse_url($url);
+	@parse_str($parts['query'], $urlquery);
+	$this_file = @$urlquery['file'];
+
+	$this_file = WIZBUI_PLUGIN_PATH."cache/".$this_file;
+
 	// parse regex expressions (triple brackets)
 	$q = array();
 	preg_match_all('/{{{.*}}}/U', $query, $q, PREG_SET_ORDER, 0);
@@ -331,9 +344,13 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 	// csv file
 	if ($ext == ".csv") {
-		$handle = fopen($url, "r");
+		$handle = fopen($this_file, "r");
+
+		if (!isset($jconfig["fielddelimiter"])) $jconfig["fielddelimiter"] = ",";
+		if (!isset($jconfig["enclosure"])) $jconfig["enclosure"] = '"';
 
 		$latest_first_line = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
+
 		if ($offset > 0) {
 			for ($i = 0; $i < $offset; ++$i) {
 				$dump = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
@@ -342,7 +359,7 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 		$csvdata = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
 	
 	// DB Query
-	} elseif ($jconfig["inputmethod"] == "sql") {
+	} elseif ($jconfig["inputmethod"] == ".sql") {
 		
 		// parse field name
 		$q = array();
@@ -466,7 +483,7 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 		
 //$rustart = getrusage();
 		
-		if ( $xlsx = SimpleXLSX::parse($url)) {
+		if ( $xlsx = SimpleXLSX::parse($this_file)) {
 		/*
 			function rutime($ru, $rus, $index) {
 				return ($ru["ru_$index.tv_sec"]*1000 + intval($ru["ru_$index.tv_usec"]/1000))
@@ -538,7 +555,6 @@ echo "It spent " . rutime($ru, $rustart, "stime") .
 
 	if ($ext == ".csv") {
 		// CSV: filename, {col letter}, {{col by field name}}, {col number}
-
 		array_walk($latest_first_line, 'selector_val');
 		
 		// cols by field name
@@ -744,11 +760,10 @@ function parseAfterOp($html, $op, $opeq) {
 			break;
 		case "imgsearch":
 			try {
-				var_dump($html);
 				$json = wizbui_curlit("https://api.qwant.com/api/search/images?count=1&q=".$html."&t=images&safesearch=1&locale=en_CA&uiv=4");
 
-				$decoded = json_decode($json);
-				if ($decoded->status != "error") {
+				$decoded = json_decode($json, true);
+				if ($decoded["status"] != "error") {
 					$html = stripslashes($decoded["data"]["result"]["items"][0]["media"]);
 				}
 			} catch (Exception $e) {
@@ -1077,8 +1092,6 @@ function create_item($the_query, $build_fields, $jc_val, $id) {
 }
 function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = false) {
 
-	var_dump($json_config);
-
 	$map_params_ret = array();
 	$map_params_ret["config"] = $json_config;
 	$map_params_ret["file_offset"] = $file_offset;
@@ -1092,6 +1105,7 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 	logme("Mappings initialized (Row offset: ".$file_offset.", File offset: ".$offset.")");
 
 	$path_init = WIZBUI_PLUGIN_PATH . "cache";
+	
 	if(!file_exists(dirname($path_init))) {
 		@mkdir(dirname($path_init), 0777, true);
 	}
@@ -1117,6 +1131,7 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 				$ext = pathinfo($filez[$i], PATHINFO_EXTENSION);
 
 				if ( (!isset($json_config)) || (!is_array($json_config)) ) {
+					logme("-No config found...");
 					return;
 				} 
 
@@ -1128,10 +1143,12 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 					if ($jc_val["inputmethod"] == "scraper") {
 						// amount of containers
 						$cap = count(parseEntry($jc_val["containerInstance"], $filez[$i], "", true, $jc_val, false, $fset));
+						logme("-Scraper containers: ".$cap);
 					} elseif (($jc_val["inputmethod"] == "csv") && ($ext == "csv")) {
 						// amount of rows
 						$fp = file($filez[$i]);
 						$cap = count($fp);
+						logme("-CSV count: ".$cap);
 					} elseif (($jc_val["inputmethod"] == "xlsx") && ($ext == "xlsx")) {
 						// amount of rows
 						if ( $xlsx = SimpleXLSX::parse($filez[$i])) {
@@ -1141,6 +1158,7 @@ function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = f
 								$cap += $num_rows;
 							}
 						}
+						logme("-XLSX row count: ".$cap);
 					} elseif (($jc_val["inputmethod"] == "sql") && ($ext == "dboquery")) {
 						// amount of rows
 						$servername = $jc_val["dbhost"];
