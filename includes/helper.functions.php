@@ -501,15 +501,9 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 		$current_sheet = "";
 		$offset_counter = 0;
 		
-//$rustart = getrusage();
 		
 		if ( $xlsx = SimpleXLSX::parse($this_file)) {
-		/*
-			function rutime($ru, $rus, $index) {
-				return ($ru["ru_$index.tv_sec"]*1000 + intval($ru["ru_$index.tv_usec"]/1000))
-				 -  ($rus["ru_$index.tv_sec"]*1000 + intval($rus["ru_$index.tv_usec"]/1000));
-			}
-		*/			
+
 			$sheets = $xlsx->sheetNames();
 			foreach ($sheets as $sheetnum => $sheet) {
 				$current_sheet = $sheet;
@@ -539,13 +533,6 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 			logme("----xlsx data: ".$obout);
 
 		}
-/*
-$ru = getrusage();
-echo "This process used " . rutime($ru, $rustart, "utime") .
-" ms for its computations\n";
-echo "It spent " . rutime($ru, $rustart, "stime") .
-" ms in system calls\n";
-*/
 
 	} else {
 		$ht = file_get_contents($url);
@@ -794,11 +781,16 @@ function parseAfterOp($html, $op, $opeq) {
 			break;
 		case "imgsearch":
 			try {
-				$json = wizbui_curlit("https://api.qwant.com/api/search/images?count=1&q=".$html."&t=images&safesearch=1&locale=en_CA&uiv=4");
-
+				$url_to_fetch = "https://api.qwant.com/api/search/images?count=1&q=".urlencode($html)."&t=images&safesearch=1&locale=en_CA&uiv=4";
+//logme("url: ".$url_to_fetch);
+				$json = wizbui_curlit($url_to_fetch);
+//logme("ret: ".$json);
 				$decoded = json_decode($json, true);
 				if ($decoded["status"] != "error") {
-					$html = stripslashes($decoded["data"]["result"]["items"][0]["media"]);
+					if (isset($decoded["data"]["result"]["items"][0]["media"])) {
+						$html = stripslashes($decoded["data"]["result"]["items"][0]["media"]);
+//logme("ret: ".$html);
+					}
 				}
 			} catch (Exception $e) {
 				logme("[Error] - " . $e->getMessage());

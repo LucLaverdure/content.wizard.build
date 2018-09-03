@@ -101,8 +101,9 @@ function admin_post_wb_map_preview_hook_callback() {
 // core get new logs
 add_action( 'admin_post_wb_logs_hook', 'admin_post_wb_logs_hook_callback' );
 function admin_post_wb_logs_hook_callback() {
+	include_once(WIZBUI_PLUGIN_PATH . "lib/tailcustom.php");
 	$logs = WIZBUI_PLUGIN_PATH . "logs.txt";
 	if (file_exists($logs)) {
-		echo htmlentities(file_get_contents($logs)) ;
+		echo tailCustom($logs, 500);
 	}
 }
