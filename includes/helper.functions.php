@@ -324,7 +324,7 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 	$obout = ob_get_clean();
 	logme("----entry config: ".$obout);
 
-	global $latest_first_line, $csvdata;
+	global $latest_first_line, $csvdata, $sheetsHeads, $current_sheet;
 	$csvdata = array();
 	$ext = substr($url, strrpos($url, '.'));
 	$latest_first_line = array();
@@ -495,45 +495,8 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 		}	
 
 
-
-	// XLSX File
 	} elseif (($ext == ".xlsx") || ($ext == ".xls")) {
-		$current_sheet = "";
-		$offset_counter = 0;
-		
-		
-		if ( $xlsx = SimpleXLSX::parse($this_file)) {
-
-			$sheets = $xlsx->sheetNames();
-			foreach ($sheets as $sheetnum => $sheet) {
-				$current_sheet = $sheet;
-				list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
-				$ret = $xlsx->rows($sheetnum);
-				foreach ($ret as $key => $row) {
-					if ( ($offset_counter==0) || ($offset_counter == ($offset + 1)) ) {
-						for ( $col = 0; $col < $num_cols; $col++ ) {
-							if ($key == 0) {
-								// 1st line
-								$latest_first_line[$col] = $row[$col];
-								array_walk($latest_first_line, 'selector_val');
-							} else {
-								if ($offset_counter >= $offset + 1) {
-									$csvdata[$col] = $row[$col];
-								}
-							}
-						}
-					} 
-					$offset_counter++;
-				}
-			}
-
-			ob_start();
-			var_dump($csvdata);
-			$obout = ob_get_clean();
-			logme("----xlsx data: ".$obout);
-
-		}
-
+		// do nothing
 	} else {
 		$ht = file_get_contents($url);
 	}
@@ -622,6 +585,56 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 	} elseif (($ext == ".xlsx") || ($ext == ".xls")) {
 		// XLSX: sheetname, {col letter}, {{col by field name}}, {col number}
+		$csvdata = array();
+		$offset_counter = 0;
+		$latest_first_line = array();
+		if ( $xlsx = SimpleXLSX::parse($this_file)) {
+
+			$sheets = $xlsx->sheetNames();
+			foreach ($sheets as $sheetnum => $sheet) {
+				$current_sheet = $sheet;
+				list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
+				$ret = $xlsx->rows($sheetnum);
+				foreach ($ret as $key => $row) {
+					if ( ($key == 0) || ($offset_counter == ($offset + 1)) ) {
+						for ( $col = 0; $col < $num_cols; $col++ ) {
+							if ($key == 0) {
+								// 1st line of sheet
+								$latest_first_line[$col] = $row[$col];
+								array_walk($latest_first_line, 'selector_val');
+							} else {
+								if ($offset_counter == ($offset + 1)) {
+									$csvdata[$col] = $row[$col];
+								}
+							}
+						}
+					}
+
+					if ($offset_counter == ($offset + 1)) {
+						break 2;
+					}
+
+					$offset_counter++;
+				}
+			}
+
+			/*
+			ob_start();
+			var_dump($latest_first_line);
+			$obout = ob_get_clean();
+			logme("----xlsx head: ".$obout);
+
+
+			ob_start();
+			var_dump($csvdata);
+			$obout = ob_get_clean();
+			logme("----xlsx data: ".$obout);
+			*/
+
+		}
+
+		// latest sheet name 
+		$query = str_replace("%sheetname%", $current_sheet, $query);
 
 		// cols by field name
 		$q = array();
@@ -634,6 +647,16 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 			$newjq = str_replace("}}", '', $newjq);
 			$newjq = selector_val($newjq);
 			$appendHTML = "";
+
+			/*
+			logme("----needle: ".$newjq);
+			ob_start();
+			var_dump($latest_first_line);
+			$obout = ob_get_clean();
+			logme("----hay: ".$obout);
+			*/
+
+
 			$search_arr = array_search($newjq, $latest_first_line);
 			if (in_array($newjq, $latest_first_line)) {
 				if (isset($csvdata[$search_arr])) {
@@ -641,6 +664,7 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 				}
 			}
 
+			//replace
 			$query = str_replace($qq, $appendHTML, $query);
 
 		}
@@ -674,7 +698,7 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 				$appendHTML .= $csvdata[$col_num];
 			}
 
-			//firstLineFields
+			//replace
 			$query = str_replace($qq, $appendHTML, $query);
 		}
 
@@ -732,7 +756,13 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 		$newjq = stripslashes($newjq);
 		$newjq = html_entity_decode($newjq);
-		$ret_val = eval("return ".$newjq.";");
+
+		try {
+			$ret_val = @eval("return ".$newjq.";");
+		} catch (Exception $e) {
+			logme("----error: PHP expression failed:".$newjq);
+		}
+
 		$query = str_replace($qq, $ret_val, $query);
 	}
 
@@ -878,6 +908,8 @@ function parseAfterOp($html, $op, $opeq) {
 			break;
 		case "Image Download":
 			// add thumbnail
+			logme("Downloading:". $html);
+			add_image(get_the_ID(), $html, basename($html));
 			break;
 	}
 	
@@ -931,6 +963,11 @@ function validateOp($query, $url, $html, $op, $opeq, $config,  $file_offset = 0)
 function build_fields($jc_val, $url, $file_offset) {
 	$build_fields = array();
 	$raw_fields = $jc_val["fields"];
+
+	ob_start();
+	var_dump($raw_fields);
+	$obout = ob_get_clean();
+	logme("----built fields: ".$obout);
 
 	foreach ($raw_fields as $keyin => $field) {
 		$this_field = "";
@@ -1039,7 +1076,6 @@ function update_item($the_query, $build_fields, $jc_val) {
 		}
 		
 	endwhile;
-	wp_reset_postdata();
 }
 
 function create_item($the_query, $build_fields, $jc_val, $id) {
@@ -1114,12 +1150,13 @@ function create_item($the_query, $build_fields, $jc_val, $id) {
 		@update_post_meta($pid , $mk, $mv);
 	}
 
-
+	/*
 	if (isset($my_post["thumbnail"])) {								
 		logme("-----Adding Image: url(".$my_post["thumbnail"].")");
 		//add_image($post_id, $image_url, $image_name)
 		add_image($pid, $my_post["thumbnail"], basename($my_post["thumbnail"]));
 	}
+	*/
 }
 function runmap($offset, $json_config, $preview = false) {
 
@@ -1267,6 +1304,14 @@ function runmap($offset, $json_config, $preview = false) {
 											create_item($the_query, $build_fields, $jc_val, $id);
 										}
 
+										ob_start();
+										var_dump($build_fields);
+										$obout = ob_get_clean();
+										logme("Built Fields: ".$obout);
+
+										if ($the_query !== false) {
+											wp_reset_postdata();
+										}
 									} // valid
 									
 								} // containers
@@ -1316,6 +1361,16 @@ function runmap($offset, $json_config, $preview = false) {
 										logme("----wiz id doesn't exists: Create item.");
 										create_item($the_query, $build_fields, $jc_val, $id);
 									}
+
+									ob_start();
+									var_dump($build_fields);
+									$obout = ob_get_clean();
+									logme("Built Fields: ".$obout);
+									
+									if ($the_query !== false) {
+										wp_reset_postdata();
+									} 
+
 
 								} else {
 									// validation fail
