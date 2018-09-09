@@ -38,10 +38,6 @@ if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 		<div class="stop-button-map" style="display:none;"><a class="button" href="">Stop Mapping</a></div>
 	</div>
 </div>
-<div class="need-tokens" style="clear:left;display:none;color:#990000;padding:40px 0 20px  0;width:800px;max-width:100%;">
-You need to purchase a licence (key) that provides you with download tokens before crawling... The key is either invalid or you may not have enough tokens to proceed...<br><br>
-<a target="_blank" href="http://content.wizard.build">Click Here</a> to purchase a new key.
-</div>
 		<div style="display:none;">
 			<span class="total"><span class="progress"></span></span>
 			<span class="crawled-count">0</span>

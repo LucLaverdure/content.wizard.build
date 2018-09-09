@@ -1,7 +1,7 @@
 <?php
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 if (!current_user_can('administrator')) die( 'No script kiddies please!' );
-?><
+?>
 <div class="magic-pick" style="display:none;">
 
 	<div class="right-col sample-step" style="float:right;width:700px;max-width:100%;display:none;">
