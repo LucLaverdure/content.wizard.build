@@ -19,17 +19,16 @@ if (is_admin()) {
 		//runmappings: true,
 		//offset: offset,
 		//file_offset: file_offset
+		//$file_offset = $_POST["file_offset"];
 
 		$offset = $_POST["offset"];
-		$file_offset = $_POST["file_offset"];
-		$queue_size = 35;
 
 		$parseConfig = parseJsonConfig($_POST["config"]);
-
+	
 		//var_dump($offset, $file_offset, $queue_size, $json_config, $parseConfig);
 
-		// function runmap($offset, $mapCount, $json_config, $file_offset = 0, $preview = false) 
-		runmap($offset, $queue_size, $parseConfig, $file_offset);
+		//function runmap($offset, $json_config, $preview = false) {
+		runmap($offset, $parseConfig, false);
 	}
 
 }

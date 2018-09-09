@@ -4,7 +4,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<h2>Data Browser</h2>
 	<p>Browse and review uploaded content.</p>
 
-	<input name="refresh" value="Refresh" style="font-size:16px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary with-sel-confirm" type="button" onclick="return refresh_FNF();">
+	<input name="refresh" value="Refresh Cached Files" style="font-size:16px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary with-sel-confirm" type="button" onclick="return refresh_FNF();">
 
 	<div id="filesNfolders"></div>
 
@@ -20,11 +20,12 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		</p>
 	</div>
 
-	<input name="refresh" value="Refresh" style="font-size:16px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary with-sel-confirm" type="button" onclick="return refresh_logs();">
+	<input name="refresh" value="Refresh Logs (Last 500 lines)" style="font-size:16px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary with-sel-confirm" type="button" onclick="return refresh_logs();">
 	<div id="logs" style="border: 1px solid #000;padding:10px;box-sizing:border-box;max-height:300px;overflow-y:scroll;"><pre><?php
+				include_once(WIZBUI_PLUGIN_PATH . "lib/tailcustom.php");
 				$logs = WIZBUI_PLUGIN_PATH . "logs.txt";
 				if (file_exists($logs)) {
-					echo htmlentities(file_get_contents($logs)) ;
+					echo tailCustom($logs, 500);
 				}
 	?></pre></div>
 

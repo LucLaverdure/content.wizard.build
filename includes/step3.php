@@ -123,6 +123,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 			<option value="text" selected="selected">Text (Strip HTML Tags)</option>
 			<option value="html">HTML (Keep HTML Tags)</option>
 			<option value="imgsrc">Image (get IMG SRC attribute)</option>
+			<option value="imgsearch">Image (1st result from web search) </option>
 		</select>
 		
 		<select class="selector containeropeq">
@@ -171,6 +172,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		<option value="text" selected="selected">Text (Strip HTML Tags)</option>
 		<option value="html">HTML (Keep HTML Tags)</option>
 		<option value="imgsrc">Image (get IMG SRC attribute)</option>
+		<option value="imgsearch">Image (1st result from web search) </option>
 	</select>
 	
 	<select class="selector idopeq">
@@ -267,6 +269,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 		<option value="text" selected="selected">Text (Strip HTML Tags)</option>
 		<option value="html">HTML (Keep HTML Tags)</option>
 		<option value="imgsrc">Image (get IMG SRC attribute)</option>
+		<option value="imgsearch">Image (1st result from web search) </option>
 	</select>
 	
 	<select class="selector fieldopeq">
@@ -299,7 +302,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 	<div class="save-wrapper">
 		<input type="button" name="save" value="Save Mappings" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary" onclick="compileMappings();return false;"/>
 
-		<input type="button" name="run" value="Save Mappings & Run Import" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary" onclick="mappings_run(0);return false;"/>
+		<input type="button" name="run" value="Save Mappings & Run Import" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary" onclick="mappings_run_init(0);return false;"/>
 	</div>
 	
 </div>
