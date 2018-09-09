@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== Content.Wizard.Build ===
 
 Contributors: Luc Laverdure
 Plugin Name: Content.Wizard.Build
