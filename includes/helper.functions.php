@@ -1150,13 +1150,11 @@ function create_item($the_query, $build_fields, $jc_val, $id) {
 		@update_post_meta($pid , $mk, $mv);
 	}
 
-	/*
 	if (isset($my_post["thumbnail"])) {								
 		logme("-----Adding Image: url(".$my_post["thumbnail"].")");
 		//add_image($post_id, $image_url, $image_name)
 		add_image($pid, $my_post["thumbnail"], basename($my_post["thumbnail"]));
 	}
-	*/
 }
 function runmap($offset, $json_config, $preview = false) {
 
@@ -1412,7 +1410,7 @@ function add_image($post_id, $image_url, $image_name) {
 	$image_url = strtok($image_url, '?');
 	$image_name = strtok($image_name, '?');
     $upload_dir       = wp_upload_dir(); // Set upload folder
-    $image_data       = file_get_contents($image_url); // Get image data
+    $image_data       = @file_get_contents($image_url); // Get image data
     $unique_file_name = wp_unique_filename( $upload_dir['path'], $image_name ); // Generate unique name
     $filename         = basename( $unique_file_name ); // Create image file name
 
