@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 ?><div class="progress-box">
 	<div class="key">
 		<span class="head-f">Plugin Cost:</span>

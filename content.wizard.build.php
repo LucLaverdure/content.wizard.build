@@ -10,6 +10,7 @@
    */
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 
 define("WIZBUI_PLUGIN_PATH", ABSPATH . 'wp-content/plugins/content.wizard.build/');
 

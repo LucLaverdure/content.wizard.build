@@ -1,6 +1,7 @@
 <?php
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 
 require_once __DIR__ . '/../lib/xlsx/simplexlsx.class.php';
 

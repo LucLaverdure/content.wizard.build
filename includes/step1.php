@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 ?><div class="card urls">
 	<h2>Option 1 - Upload files manually</h2>
 	<p>XML? HTML? CSV? XLSX? ZIP?</p>

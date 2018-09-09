@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 ?><div class="card licence" style="display:none;">
 	<h2>Data Browser</h2>
 	<p>Browse and review uploaded content.</p>

@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 ?><div class="card map" style="display:none;">
 	<h2>Step 3 - Content Mappings</h2>
 	<p class="wbmsg" style="color:#fff;background:#00cc00;display:none;padding:10px;">Saved content mappings.</p>
