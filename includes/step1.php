@@ -58,8 +58,6 @@ if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 		<p>
 		<input type="button" name="save" value="Crawl URLs" onclick="return initCrawler();" 
 		style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="crawlnow button button-primary"/>
-		<input type="button" name="save" value="Stop crawler" onclick="window.location='';" 
-		style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="crawlstop button button-primary"/>
 		</p>
 	</div>
 </div>

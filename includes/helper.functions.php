@@ -909,8 +909,9 @@ function parseAfterOp($html, $op, $opeq) {
 			break;
 		case "Image Download":
 			// add thumbnail
-			logme("Downloading:". $html);
-			add_image(get_the_ID(), $html, basename($html));
+			/*
+			needs to be added after creating the ID
+			*/
 			break;
 	}
 	

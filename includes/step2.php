@@ -37,7 +37,4 @@ if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 	});
 	</script>
 
-	<div class="save-wrapper tostep2">
-		<input type="button" name="save" value="Continue to next step" style="font-size:20px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary" onclick="return quicksave_call();"/>
-	</div>
 </div>
