@@ -622,36 +622,32 @@ function preview_entry(query, url, ht, isContainer = false) {
 	);
 
 }
-$(document).on("click", ".with-sel-confirm", function() {
-	switch ($(".with-sel").val()) {
-		case "del":
-			
-			var filenames = [];
-			
-			$(".chkfile:checked").each(function() {
-				var $this = $(this);
-				filenames.push($this.val());
-			});
+$(document).on("click", "#del-btn", function() {
 
-			$(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_delcache_hook", {
-				killcache: filenames
-			},
-			function(data) {
-				$('#filesNfolders').html("");
-				$('#filesNfolders').fileTree({
-					root: "../wp-content/plugins/content.wizard.build/cache/",
-					script: WB_PLUGIN_URL + "wp-admin/admin-post.php?action=wb_browseme_hook",
-					expandSpeed: 100
-					}, function(file) { 
-						$("#selectedFile").show();
-						$("#selectedFile .download").attr('href', file);
-					}
-				);
+	var filenames = [];
+	
+	$(".chkfile:checked").each(function() {
+		var $this = $(this);
+		filenames.push($this.val());
+	});
 
-			});
-			
-			break;
-	}
+	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_delcache_hook", {
+			killcache: filenames
+		},
+		function(data) {
+			$('#filesNfolders').html("");
+			$('#filesNfolders').fileTree({
+				root: "../wp-content/plugins/content.wizard.build/cache/",
+				script: WB_PLUGIN_URL + "wp-admin/admin-post.php?action=wb_browseme_hook",
+				expandSpeed: 100
+				}, function(file) { 
+					$("#selectedFile").show();
+					$("#selectedFile .download").attr('href', file);
+				}
+			);
+		}
+	);
+
 });
 
 function refresh_FNF() {

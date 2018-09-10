@@ -17,7 +17,7 @@ if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 			<option value="del">Delete</option>
 		</select>
 
-		<input type="button" name="save" value="Confirm" style="font-size:16px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary with-sel-confirm" onclick="return quicksave_call();"/>
+		<input id="del-btn" type="button" name="del" value="Confirm" style="font-size:16px;padding:10px 20px;height:40px;line-height:20px;" class="button button-primary with-sel-confirm" />
 		</p>
 	</div>
 
