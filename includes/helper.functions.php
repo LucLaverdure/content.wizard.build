@@ -1033,17 +1033,45 @@ function update_item($the_query, $build_fields, $jc_val) {
 		logme("-----Updating [".$jc_val["postType"]."]: (".$obout.")");
 	
 		// create product category if doesn`t exist
+		ob_start();
 		if (isset($my_post["product_cat"])) {
-			logme("-----Creating Category: ".$my_post["product_cat"]);
-			wp_insert_term(
-				$my_post["product_cat"], // the term 
-				'product_cat', // the taxonomy
-				array(
-				'description'=> $my_post["post_category"]
-				)
-			);								
-		}
+			$cats = explode(",", $my_post["product_cat"]);
+			$cats_ids = array();
+
+			logme("-----Cats [".$my_post["product_cat"]."]");
 		
+			foreach($cats as $data) {
+				//$thumb_id = fetch_media($data['thumb']);
+				$cid = -1;
+				$cid = wp_insert_term(
+					$data, // the term 
+					'product_cat', // the taxonomy
+					array(
+						'description'=> $data
+						//'slug' => $data['slug'],
+						//'parent' => $data['parent']
+					)
+				);
+				$cat_id = -1;
+				if (is_wp_error($cid)) {
+					$cid = -1;
+				} else {
+					$cat_id = isset( $cid['term_id'] ) ? $cid['term_id'] : -1;
+					logme("-----Created cat id [".$cat_id."]");
+				}
+				if ($cat_id >= 0) {
+					$cats_ids[] = $cat_id;
+				} else {
+					$term = @get_term_by('name', $data, 'product_cat');
+					$cat_id = $term->term_id;
+					$cats_ids[] = $cat_id;
+				}
+			}
+			@wp_set_object_terms( get_the_ID(), $cats_ids, 'product_cat' );
+
+		}
+		$obout = ob_get_clean();
+		logme("----- supressed info: ".$obout);
 
 		// create post category if doesn`t exist
 		ob_start();
@@ -1111,18 +1139,49 @@ function create_item($the_query, $build_fields, $jc_val, $id) {
 
 	logme("-----WP_ID generated: ".$pid);
 
-	// create category if doesn`t exist
+	// create product category if doesn`t exist
+	ob_start();
 	if (isset($my_post["product_cat"])) {
-		logme("-----Creating Category: ".$my_post["product_cat"]);
-		@wp_insert_term(
-			$my_post["product_cat"], // the term 
-			'product_cat', // the taxonomy
-			array(
-			'description'=> $my_post["post_category"]
-			)
-		);								
-	}
+		$cats = explode(",", $my_post["product_cat"]);
+		$cats_ids = array();
+
+		logme("-----Cats [".$my_post["product_cat"]."]");
 	
+		foreach($cats as $data) {
+			//$thumb_id = fetch_media($data['thumb']);
+			$cid = -1;
+			$cid = wp_insert_term(
+				$data, // the term 
+				'product_cat', // the taxonomy
+				array(
+					'description'=> $data
+					//'slug' => $data['slug'],
+					//'parent' => $data['parent']
+				)
+			);
+			$cat_id = -1;
+			if (is_wp_error($cid)) {
+				$cid = -1;
+			} else {
+				$cat_id = isset( $cid['term_id'] ) ? $cid['term_id'] : -1;
+				logme("-----Created cat id [".$cat_id."]");
+			}
+			if ($cat_id >= 0) {
+				$cats_ids[] = $cat_id;
+			} else {
+				$term = @get_term_by('name', $data, 'product_cat');
+				$cat_id = $term->term_id;
+				$cats_ids[] = $cat_id;
+			}
+		}
+		@wp_set_object_terms( $pid, $cats_ids, 'product_cat' );
+
+	}
+	$obout = ob_get_clean();
+	logme("----- supressed info: ".$obout);
+
+	
+
 	// create post category if doesn`t exist
 	ob_start();
 	if (isset($my_post["post_category"])) {

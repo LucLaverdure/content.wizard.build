@@ -214,6 +214,9 @@ if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 		<h3>Woo Commerce Fields</h3>
 <?php 
 	$arr_data = array();
+	$arr_data["_price"] = "Price";
+	$arr_data["product_cat"] = "Categories (Array and/or separated with commas)";
+	$arr_data["_stock"] = "Stock";
 	$arr_data["_visibility"] = "Visibility";
 	$arr_data["_stock_status"] = "In Stock";
 	$arr_data["total_sales"] = "Total Sales";
@@ -231,11 +234,9 @@ if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 	$arr_data["_product_attributes"] = "Product Attributes";
 	$arr_data["_sale_price_dates_from"] = "Sales Price Date - From";
 	$arr_data["_sale_price_dates_to"] = "Sales Price Date - To";
-	$arr_data["_price"] = "Price";
 	$arr_data["_sold_individually"] = "Sold Individually";
 	$arr_data["_manage_stock"] = "Manage Stock";
 	$arr_data["_backorders"] = "Back Orders";
-	$arr_data["_stock"] = "Stock";
 
 	$arr_ret = array_merge($arr_ret, $arr_data);	
  ?>
