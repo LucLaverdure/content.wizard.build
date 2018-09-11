@@ -718,13 +718,13 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 			try {
 
-				$doc = phpQuery::newDocument('<div>'.$ht.'</div>'); 
+				$doc = @phpQuery::newDocument('<div>'.$ht.'</div>'); 
 
 				logme("----searching jq: ".$newjq);
-				$code = $doc->find($newjq);
+				$code = @$doc->find($newjq);
 				$appendHTML = '';
-				foreach (pq($code) as $k => $thisf) {
-					$to_push = pq($thisf)->html();
+				foreach (@pq($code) as $k => $thisf) {
+					$to_push = @pq($thisf)->html();
 					if ($isContainer) {
 						$container_array[] = $to_push;
 					} else {
@@ -736,7 +736,7 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 			} catch (Exception $e) {
 				logme("----error processing: ".$newjq);
 			}
-	}
+		}
 	}
 
 	// SQL: {{field name}}, {col number}
@@ -798,16 +798,20 @@ function parseAfterOp($html, $op, $opeq) {
 			// nothing to do here
 			break;
 		case "imgsrc":
-			$doc = phpQuery::newDocument('<div>'.$html.'</div>'); 
-			$code = $doc->find("img");
-			$img = "";
-			foreach (pq($code) as $k => $thisf) {
-				$to_push = pq($thisf)->html();
-				$img = trim(pq($thisf)->attr("src"));
-				if (substr($img,0,2)=="//") {
-					$img = "http://".substr($img, 2);
+			try {
+				$doc = @phpQuery::newDocument('<div>'.$html.'</div>'); 
+				$code = @$doc->find("img");
+				$img = "";
+				foreach (@pq($code) as $k => $thisf) {
+					$to_push = @pq($thisf)->html();
+					$img = trim(@pq($thisf)->attr("src"));
+					if (substr($img,0,2)=="//") {
+						$img = "http://".substr($img, 2);
+					}
+					$html = $img;
 				}
-				$html = $img;
+			} catch (Exception $e) {
+				logme("phpquery error:". $e->getMessage());
 			}
 			break;
 		case "imgsearch":
@@ -1708,27 +1712,30 @@ function wiz_related_files($output, $filename, $url_origin) {
 			*  get scripts (script src)
 			*  get images (img src)
 			**************************/
+			try {
+				$doc = phpQuery::newDocument($output);
 
-			$doc = phpQuery::newDocument($output);
+				// get A HREF links
+				foreach(pq("a") as $links) {
+					$urls_to_add[] = pq($links)->attr("href");
+				}
 
-			// get A HREF links
-			foreach(pq("a") as $links) {
-				$urls_to_add[] = pq($links)->attr("href");
-			}
+				// get LINK HREF links
+				foreach(pq("link") as $links) {
+					$urls_to_add[] = pq($links)->attr("href");
+				}
 
-			// get LINK HREF links
-			foreach(pq("link") as $links) {
-				$urls_to_add[] = pq($links)->attr("href");
-			}
+				// get A SCRIPT SRC links
+				foreach(pq("script") as $links) {
+					$urls_to_add[] = pq($links)->attr("src");
+				}
 
-			// get A SCRIPT SRC links
-			foreach(pq("script") as $links) {
-				$urls_to_add[] = pq($links)->attr("src");
-			}
-
-			// get A IMG SRC links
-			foreach(pq("img") as $links) {
-				$urls_to_add[] = pq($links)->attr("src");
+				// get A IMG SRC links
+				foreach(pq("img") as $links) {
+					$urls_to_add[] = pq($links)->attr("src");
+				}
+			} catch (Exception $e) {
+				logme("Error phpquery:". $e->getMessage());
 			}
 			
 		}
