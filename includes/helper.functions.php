@@ -203,11 +203,6 @@ function parseJsonConfig($jsonConfig) {
 	$decodeConfig = json_decode($decodeConfig, true);
 	$outputConfig = array();
 
-	ob_start();
-	var_dump($decodeConfig);
-	$obout = ob_get_clean();
-	logme("config 3: ".$obout);
-
 
 	if ( (!isset($decodeConfig)) || (count($decodeConfig) == 0) ) return;
 
@@ -320,11 +315,6 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 	if ($is_preview && isset($jconfig[0])) $jconfig = $jconfig[0];
 
-	ob_start();
-	var_dump($jconfig);
-	$obout = ob_get_clean();
-	logme("----entry config: ".$obout);
-
 	global $latest_first_line, $csvdata, $sheetsHeads, $current_sheet;
 	$csvdata = array();
 	$ext = substr($url, strrpos($url, '.'));
@@ -342,7 +332,10 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 		$this_file = WIZBUI_PLUGIN_PATH."cache/".$this_file;
 	}
 
-	logme("----at file: ".$this_file.": url: ".$url);
+	if (!$isContainer) {
+		logme("-------at file: ".$this_file);
+		logme("-------at url: ".$url);
+	}
 
 
 	// parse regex expressions (triple brackets)
@@ -619,19 +612,6 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 				}
 			}
 
-			/*
-			ob_start();
-			var_dump($latest_first_line);
-			$obout = ob_get_clean();
-			logme("----xlsx head: ".$obout);
-
-
-			ob_start();
-			var_dump($csvdata);
-			$obout = ob_get_clean();
-			logme("----xlsx data: ".$obout);
-			*/
-
 		}
 
 		// latest sheet name 
@@ -648,14 +628,6 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 			$newjq = str_replace("}}", '', $newjq);
 			$newjq = selector_val($newjq);
 			$appendHTML = "";
-
-			/*
-			logme("----needle: ".$newjq);
-			ob_start();
-			var_dump($latest_first_line);
-			$obout = ob_get_clean();
-			logme("----hay: ".$obout);
-			*/
 
 
 			$search_arr = array_search($newjq, $latest_first_line);
@@ -719,8 +691,9 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 			try {
 
 				$doc = @phpQuery::newDocument('<div>'.$ht.'</div>'); 
-
-				logme("----searching jq: ".$newjq);
+				if (!$isContainer) {
+					logme("----searching jq: ".$newjq);
+				}
 				$code = @$doc->find($newjq);
 				$appendHTML = '';
 				foreach (@pq($code) as $k => $thisf) {
@@ -738,8 +711,6 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 			}
 		}
 	}
-
-	// SQL: {{field name}}, {col number}
 
 	// parse %url%
 	$query = str_replace("%url%", str_replace(WIZBUI_PLUGIN_PATH."cache/", "", $url), $query);
@@ -927,9 +898,6 @@ function validateOp($query, $url, $html, $op, $opeq, $config,  $file_offset = 0)
 	//	function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
 	$ret = parseEntry($query, $url, $html, false, $config, false, $file_offset);
 
-
-	logme("----Expression returned (".$ret.")");
-
 	if ($html == "") {
 		
 		$html = $ret;
@@ -969,11 +937,6 @@ function validateOp($query, $url, $html, $op, $opeq, $config,  $file_offset = 0)
 function build_fields($jc_val, $url, $file_offset) {
 	$build_fields = array();
 	$raw_fields = $jc_val["fields"];
-
-	ob_start();
-	var_dump($raw_fields);
-	$obout = ob_get_clean();
-	logme("----built fields: ".$obout);
 
 	foreach ($raw_fields as $keyin => $field) {
 		$this_field = "";
@@ -1031,10 +994,8 @@ function update_item($the_query, $build_fields, $jc_val) {
 			}
 		}
 		
-		ob_start();
-		var_dump($my_post);
-		$obout = ob_get_clean();
-		logme("-----Updating [".$jc_val["postType"]."]: (".$obout.")");
+
+		logme("-----Updating [".$jc_val["postType"]."]");
 	
 		// create product category if doesn`t exist
 		ob_start();
@@ -1129,10 +1090,7 @@ function create_item($the_query, $build_fields, $jc_val, $id) {
 		}
 	}
 
-	ob_start();
-	var_dump($my_post);
-	$obout = ob_get_clean();
-	logme("-----Creating [".$jc_val["postType"]."]: (".$obout.")");
+	logme("-----Creating [".$jc_val["postType"]."]");
 
 	$pid = @wp_insert_post($my_post);
 
@@ -1204,10 +1162,7 @@ function create_item($the_query, $build_fields, $jc_val, $id) {
 	$obout = ob_get_clean();
 	logme("----- supressed info: ".$obout);
 	
-	ob_start();
-	var_dump($meta);
-	$obout = ob_get_clean();
-	logme("-----Updating meta info: ".$obout);
+	logme("-----Updating meta info... ");
 
 	// Update the post into the database
 	@update_post_meta($pid, 'wizard_build_id', $id);
@@ -1237,7 +1192,7 @@ function runmap($offset, $json_config, $preview = false) {
 	}
 
 
-	logme("New Thread (Offset: ".$offset);
+	logme("New Thread, Offset: ".$offset);
 
 	$path_init = WIZBUI_PLUGIN_PATH . "cache";
 	
@@ -1246,20 +1201,17 @@ function runmap($offset, $json_config, $preview = false) {
 	}
 	$filez = getDirContents($path_init);
 
-	ob_start();
-	var_dump($filez);
-	$obout = ob_get_clean();
-	logme("File Tree: ".$obout);
-
 	$filez[] = "placeholder.dboquery";
-	logme("Added placeholder for DB: ".$obout);
+	logme("Added placeholder file for DB (placeholder.dboquery).");
 
 	// for each file
 	for ($i = 0; $i <= count($filez); ++$i) {
 
 		// when file exists
 		if (isset($filez[$i])) {
-			logme("-File open: ".$filez[$i]);
+			if ($global_counter >= ($offset)) {
+				logme("-File open: ".$filez[$i]);
+			}
 			// for each row (file offset)
 				
 				$ext = pathinfo($filez[$i], PATHINFO_EXTENSION);
@@ -1276,13 +1228,19 @@ function runmap($offset, $json_config, $preview = false) {
 					$cap = 0;
 					if ($jc_val["inputmethod"] == "scraper") {
 						// amount of containers
+						/*
 						$cap = count(parseEntry($jc_val["containerInstance"], $filez[$i], "", true, $jc_val, false, 0));
-						logme("-Scraper containers: ".$cap);
+						if ($global_counter >= ($offset)) {
+							logme("-Scraper containers: ".$cap);
+						}
+						*/
 					} elseif (($jc_val["inputmethod"] == "csv") && ($ext == "csv")) {
 						// amount of rows
 						$fp = file($filez[$i]);
 						$cap = count($fp);
-						logme("-CSV count: ".$cap);
+						if ($global_counter >= ($offset)) {
+							logme("-CSV count: ".$cap);
+						}
 					} elseif (($jc_val["inputmethod"] == "xlsx") && ($ext == "xlsx")) {
 						// amount of rows
 						if ( $xlsx = SimpleXLSX::parse($filez[$i])) {
@@ -1292,7 +1250,9 @@ function runmap($offset, $json_config, $preview = false) {
 								$cap += $num_rows;
 							}
 						}
-						logme("-XLSX row count: ".$cap);
+						if ($global_counter >= ($offset)) {
+							logme("-XLSX row count: ".$cap);
+						}
 					} elseif (($jc_val["inputmethod"] == "sql") && ($ext == "dboquery")) {
 						// amount of rows
 						$servername = $jc_val["dbhost"];
@@ -1315,7 +1275,7 @@ function runmap($offset, $json_config, $preview = false) {
 					$cap = (int) $cap;
 
 
-					// get cap
+					// run up to file cap
 					for ($fset = 0; $fset <= $cap; ++$fset) {
 
 						if ($global_counter >= ($offset + 35)) {
@@ -1323,13 +1283,17 @@ function runmap($offset, $json_config, $preview = false) {
 							echo json_encode($map_params_ret, JSON_FORCE_OBJECT);
 							return;
 						}
-						
+
+						if ($global_counter >= ($offset)) {
+							logme("---offset:".$global_counter);
+						}
 						$global_counter++;
 
 						$containers = array(); //  instance containers
 
 						if ($global_counter >= ($offset)) {
 
+							logme("Memory used: ".(memory_get_peak_usage(false)/1024/1024)." MiB");
 							logme("--Parsing Row: (".$fset."/".$cap.") file: ".$filez[$i]);
 						
 							// Scraper Method
@@ -1338,6 +1302,7 @@ function runmap($offset, $json_config, $preview = false) {
 								// get containers
 								// 		function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
 								$containers = parseEntry($jc_val["containerInstance"], $filez[$i], "", true, $jc_val, false, $fset);
+								logme("---Containers count: ".count($containers));
 								foreach ($containers as $container) {
 
 									// adjust container
@@ -1345,10 +1310,12 @@ function runmap($offset, $json_config, $preview = false) {
 									$container = parseAfterOp($container, $jc_val["containerop"], $jc_val["containeropeq"]);
 									// validate mapping
 									//		function validateOp($query, $url, $html, $op, $opeq, $config,  $file_offset = 0) {
+									logme("---Validation try: ".$filez[$i]);
 									$valid = validateOp($jc_val["validator"], $filez[$i], $container, $jc_val["op"], $jc_val["opeq"], $jc_val, $fset);
 									
 									// when validation passed
 									if ($valid) {
+										logme("----success");
 										// get id
 										// 		function parseEntry($query, $url, $ht, $isContainer = false) {
 										$id = parseEntry($jc_val["idsel"], $filez[$i], $container, false, $jc_val, false, $fset);
@@ -1367,15 +1334,13 @@ function runmap($offset, $json_config, $preview = false) {
 											create_item($the_query, $build_fields, $jc_val, $id);
 										}
 
-										ob_start();
-										var_dump($build_fields);
-										$obout = ob_get_clean();
-										logme("Built Fields: ".$obout);
-
 										if ($the_query !== false) {
 											wp_reset_postdata();
 										}
-									} // valid
+									} else {
+										// not valid
+										logme("----fail");
+									}
 									
 								} // containers
 								
@@ -1398,7 +1363,7 @@ function runmap($offset, $json_config, $preview = false) {
 								// when validation passed
 								if ($valid) {
 
-									logme("----Pass");
+									logme("----Success");
 
 									// get id
 
@@ -1425,11 +1390,6 @@ function runmap($offset, $json_config, $preview = false) {
 										create_item($the_query, $build_fields, $jc_val, $id);
 									}
 
-									ob_start();
-									var_dump($build_fields);
-									$obout = ob_get_clean();
-									logme("Built Fields: ".$obout);
-									
 									if ($the_query !== false) {
 										wp_reset_postdata();
 									} 
@@ -1459,8 +1419,7 @@ function runmap($offset, $json_config, $preview = false) {
 
 
 /*
-	Free luck image search:
-	https://api.qwant.com/api/search/images?count=1&q=luc%20laverdure&t=images&safesearch=1&locale=en_CA&uiv=4
+	add image attachment to post
 */
 function add_image($post_id, $image_url, $image_name) {
 // Add Featured Image to Post
@@ -1527,7 +1486,7 @@ function add_image($post_id, $image_url, $image_name) {
 
 	}
 	$obout = ob_get_clean();
-	logme("supressed output: ".$obout);
+	logme("supressed image save output: ".$obout);
 
 }
 
