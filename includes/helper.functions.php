@@ -789,13 +789,10 @@ function parseAfterOp($html, $op, $opeq) {
 			try {
 
 				// select random proxy:
-				$f_contents = file(WIZBUI_PLUGIN_PATH."proxy.list.txt"); 
-				$proxy = $f_contents[rand(0, count($f_contents) - 1)];
-
 				logme("[img search] - " . $html);
 				$url_to_fetch = "https://api.qwant.com/api/search/images?count=1&q=".urlencode($html)."&t=images&safesearch=1&locale=en_CA&uiv=4";
 				logme("[img fetch] - " . $url_to_fetch);
-				$json = wizbui_curlit($url_to_fetch, $proxy);
+				$json = wizbui_curlit($url_to_fetch, true);
 				$decoded = json_decode($json, true);
 				logme("[img url fetched] - " .print_r($decoded, true));
 				if ($decoded["status"] != "error") {
@@ -808,6 +805,7 @@ function parseAfterOp($html, $op, $opeq) {
 
 			} catch (Exception $e) {
 				logme("[img Error] - " . $e->getMessage());
+				$html = "";
 			}
 
 			break;
@@ -1072,10 +1070,14 @@ function update_item($the_query, $build_fields, $jc_val) {
 			@update_post_meta(get_the_ID(), $mk, $mv);
 		}
 		
-		if (isset($my_post["thumbnail"])) {
-			logme("-----Adding Image: url(".$my_post["thumbnail"].")");
-			// add_image($post_id, $image_url, $image_name) {
-			add_image(get_the_ID(), $my_post["thumbnail"], basename($my_post["thumbnail"]));
+		try {
+			if (isset($my_post["thumbnail"])) {
+				logme("-----Adding Image: url(".$my_post["thumbnail"].")");
+				// add_image($post_id, $image_url, $image_name) {
+				@add_image(get_the_ID(), $my_post["thumbnail"], basename($my_post["thumbnail"]));
+			}
+		} catch (Exception $e) {
+			logme("----- image save error: ". $e->getMessage());
 		}
 		
 	endwhile;
@@ -1178,10 +1180,14 @@ function create_item($the_query, $build_fields, $jc_val, $id) {
 		@update_post_meta($pid , $mk, $mv);
 	}
 
-	if (isset($my_post["thumbnail"])) {								
-		logme("-----Adding Image: url(".$my_post["thumbnail"].")");
-		//add_image($post_id, $image_url, $image_name)
-		add_image($pid, $my_post["thumbnail"], basename($my_post["thumbnail"]));
+	try {
+		if (isset($my_post["thumbnail"])) {
+			logme("-----Adding Image: url(".$my_post["thumbnail"].")");
+			// add_image($post_id, $image_url, $image_name) {
+			@add_image($pid, $my_post["thumbnail"], basename($my_post["thumbnail"]));
+		}
+	} catch (Exception $e) {
+		logme("----- image save error: ". $e->getMessage());
 	}
 }
 function runmap($offset, $json_config, $preview = false) {
@@ -1314,8 +1320,8 @@ function runmap($offset, $json_config, $preview = false) {
 					// run up to file cap
 					for ($fset = 0; $fset <= $cap; ++$fset) {
 
-						if ($global_counter >= ($offset + 35)) {
-							$map_params_ret["offset"] = $offset + 35;
+						if ($global_counter >= ($offset + 5)) {
+							$map_params_ret["offset"] = $offset + 5;
 							echo json_encode($map_params_ret, JSON_FORCE_OBJECT);
 							return;
 						}
@@ -1459,8 +1465,6 @@ function runmap($offset, $json_config, $preview = false) {
 */
 function add_image($post_id, $image_url, $image_name) {
 // Add Featured Image to Post
-    //$image_url        = 'http://s.wordpress.org/style/images/wp-header-logo.png'; // Define the image URL here
-	//$image_name       = 'wp-header-logo.png';
 	ob_start();
 	
 	try {
@@ -1470,8 +1474,8 @@ function add_image($post_id, $image_url, $image_name) {
 			return;
 		}
 
-		$image_url = strtok($image_url, '?');
-		$image_name = strtok($image_name, '?');
+		$image_url 		  = strtok($image_url, '?');
+		$image_name 	  = strtok($image_name, '?');
 		$upload_dir       = wp_upload_dir(); // Set upload folder
 		$image_data       = @file_get_contents($image_url); // Get image data
 		$unique_file_name = wp_unique_filename( $upload_dir['path'], $image_name ); // Generate unique name
@@ -1526,17 +1530,47 @@ function add_image($post_id, $image_url, $image_name) {
 
 }
 
-function wizbui_curlit($url, $proxy = null) {
+function wizbui_curlit($url, $use_proxy = false) {
+	
+	$loop = true;
+	$proxy = null;
+	$attempts = 0;
 
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_PROXY, $proxy);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)"); 
-	curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-	$output = curl_exec($ch);
-	curl_close($ch);
+	while ($loop) {
+
+		$proxy = null;
+
+		// fetch random proxy
+		if ($use_proxy) {
+			$f_contents = file(WIZBUI_PLUGIN_PATH."proxy.list.txt"); 
+			$proxy = $f_contents[rand(0, count($f_contents) - 1)];
+			logme("[search proxy] - " . $proxy);
+		}
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_PROXY, $proxy);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)"); 
+		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+
+		$output = curl_exec($ch);
+
+		// Check if any error occurred
+		if(curl_errno($ch)) {
+			logme("[error on proxy] - " .  curl_error($ch));
+			$loop = true;
+			$attempts++;
+			if ($attempts > 3) throw new Exception("Error on proxy: ". curl_error($ch));
+		} else {
+			$loop = false;
+		}
+
+		curl_close($ch);
+
+	}
 	return $output;
 }
 
