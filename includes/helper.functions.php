@@ -787,19 +787,34 @@ function parseAfterOp($html, $op, $opeq) {
 			break;
 		case "imgsearch":
 			try {
-				$url_to_fetch = "https://api.qwant.com/api/search/images?count=1&q=".urlencode($html)."&t=images&safesearch=1&locale=en_CA&uiv=4";
-//logme("url: ".$url_to_fetch);
-				$json = wizbui_curlit($url_to_fetch);
-//logme("ret: ".$json);
-				$decoded = json_decode($json, true);
-				if ($decoded["status"] != "error") {
-					if (isset($decoded["data"]["result"]["items"][0]["media"])) {
-						$html = stripslashes($decoded["data"]["result"]["items"][0]["media"]);
-//logme("ret: ".$html);
-					}
+
+				$max_attempts = 5;
+				$attempts = 1;
+
+				while($attempts <= $max_attempts) {
+
+					// select random proxy:
+					$f_contents = file(WIZBUI_PLUGIN_PATH."proxy.list.txt"); 
+					$proxy = $f_contents[rand(0, count($f_contents) - 1)];
+
+					logme("[img search] - " . $html);
+					$url_to_fetch = "https://api.qwant.com/api/search/images?count=1&q=".urlencode($html)."&t=images&safesearch=1&locale=en_CA&uiv=4";
+					logme("[img fetch] - " . $url_to_fetch);
+					$json = wizbui_curlit($url_to_fetch, $proxy);
+					$decoded = json_decode($json, true);
+					logme("[img url fetched] - " .print_r($decoded, true));
+					if ($decoded["status"] != "error") {
+						if (isset($decoded["data"]["result"]["items"][0]["media"])) {
+							$html = stripslashes($decoded["data"]["result"]["items"][0]["media"]);
+							$attempts = 999;
+							logme("[img search result] - " . $html);
+						}
+					} 
+					$attempts++;
 				}
+
 			} catch (Exception $e) {
-				logme("[Error] - " . $e->getMessage());
+				logme("[img Error] - " . $e->getMessage());
 			}
 
 			break;
@@ -1189,6 +1204,34 @@ function runmap($offset, $json_config, $preview = false) {
 	if ($offset == 0)  {
 		logme("----------------------------------------------------------------------------");
 		logme("Mappings Thread initialized");
+
+		// get proxy list
+
+		// start fresh
+		if (file_exists(WIZBUI_PLUGIN_PATH."proxy.list.txt")) {
+			unlink(WIZBUI_PLUGIN_PATH."proxy.list.txt");
+		}
+
+		// get free proxy list
+		$proxy_page = @file_get_contents("https://free-proxy-list.net/");
+		$proxy_list = array();
+		try {
+			$this_proxy = "";
+			$doc = @phpQuery::newDocument($proxy_page); 
+			$code = @$doc->find("#proxylisttable tr td:first-child");
+			foreach (@pq($code) as $k => $thisf) {
+				$proxy_list[$k] = @pq($thisf)->text();
+			}
+			$code = @$doc->find("#proxylisttable tr td:nth-child(2)");
+			foreach (@pq($code) as $k => $thisf) {
+				$proxy_list[$k] .= ":". @pq($thisf)->text();
+			}
+		} catch (Exception $e) {
+			logme("proxy phpquery error:". $e->getMessage());
+		}
+
+		@file_put_contents(WIZBUI_PLUGIN_PATH."proxy.list.txt", implode("\n", $proxy_list), FILE_APPEND);
+
 	}
 
 
@@ -1490,9 +1533,11 @@ function add_image($post_id, $image_url, $image_name) {
 
 }
 
-function wizbui_curlit($url) {
+function wizbui_curlit($url, $proxy = null) {
+
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_PROXY, $proxy);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)"); 
 	curl_setopt($ch, CURLOPT_AUTOREFERER, true);

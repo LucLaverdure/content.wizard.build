@@ -483,7 +483,8 @@ function setFrames() {
 		$body.on("click", function(e) { // assign a handler
 			var ext = $("#magicfile").val().split('.').pop();
 			$("#combo-wrap .options", window.top.document).html("");
-			if (ext=="xlsx" || ext=="csv" || ext=="xls") {
+			console.log(ext);
+			if ( (ext=="xlsx") || (ext=="csv") || (ext=="xls") ) {
 				$(e.target).each(function(ii,el) {
 					// by sheet letters
 					
