@@ -788,30 +788,23 @@ function parseAfterOp($html, $op, $opeq) {
 		case "imgsearch":
 			try {
 
-				$max_attempts = 5;
-				$attempts = 1;
+				// select random proxy:
+				$f_contents = file(WIZBUI_PLUGIN_PATH."proxy.list.txt"); 
+				$proxy = $f_contents[rand(0, count($f_contents) - 1)];
 
-				while($attempts <= $max_attempts) {
-
-					// select random proxy:
-					$f_contents = file(WIZBUI_PLUGIN_PATH."proxy.list.txt"); 
-					$proxy = $f_contents[rand(0, count($f_contents) - 1)];
-
-					logme("[img search] - " . $html);
-					$url_to_fetch = "https://api.qwant.com/api/search/images?count=1&q=".urlencode($html)."&t=images&safesearch=1&locale=en_CA&uiv=4";
-					logme("[img fetch] - " . $url_to_fetch);
-					$json = wizbui_curlit($url_to_fetch, $proxy);
-					$decoded = json_decode($json, true);
-					logme("[img url fetched] - " .print_r($decoded, true));
-					if ($decoded["status"] != "error") {
-						if (isset($decoded["data"]["result"]["items"][0]["media"])) {
-							$html = stripslashes($decoded["data"]["result"]["items"][0]["media"]);
-							$attempts = 999;
-							logme("[img search result] - " . $html);
-						}
-					} 
-					$attempts++;
-				}
+				logme("[img search] - " . $html);
+				$url_to_fetch = "https://api.qwant.com/api/search/images?count=1&q=".urlencode($html)."&t=images&safesearch=1&locale=en_CA&uiv=4";
+				logme("[img fetch] - " . $url_to_fetch);
+				$json = wizbui_curlit($url_to_fetch, $proxy);
+				$decoded = json_decode($json, true);
+				logme("[img url fetched] - " .print_r($decoded, true));
+				if ($decoded["status"] != "error") {
+					if (isset($decoded["data"]["result"]["items"][0]["media"])) {
+						$html = stripslashes($decoded["data"]["result"]["items"][0]["media"]);
+						$attempts = 999;
+						logme("[img search result] - " . $html);
+					}
+				} 
 
 			} catch (Exception $e) {
 				logme("[img Error] - " . $e->getMessage());
