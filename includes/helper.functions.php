@@ -788,18 +788,15 @@ function parseAfterOp($html, $op, $opeq) {
 		case "imgsearch":
 			try {
 
-				// select random proxy:
-				logme("[img search] - " . $html);
+				logme("[img search terms] - " . $html);
 				$url_to_fetch = "https://api.qwant.com/api/search/images?count=1&q=".urlencode($html)."&t=images&safesearch=1&locale=en_CA&uiv=4";
-				logme("[img fetch] - " . $url_to_fetch);
-				$json = wizbui_curlit($url_to_fetch, true);
+				logme("[img search query] - " . $url_to_fetch);
+				$json = wizbui_curlit($url_to_fetch, true);	// fetch with proxy
 				$decoded = json_decode($json, true);
-				logme("[img url fetched] - " .print_r($decoded, true));
 				if ($decoded["status"] != "error") {
 					if (isset($decoded["data"]["result"]["items"][0]["media"])) {
 						$html = stripslashes($decoded["data"]["result"]["items"][0]["media"]);
-						$attempts = 999;
-						logme("[img search result] - " . $html);
+						logme("[img fetched image URL] - " . $html);
 					}
 				} 
 
@@ -1002,6 +999,9 @@ function update_item($the_query, $build_fields, $jc_val) {
 		
 
 		logme("-----Updating [".$jc_val["postType"]."]");
+		if (isset($my_post["post_title"])) {
+			logme("------- title: [".$my_post["post_title"]."]");
+		}
 	
 		// create product category if doesn`t exist
 		ob_start();
@@ -1042,7 +1042,7 @@ function update_item($the_query, $build_fields, $jc_val) {
 
 		}
 		$obout = ob_get_clean();
-		logme("----- supressed info: ".$obout);
+		logme("----- supressed prod cat info: ".$obout);
 
 		// create post category if doesn`t exist
 		ob_start();
@@ -1061,7 +1061,7 @@ function update_item($the_query, $build_fields, $jc_val) {
 			@wp_set_post_categories(get_the_ID(), $cats_ids, true);
 		}
 		$obout = ob_get_clean();
-		logme("----- supressed info: ".$obout);
+		logme("----- supressed post cat info: ".$obout);
 
 		
 		// Update the post into the database
@@ -1074,7 +1074,7 @@ function update_item($the_query, $build_fields, $jc_val) {
 			if (isset($my_post["thumbnail"])) {
 				logme("-----Adding Image: url(".$my_post["thumbnail"].")");
 				// add_image($post_id, $image_url, $image_name) {
-				@add_image(get_the_ID(), $my_post["thumbnail"], basename($my_post["thumbnail"]));
+				add_image(get_the_ID(), $my_post["thumbnail"], basename($my_post["thumbnail"]));
 			}
 		} catch (Exception $e) {
 			logme("----- image save error: ". $e->getMessage());
@@ -1101,6 +1101,9 @@ function create_item($the_query, $build_fields, $jc_val, $id) {
 	}
 
 	logme("-----Creating [".$jc_val["postType"]."]");
+	if (isset($my_post["post_title"])) {
+		logme("------- title: [".$my_post["post_title"]."]");
+	}
 
 	$pid = @wp_insert_post($my_post);
 
@@ -1184,7 +1187,7 @@ function create_item($the_query, $build_fields, $jc_val, $id) {
 		if (isset($my_post["thumbnail"])) {
 			logme("-----Adding Image: url(".$my_post["thumbnail"].")");
 			// add_image($post_id, $image_url, $image_name) {
-			@add_image($pid, $my_post["thumbnail"], basename($my_post["thumbnail"]));
+			add_image($pid, $my_post["thumbnail"], basename($my_post["thumbnail"]));
 		}
 	} catch (Exception $e) {
 		logme("----- image save error: ". $e->getMessage());
@@ -1477,6 +1480,7 @@ function add_image($post_id, $image_url, $image_name) {
 		$image_url 		  = strtok($image_url, '?');
 		$image_name 	  = strtok($image_name, '?');
 		$upload_dir       = wp_upload_dir(); // Set upload folder
+		logme("Downloading image: ".$image_url);
 		$image_data       = @file_get_contents($image_url); // Get image data
 		$unique_file_name = wp_unique_filename( $upload_dir['path'], $image_name ); // Generate unique name
 		$filename         = basename( $unique_file_name ); // Create image file name
