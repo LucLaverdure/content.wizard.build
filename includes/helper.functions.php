@@ -2,6 +2,10 @@
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 
+define( "MAPPING_INC", 5 );
+define( "DOWNLOAD_TIMEOUT_SECS", 5 );
+define( "DOWNLOAD_ATTEMPTS", 5 );
+
 function logme($string) {
 
 	$filename = WIZBUI_PLUGIN_PATH . "logs.txt";
@@ -315,12 +319,15 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 	if ($is_preview && isset($jconfig[0])) $jconfig = $jconfig[0];
 
+	// TODO: Need to get rid of these globals...
 	global $latest_first_line, $csvdata, $sheetsHeads, $current_sheet;
+
 	$csvdata = array();
 	$ext = substr($url, strrpos($url, '.'));
 	$latest_first_line = array();
 	$container_array = array();
 
+	// get file path
 	$parts = parse_url($url);
 	@parse_str($parts['query'], $urlquery);
 	$this_file = @$urlquery['file'];
@@ -346,19 +353,24 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 	// csv file
 	if ($ext == ".csv") {
-		$handle = fopen($this_file, "r");
+		
+		try {
+			$handle = fopen($this_file, "r");
 
-		if (!isset($jconfig["fielddelimiter"])) $jconfig["fielddelimiter"] = ",";
-		if (!isset($jconfig["enclosure"])) $jconfig["enclosure"] = '"';
+			if (!isset($jconfig["fielddelimiter"])) $jconfig["fielddelimiter"] = ",";
+			if (!isset($jconfig["enclosure"])) $jconfig["enclosure"] = '"';
 
-		$latest_first_line = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
+			$latest_first_line = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
 
-		if ($offset > 0) {
-			for ($i = 0; $i < $offset; ++$i) {
-				$dump = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
+			if ($offset > 0) {
+				for ($i = 0; $i < $offset; ++$i) {
+					$dump = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
+				}
 			}
+			$csvdata = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
+		} catch (Exception $e) {
+			logme("error fetching csv head: ". $e->getMessage());
 		}
-		$csvdata = fgetcsv($handle, 0, $jconfig["fielddelimiter"], $jconfig["enclosure"]);
 
 	// DB Query
 	} elseif ($ext == ".dboquery") {
@@ -436,6 +448,8 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 		
 		foreach ($q as $n => $qq) {
 			// if is_numeric, col number, else col letter
+
+			
 			$qq = $qq[0];
 			
 			$newjq = str_replace("{", '', $qq);
@@ -492,35 +506,43 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 	} elseif (($ext == ".xlsx") || ($ext == ".xls")) {
 		// do nothing
 	} else {
-		$ht = file_get_contents($url);
+		try {
+			$ht = file_get_contents($url);
+		} catch (Exception $e) {
+			logme("error fetching file contents: ". $e->getMessage());
+		}
+
 	}
 
 	// Regex parsing
 	foreach ($q as $n => $qq) {
-		$qq = $qq[0];
-		
-		$newregex = str_replace("{{{", '', $qq);
-		$newregex = str_replace("}}}", '', $newregex);
+		try { 
+			$qq = $qq[0];
+			$newregex = str_replace("{{{", '', $qq);
+			$newregex = str_replace("}}}", '', $newregex);
 
-		$newq = array();
-		@preg_match_all($newregex, $ht, $newq, PREG_SET_ORDER, 0);
+			$newq = array();
+			@preg_match_all($newregex, $ht, $newq, PREG_SET_ORDER, 0);
 
-		$getzeros = array();
-		foreach ($newq as $z => $zero) {
-			$getzeros[] = $zero[0];
-		}
-		
-		$getzeros = implode("", $getzeros);
-		
-		if ($isContainer) {
-			$matches = array();
-			@preg_match_all($newregex, $ht, $matches, PREG_SET_ORDER, 0);
-			foreach($matches as $b => $found_match) {
-				$container_array[] = $found_match;
+			$getzeros = array();
+			foreach ($newq as $z => $zero) {
+				$getzeros[] = $zero[0];
 			}
+			
+			$getzeros = implode("", $getzeros);
+			
+			if ($isContainer) {
+				$matches = array();
+				@preg_match_all($newregex, $ht, $matches, PREG_SET_ORDER, 0);
+				foreach($matches as $b => $found_match) {
+					$container_array[] = $found_match;
+				}
+			}
+			
+			$query = str_replace($qq, $getzeros, $query);
+		} catch (Exception $e) {
+			logme("error parsing regex: ". $e->getMessage());
 		}
-		
-		$query = str_replace($qq, $getzeros, $query);
 	}
 
 	if ($ext == ".csv") {
@@ -532,19 +554,23 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 		preg_match_all('/{{.*}}/U', $query, $q, PREG_SET_ORDER, 0);
 		
 		foreach ($q as $n => $qq) {
-			$qq = $qq[0];
-			
-			$newjq = str_replace("{{", '', $qq);
-			$newjq = str_replace("}}", '', $newjq);
-			$newjq = selector_val($newjq);
+			try{			
+				$qq = $qq[0];
+				
+				$newjq = str_replace("{{", '', $qq);
+				$newjq = str_replace("}}", '', $newjq);
+				$newjq = selector_val($newjq);
 
-			$search_arr = array_search($newjq, $latest_first_line);
-			$appendHTML = "";
-			if (in_array($newjq, $latest_first_line)) {
-				$appendHTML .= $csvdata[$search_arr];
+				$search_arr = array_search($newjq, $latest_first_line);
+				$appendHTML = "";
+				if (in_array($newjq, $latest_first_line)) {
+					$appendHTML .= $csvdata[$search_arr];
+				}
+
+				$query = str_replace($qq, $appendHTML, $query);
+			} catch (Exception $e) {
+				logme("error on csv cols by field name: ". $e->getMessage());
 			}
-
-			$query = str_replace($qq, $appendHTML, $query);
 		}
 
 		// cols by number or letters
@@ -553,27 +579,31 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 		
 		foreach ($q as $n => $qq) {
-			// if is_numeric, col number, else col letter
-			$qq = $qq[0];
-			
-			$newjq = str_replace("{", '', $qq);
-			$newjq = str_replace("}", '', $newjq);
-			$newjq = selector_val($newjq);
+			try {
+				// if is_numeric, col number, else col letter
+				$qq = $qq[0];
+				
+				$newjq = str_replace("{", '', $qq);
+				$newjq = str_replace("}", '', $newjq);
+				$newjq = selector_val($newjq);
 
-			$appendHTML = "";
-			if (is_numeric($newjq)) {
-				// col number
-				$col_num = $newjq;
-				$appendHTML .= $csvdata[$col_num];
+				$appendHTML = "";
+				if (is_numeric($newjq)) {
+					// col number
+					$col_num = $newjq;
+					$appendHTML .= $csvdata[$col_num];
 
-			} else {
-				// col letter
-				$col_num = convert2ColumnIndex($newjq);
-				$appendHTML .= $csvdata[$col_num];
+				} else {
+					// col letter
+					$col_num = convert2ColumnIndex($newjq);
+					$appendHTML .= $csvdata[$col_num];
+				}
+
+				//firstLineFields
+				$query = str_replace($qq, $appendHTML, $query);
+			} catch (Exception $e) {
+				logme("error on csv colnumber or letter: ". $e->getMessage());
 			}
-
-			//firstLineFields
-			$query = str_replace($qq, $appendHTML, $query);
 		}	
 
 
@@ -582,36 +612,40 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 		$csvdata = array();
 		$offset_counter = 0;
 		$latest_first_line = array();
-		if ( $xlsx = SimpleXLSX::parse($this_file)) {
+		try {
+			if ( $xlsx = SimpleXLSX::parse($this_file)) {
 
-			$sheets = $xlsx->sheetNames();
-			foreach ($sheets as $sheetnum => $sheet) {
-				$current_sheet = $sheet;
-				list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
-				$ret = $xlsx->rows($sheetnum);
-				foreach ($ret as $key => $row) {
-					if ( ($key == 0) || ($offset_counter == ($offset + 1)) ) {
-						for ( $col = 0; $col < $num_cols; $col++ ) {
-							if ($key == 0) {
-								// 1st line of sheet
-								$latest_first_line[$col] = $row[$col];
-								array_walk($latest_first_line, 'selector_val');
-							} else {
-								if ($offset_counter == ($offset + 1)) {
-									$csvdata[$col] = $row[$col];
+				$sheets = $xlsx->sheetNames();
+				foreach ($sheets as $sheetnum => $sheet) {
+					$current_sheet = $sheet;
+					list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
+					$ret = $xlsx->rows($sheetnum);
+					foreach ($ret as $key => $row) {
+						if ( ($key == 0) || ($offset_counter == ($offset + 1)) ) {
+							for ( $col = 0; $col < $num_cols; $col++ ) {
+								if ($key == 0) {
+									// 1st line of sheet
+									$latest_first_line[$col] = $row[$col];
+									array_walk($latest_first_line, 'selector_val');
+								} else {
+									if ($offset_counter == ($offset + 1)) {
+										$csvdata[$col] = $row[$col];
+									}
 								}
 							}
 						}
-					}
 
-					if ($offset_counter == ($offset + 1)) {
-						break 2;
-					}
+						if ($offset_counter == ($offset + 1)) {
+							break 2;
+						}
 
-					$offset_counter++;
+						$offset_counter++;
+					}
 				}
-			}
 
+			}
+		} catch (Exception $e) {
+			logme("error on xlsx getting header: ". $e->getMessage());
 		}
 
 		// latest sheet name 
@@ -622,24 +656,28 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 		preg_match_all('/{{.*}}/U', $query, $q, PREG_SET_ORDER, 0);
 
 		foreach ($q as $n => $qq) {
-			$qq = $qq[0];
+			try {
+				$qq = $qq[0];
 			
-			$newjq = str_replace("{{", '', $qq);
-			$newjq = str_replace("}}", '', $newjq);
-			$newjq = selector_val($newjq);
-			$appendHTML = "";
+				$newjq = str_replace("{{", '', $qq);
+				$newjq = str_replace("}}", '', $newjq);
+				$newjq = selector_val($newjq);
+				$appendHTML = "";
 
 
-			$search_arr = array_search($newjq, $latest_first_line);
-			if (in_array($newjq, $latest_first_line)) {
-				if (isset($csvdata[$search_arr])) {
-					 $appendHTML .= $csvdata[$search_arr];
+				$search_arr = array_search($newjq, $latest_first_line);
+				if (in_array($newjq, $latest_first_line)) {
+					if (isset($csvdata[$search_arr])) {
+						$appendHTML .= $csvdata[$search_arr];
+					}
 				}
+
+				//replace
+				$query = str_replace($qq, $appendHTML, $query);
+			} catch (Exception $e) {
+				logme("error on xlsx by fields name: ". $e->getMessage());
 			}
-
-			//replace
-			$query = str_replace($qq, $appendHTML, $query);
-
+	
 		}
 
 		// letter col: convertToNumberingScheme($col)
@@ -653,26 +691,30 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 
 		foreach ($q as $n => $qq) {
 			// if is_numeric, col number, else col letter
-			$qq = $qq[0];
-			
-			$newjq = str_replace("{", '', $qq);
-			$newjq = str_replace("}", '', $newjq);
-			$newjq = selector_val($newjq);
+			try {
+				$qq = $qq[0];
+				
+				$newjq = str_replace("{", '', $qq);
+				$newjq = str_replace("}", '', $newjq);
+				$newjq = selector_val($newjq);
 
-			$appendHTML = "";
-			if (is_numeric($newjq)) {
-				// col number
-				$col_num = $newjq;
-				$appendHTML .= $csvdata[$col_num];
+				$appendHTML = "";
+				if (is_numeric($newjq)) {
+					// col number
+					$col_num = $newjq;
+					$appendHTML .= $csvdata[$col_num];
 
-			} else {
-				// col letter
-				$col_num = convert2ColumnIndex($newjq);
-				$appendHTML .= $csvdata[$col_num];
+				} else {
+					// col letter
+					$col_num = convert2ColumnIndex($newjq);
+					$appendHTML .= $csvdata[$col_num];
+				}
+
+				//replace
+				$query = str_replace($qq, $appendHTML, $query);
+			} catch (Exception $e) {
+				logme("error on xlsx by col-number or  col-letter: ". $e->getMessage());
 			}
-
-			//replace
-			$query = str_replace($qq, $appendHTML, $query);
 		}
 
 
@@ -707,7 +749,7 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 				$query = str_replace($qq, $appendHTML, $query);
 
 			} catch (Exception $e) {
-				logme("----error processing: ".$newjq);
+				logme("----error jquery processing: ".$newjq);
 			}
 		}
 	}
@@ -721,21 +763,25 @@ function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_previ
 	preg_match_all('/\<\?php.*\?\>/U', $query, $q, PREG_SET_ORDER, 0);
 	
 	foreach ($q as $n => $qq) {
-		$qq = $qq[0];
-		
-		$newjq = str_replace("<?php", '', $qq);
-		$newjq = str_replace("?>", '', $newjq);
+		try { 
+			$qq = $qq[0];
+			
+			$newjq = str_replace("<?php", '', $qq);
+			$newjq = str_replace("?>", '', $newjq);
 
-		$newjq = stripslashes($newjq);
-		$newjq = html_entity_decode($newjq);
+			$newjq = stripslashes($newjq);
+			$newjq = html_entity_decode($newjq);
 
-		try {
-			$ret_val = @eval("return ".$newjq.";");
+			try {
+				$ret_val = @eval("return ".$newjq.";");
+			} catch (Exception $e) {
+				logme("----error: PHP expression failed:".$newjq);
+			}
+
+			$query = str_replace($qq, $ret_val, $query);
 		} catch (Exception $e) {
-			logme("----error: PHP expression failed:".$newjq);
+			logme("error on php expression: ". $e->getMessage());
 		}
-
-		$query = str_replace($qq, $ret_val, $query);
 	}
 
 	$ret = $query;
@@ -1195,12 +1241,13 @@ function create_item($the_query, $build_fields, $jc_val, $id) {
 }
 function runmap($offset, $json_config, $preview = false) {
 
+	// map params are later formatted into json response
 	$map_params_ret = array();
 	$map_params_ret["config"] = $json_config;
 	$map_params_ret["offset"] = $offset;
 	$map_params_ret["process"] = "next";
 
-	$global_counter = 0;
+	$global_counter = 0;	// index after offset
 
 	// get crawled files
 	if ($offset == 0)  {
@@ -1232,6 +1279,7 @@ function runmap($offset, $json_config, $preview = false) {
 			logme("proxy phpquery error:". $e->getMessage());
 		}
 
+		// save new proxy list
 		@file_put_contents(WIZBUI_PLUGIN_PATH."proxy.list.txt", implode("\n", $proxy_list), FILE_APPEND);
 
 	}
@@ -1246,18 +1294,18 @@ function runmap($offset, $json_config, $preview = false) {
 	}
 	$filez = getDirContents($path_init);
 
+	// placeholder file to parse db queries
 	$filez[] = "placeholder.dboquery";
-	logme("Added placeholder file for DB (placeholder.dboquery).");
 
 	// for each file
-	for ($i = 0; $i <= count($filez); ++$i) {
+	for ($i = 0; $i < count($filez); ++$i) {
 
 		// when file exists
 		if (isset($filez[$i])) {
-			if ($global_counter >= ($offset)) {
-				logme("-File open: ".$filez[$i]);
-			}
-			// for each row (file offset)
+
+				if ($global_counter >= ($offset)) {
+					logme("-File open: ".$filez[$i]);
+				}
 				
 				$ext = pathinfo($filez[$i], PATHINFO_EXTENSION);
 
@@ -1269,9 +1317,10 @@ function runmap($offset, $json_config, $preview = false) {
 				// for each Mappings Group
 				foreach($json_config as $jc_key => $jc_val) {
 
-					// get cap of file
+					// get cap of file (maximum entries per files)
 					$cap = 0;
 					if ($jc_val["inputmethod"] == "scraper") {
+						// removed because it takes too much mem, TODO: investigate mem crash
 						// amount of containers
 						/*
 						$cap = count(parseEntry($jc_val["containerInstance"], $filez[$i], "", true, $jc_val, false, 0));
@@ -1280,51 +1329,73 @@ function runmap($offset, $json_config, $preview = false) {
 						}
 						*/
 					} elseif (($jc_val["inputmethod"] == "csv") && ($ext == "csv")) {
-						// amount of rows
-						$fp = file($filez[$i]);
-						$cap = count($fp);
-						if ($global_counter >= ($offset)) {
-							logme("-CSV count: ".$cap);
-						}
-					} elseif (($jc_val["inputmethod"] == "xlsx") && ($ext == "xlsx")) {
-						// amount of rows
-						if ( $xlsx = SimpleXLSX::parse($filez[$i])) {
-							$sheets = $xlsx->sheetNames();
-							foreach ($sheets as $sheetnum => $sheet) {
-								list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
-								$cap += $num_rows;
-							}
-						}
-						if ($global_counter >= ($offset)) {
-							logme("-XLSX row count: ".$cap);
-						}
-					} elseif (($jc_val["inputmethod"] == "sql") && ($ext == "dboquery")) {
-						// amount of rows
-						$servername = $jc_val["dbhost"];
-						$username = $jc_val["dbuser"];
-						$password = $jc_val["dbpass"];
-						$dbname = $jc_val["dbname"];
-						$sql = $jc_val["dbquery"];
-							
-						// Create connection
-						$conn = new mysqli($servername, $username, $password, $dbname);
-						// Check connection
-						if ($conn->connect_error) {
-							die("Connection failed: " . $conn->connect_error);
-						}
-						
-						$result = $conn->query($sql);
-						
-						$cap = $result->num_rows;
-					}
-					$cap = (int) $cap;
 
+						try {
+							// amount of rows
+							$fp = file($filez[$i]);
+							$cap = count($fp);
+							if ($global_counter >= ($offset)) {
+								logme("-CSV count: ".$cap);
+							}
+
+							unset($fp); // free mem
+						} catch (Exception $e) {
+							logme("error capping CSV: ". $e->getMessage());
+						}
+
+					} elseif (($jc_val["inputmethod"] == "xlsx") && ($ext == "xlsx")) {
+						try {
+							// amount of rows
+							if ( $xlsx = SimpleXLSX::parse($filez[$i])) {
+								$sheets = $xlsx->sheetNames();
+								foreach ($sheets as $sheetnum => $sheet) {
+									list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
+									$cap += $num_rows;
+								}
+							}
+							if ($global_counter >= ($offset)) {
+								logme("-XLSX row count: ".$cap);
+							}
+
+							unset($xlsx);
+							unset($sheets);
+						} catch (Exception $e) {
+							logme("error capping xlsx: ". $e->getMessage());
+						}
+						
+					} elseif (($jc_val["inputmethod"] == "sql") && ($ext == "dboquery")) {
+						try {
+							// amount of rows
+							$servername = $jc_val["dbhost"];
+							$username = $jc_val["dbuser"];
+							$password = $jc_val["dbpass"];
+							$dbname = $jc_val["dbname"];
+							$sql = $jc_val["dbquery"];
+								
+							// Create connection
+							$conn = new mysqli($servername, $username, $password, $dbname);
+							// Check connection
+							if ($conn->connect_error) {
+								die("Connection failed: " . $conn->connect_error);
+							}
+							
+							$result = $conn->query($sql);
+							
+							$cap = $result->num_rows;
+
+							unset($conn);
+							unset($result);
+						} catch (Exception $e) {
+							logme("error capping sql: ". $e->getMessage());
+						}
+					}
 
 					// run up to file cap
+					// fset = the file offset
 					for ($fset = 0; $fset <= $cap; ++$fset) {
 
-						if ($global_counter >= ($offset + 5)) {
-							$map_params_ret["offset"] = $offset + 5;
+						if ($global_counter >= ($offset + MAPPING_INC)) {
+							$map_params_ret["offset"] = $offset + MAPPING_INC;
 							echo json_encode($map_params_ret, JSON_FORCE_OBJECT);
 							return;
 						}
@@ -1346,49 +1417,88 @@ function runmap($offset, $json_config, $preview = false) {
 								
 								// get containers
 								// 		function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
-								$containers = parseEntry($jc_val["containerInstance"], $filez[$i], "", true, $jc_val, false, $fset);
+								try {
+										$containers = parseEntry($jc_val["containerInstance"], $filez[$i], "", true, $jc_val, false, $fset);
+								} catch (Exception $e) {
+									logme("error grouping containers: ". $e->getMessage());
+								}
 								logme("---Containers count: ".count($containers));
 								foreach ($containers as $container) {
-
-									// adjust container
-									// 		function parseAfterOp($html, $op, $opeq) {
-									$container = parseAfterOp($container, $jc_val["containerop"], $jc_val["containeropeq"]);
+									try {
+										// adjust container
+										// 		function parseAfterOp($html, $op, $opeq) {
+										$container = parseAfterOp($container, $jc_val["containerop"], $jc_val["containeropeq"]);
+									} catch (Exception $e) {
+										logme("error parsing container: ". $e->getMessage());
+									}
 									// validate mapping
 									//		function validateOp($query, $url, $html, $op, $opeq, $config,  $file_offset = 0) {
 									logme("---Validation try: ".$filez[$i]);
-									$valid = validateOp($jc_val["validator"], $filez[$i], $container, $jc_val["op"], $jc_val["opeq"], $jc_val, $fset);
-									
+
+									$valid = false;
+									try {
+										$valid = validateOp($jc_val["validator"], $filez[$i], $container, $jc_val["op"], $jc_val["opeq"], $jc_val, $fset);
+									} catch (Exception $e) {
+										logme("error validating Op: ". $e->getMessage());
+									}
 									// when validation passed
 									if ($valid) {
 										logme("----success");
 										// get id
-										// 		function parseEntry($query, $url, $ht, $isContainer = false) {
-										$id = parseEntry($jc_val["idsel"], $filez[$i], $container, false, $jc_val, false, $fset);
+										$id = -1;
+										try {
+											// 		function parseEntry($query, $url, $ht, $isContainer = false) {
+											$id = parseEntry($jc_val["idsel"], $filez[$i], $container, false, $jc_val, false, $fset);
+										} catch (Exception $e) {
+											logme("error getting ID: ". $e->getMessage());
+										}
 
-										// 		function parseAfterOp($html, $op, $opeq) {
-										$id = parseAfterOp($id, $jc_val["idop"], $jc_val["idopeq"]);
+										try {
+											// 		function parseAfterOp($html, $op, $opeq) {
+											$id = parseAfterOp($id, $jc_val["idop"], $jc_val["idopeq"]);
+										} catch (Exception $e) {
+											logme("error parsing ID: ". $e->getMessage());
+										}
 										
-										// build fields
-										$build_fields = build_fields($jc_val, $filez[$i], $fset);
-										
-										$the_query = wp_id_exists($id, $jc_val);
+										$build_fields = array();
+										try {
+											// build fields
+											$build_fields = build_fields($jc_val, $filez[$i], $fset);
+										} catch (Exception $e) {
+											logme("error building fields: ". $e->getMessage());
+										}
+									
+										$the_query = false;
+										try {
+											$the_query = wp_id_exists($id, $jc_val);
+										} catch (Exception $e) {
+											logme("error verifying id exists: ". $e->getMessage());
+										}
 
 										if ($the_query !== false) {
-											update_item($the_query, $build_fields, $jc_val);
+											try {
+												update_item($the_query, $build_fields, $jc_val);
+												wp_reset_postdata();
+											} catch (Exception $e) {
+												logme("error updating item: ". $e->getMessage());
+											}
 										} else {
-											create_item($the_query, $build_fields, $jc_val, $id);
+											try {
+												create_item($the_query, $build_fields, $jc_val, $id);
+											} catch (Exception $e) {
+												logme("error creating item: ". $e->getMessage());
+											}
 										}
 
-										if ($the_query !== false) {
-											wp_reset_postdata();
-										}
+										unset($container);
+
 									} else {
 										// not valid
 										logme("----fail");
 									}
 									
 								} // containers
-								
+								unset($containers);
 							} elseif (
 								(($jc_val["inputmethod"] == "csv") && ($ext == "csv")) ||
 								(($jc_val["inputmethod"] == "xlsx") && ($ext == "xlsx")) ||
@@ -1397,13 +1507,19 @@ function runmap($offset, $json_config, $preview = false) {
 
 								logme("---Input Type = (".$jc_val["inputmethod"].")");
 
-								// CSV Parsing
+								// Standard Parsing
 								
 								// validate mapping
 
 								//	validateOp($query, $url, $html, $op, $opeq, $config,  $file_offset = 0) {
 								logme("---Validation try `".$jc_val["validator"]."` is `".$jc_val["op"]."` of `".$jc_val["opeq"]."`)");
-								$valid = validateOp($jc_val["validator"], $filez[$i], "", $jc_val["op"], $jc_val["opeq"], $jc_val, $fset);
+
+								$valid = false;
+								try {
+									$valid = validateOp($jc_val["validator"], $filez[$i], "", $jc_val["op"], $jc_val["opeq"], $jc_val, $fset);
+								} catch (Exception $e) {
+									logme("error validating standard Op: ". $e->getMessage());
+								}
 
 								// when validation passed
 								if ($valid) {
@@ -1412,34 +1528,61 @@ function runmap($offset, $json_config, $preview = false) {
 
 									// get id
 
-									//	function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
-									$id = parseEntry($jc_val["idsel"], $filez[$i], "", false, $jc_val, false, $fset);
+									$id = -1;
 
-									logme("----id expression: ". $jc_val["idsel"]);
+									try {
+										//	function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
+										$id = parseEntry($jc_val["idsel"], $filez[$i], "", false, $jc_val, false, $fset);
+										logme("----id expression: ". $jc_val["idsel"]);
+									} catch (Exception $e) {
+										logme("error on id expression: ". $e->getMessage());
+									}
 
-									// 	function parseAfterOp($html, $op, $opeq) {
-									$id = parseAfterOp($id, $jc_val["idop"], $jc_val["idopeq"]);
+									try {
+										// 	function parseAfterOp($html, $op, $opeq) {
+										$id = parseAfterOp($id, $jc_val["idop"], $jc_val["idopeq"]);
+										logme("----id formatted: ". $id);
+									} catch (Exception $e) {
+										logme("error on id formatting: ". $e->getMessage());
+									}
+										
+									$build_fields = array();
+									try {
+										// build fields
+										$build_fields = build_fields($jc_val, $filez[$i], $fset);
+									} catch (Exception $e) {
+										logme("error building fields: ". $e->getMessage());
+									}
 
-									logme("----id formatted: ". $id);
-											
-									// build fields
-									$build_fields = build_fields($jc_val, $filez[$i], $fset);
-
-									$the_query = wp_id_exists($id, $jc_val);
-
-									if ($the_query !== false) {
-										logme("----wiz id exists: Update item.");
-										update_item($the_query, $build_fields, $jc_val);
-									} else {
-										logme("----wiz id doesn't exists: Create item.");
-										create_item($the_query, $build_fields, $jc_val, $id);
+									$the_query = false;
+									try { 
+										$the_query = wp_id_exists($id, $jc_val);
+									} catch (Exception $e) {
+										logme("error on query: ". $e->getMessage());
 									}
 
 									if ($the_query !== false) {
-										wp_reset_postdata();
-									} 
+										try {
+											logme("----wiz id exists: Update item.");
+											update_item($the_query, $build_fields, $jc_val);
+											wp_reset_postdata();
+										} catch (Exception $e) {
+											logme("error on item update: ". $e->getMessage());
+										}
 
+									} else {
+										try {
+											logme("----wiz id doesn't exists: Create item.");
+											create_item($the_query, $build_fields, $jc_val, $id);
+										} catch (Exception $e) {
+											logme("error on item creation: ". $e->getMessage());
+										}
+									}
 
+									unset($id);
+									unset($build_fields);
+									unset($valid);
+									
 								} else {
 									// validation fail
 									logme("----Fail");
@@ -1558,7 +1701,7 @@ function wizbui_curlit($url, $use_proxy = false) {
 		curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)"); 
 		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+		curl_setopt($ch, CURLOPT_TIMEOUT, DOWNLOAD_TIMEOUT_SECS);
 
 		$output = curl_exec($ch);
 
@@ -1567,7 +1710,7 @@ function wizbui_curlit($url, $use_proxy = false) {
 			logme("[error on proxy] - " .  curl_error($ch));
 			$loop = true;
 			$attempts++;
-			if ($attempts > 3) throw new Exception("Error on proxy: ". curl_error($ch));
+			if ($attempts > DOWNLOAD_ATTEMPTS) throw new Exception("Error on proxy: ". curl_error($ch));
 		} else {
 			$loop = false;
 		}

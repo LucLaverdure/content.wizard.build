@@ -720,7 +720,6 @@ function mappings_run(offset, mapped = false) {
 		},
 		function(data) {
 			data = $.parseJSON(data);
-			//data.offset += 35;
 		
 			if (data.process ==  "stop") {
 				// stop queue all files have been parsed
