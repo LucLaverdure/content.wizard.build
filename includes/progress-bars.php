@@ -4,7 +4,7 @@ if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 ?><div class="progress-box">
 	<div class="key">
 		<span class="head-f">Plugin Cost:</span>
-		<span class="tokens-count"><a target="_blank" href="https://shop.wizard.build">Free</a></span>
+		<span class="tokens-count"><a target="_blank" href="https://shop.wizard.build">Free <br><span class="small"><sup>Donate Now!</sup></span></a></span>
 		<span style="display:none;" class="tokens-count" id="counter">0</span>
 	</div>
 	<div class="crawled">

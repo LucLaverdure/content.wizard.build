@@ -14,6 +14,7 @@ if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 		<p style="line-height:20px;">
 		With All Selected:
 		<select class="with-sel">
+			<option value=""></option>
 			<option value="del">Delete</option>
 		</select>
 

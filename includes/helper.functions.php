@@ -835,16 +835,49 @@ function parseAfterOp($html, $op, $opeq) {
 			try {
 
 				logme("[img search terms] - " . $html);
-				$url_to_fetch = "https://api.qwant.com/api/search/images?count=1&q=".urlencode($html)."&t=images&safesearch=1&locale=en_CA&uiv=4";
+				$url_to_fetch = "https://api.qwant.com/api/search/images?count=5&q=".urlencode($html)."&t=images&safesearch=1&locale=en_CA&uiv=4";
+				
 				logme("[img search query] - " . $url_to_fetch);
-				$json = wizbui_curlit($url_to_fetch, true);	// fetch with proxy
+
+				$json = wizbui_curlit($url_to_fetch, true);	// fetch with random proxy
 				$decoded = json_decode($json, true);
-				if ($decoded["status"] != "error") {
-					if (isset($decoded["data"]["result"]["items"][0]["media"])) {
-						$html = stripslashes($decoded["data"]["result"]["items"][0]["media"]);
-						logme("[img fetched image URL] - " . $html);
+				
+				$img_idx = 0;
+				// Create the image  file on the server
+				while ( $img_idx < 5) {
+					
+					if ($decoded["status"] != "error") {
+						if (isset($decoded["data"]["result"]["items"][$img_idx]["media"])) {
+							/// get filename
+							$retURL = stripslashes($decoded["data"]["result"]["items"][$img_idx]["media"]);
+							logme("[img fetched URL] - " . $retURL);
+
+							/// get image
+							$image_data = @wizbui_curlit($retURL); // Get image data with failsafe and proxy
+
+							// tmp save to verify file type
+							$tmp_filename = WIZBUI_PLUGIN_PATH."tmp.img";
+							@file_put_contents( $tmp_filename , $image_data );
+
+							unset($image_data);
+
+							if (is_image($tmp_filename)) {
+								logme("[img valid!] - " . $retURL);
+								unlink($tmp_filename);
+								$html = $retURL;
+								$img_idx = 999; // break out of loop
+							}
+						}
+					} else {
+						logme("[json resp error]");
+						$json = wizbui_curlit($url_to_fetch, true);	// fetch with random proxy
+						$decoded = json_decode($json, true);
 					}
-				} 
+
+					$img_idx++;
+				}
+
+
 
 			} catch (Exception $e) {
 				logme("[img Error] - " . $e->getMessage());
@@ -1627,6 +1660,7 @@ function add_image($post_id, $image_url, $image_name) {
 		$image_data       = @file_get_contents($image_url); // Get image data
 		$unique_file_name = wp_unique_filename( $upload_dir['path'], $image_name ); // Generate unique name
 		$filename         = basename( $unique_file_name ); // Create image file name
+		$file 			  = "";
 
 		// Check folder permission and define file location
 		if( wp_mkdir_p( $upload_dir['path'] ) ) {
@@ -1637,6 +1671,7 @@ function add_image($post_id, $image_url, $image_name) {
 
 		// Create the image  file on the server
 		@file_put_contents( $file, $image_data );
+		unset($image_data);
 
 		// Check image file type
 		$wp_filetype = wp_check_filetype( $filename, null );
@@ -1675,6 +1710,17 @@ function add_image($post_id, $image_url, $image_name) {
 	$obout = ob_get_clean();
 	logme("supressed image save output: ".$obout);
 
+}
+
+
+function is_image($filename) {
+
+	list($width, $height, $type, $attr) = getimagesize($filename);
+
+	if (isset($type) && in_array($type, array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF))) {
+		return true;
+	}
+	return false;
 }
 
 function wizbui_curlit($url, $use_proxy = false) {
