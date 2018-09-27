@@ -1714,12 +1714,16 @@ function add_image($post_id, $image_url, $image_name) {
 
 
 function is_image($filename) {
+	try {
+		list($width, $height, $type, $attr) = @getimagesize($filename);
 
-	list($width, $height, $type, $attr) = getimagesize($filename);
-
-	if (isset($type) && in_array($type, array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF))) {
-		return true;
+		if (isset($type) && in_array($type, array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF))) {
+			return true;
+		}
+	} catch (Exception $e) {
+		logme("Error on imagesize:". $e->getMessage());
 	}
+
 	return false;
 }
 
