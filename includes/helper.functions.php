@@ -1331,16 +1331,16 @@ function runmap($offset, $json_config, $preview = false) {
 	$filez[] = "placeholder.dboquery";
 
 	// for each file
-	for ($i = 0; $i < count($filez); ++$i) {
+	for ($this_file_index = 0; $this_file_index < count($filez); ++$this_file_index) {
 
 		// when file exists
-		if (isset($filez[$i])) {
+		if (isset($filez[$this_file_index])) {
 
 				if ($global_counter >= ($offset)) {
-					logme("-File open: ".$filez[$i]);
+					logme("-File open: ".$filez[$this_file_index]);
 				}
 				
-				$ext = pathinfo($filez[$i], PATHINFO_EXTENSION);
+				$ext = pathinfo($filez[$this_file_index], PATHINFO_EXTENSION);
 
 				if ( (!isset($json_config)) || (!is_array($json_config)) ) {
 					logme("-No config found...");
@@ -1365,7 +1365,7 @@ function runmap($offset, $json_config, $preview = false) {
 
 						try {
 							// amount of rows
-							$fp = file($filez[$i]);
+							$fp = file($filez[$this_file_index]);
 							$cap = count($fp);
 							if ($global_counter >= ($offset)) {
 								logme("-CSV count: ".$cap);
@@ -1379,7 +1379,7 @@ function runmap($offset, $json_config, $preview = false) {
 					} elseif (($jc_val["inputmethod"] == "xlsx") && ($ext == "xlsx")) {
 						try {
 							// amount of rows
-							if ( $xlsx = SimpleXLSX::parse($filez[$i])) {
+							if ( $xlsx = SimpleXLSX::parse($filez[$this_file_index])) {
 								$sheets = $xlsx->sheetNames();
 								foreach ($sheets as $sheetnum => $sheet) {
 									list( $num_cols, $num_rows ) = $xlsx->dimension( $sheetnum );
@@ -1443,7 +1443,7 @@ function runmap($offset, $json_config, $preview = false) {
 						if ($global_counter >= ($offset)) {
 
 							logme("Memory used: ".(memory_get_peak_usage(false)/1024/1024)." MiB");
-							logme("--Parsing Row: (".$fset."/".$cap.") file: ".$filez[$i]);
+							logme("--Parsing Row: (".$fset."/".$cap.") file: ".$filez[$this_file_index]);
 						
 							// Scraper Method
 							if ($jc_val["inputmethod"] == "scraper") {
@@ -1451,7 +1451,7 @@ function runmap($offset, $json_config, $preview = false) {
 								// get containers
 								// 		function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
 								try {
-										$containers = parseEntry($jc_val["containerInstance"], $filez[$i], "", true, $jc_val, false, $fset);
+										$containers = parseEntry($jc_val["containerInstance"], $filez[$this_file_index], "", true, $jc_val, false, $fset);
 								} catch (Exception $e) {
 									logme("error grouping containers: ". $e->getMessage());
 								}
@@ -1466,11 +1466,11 @@ function runmap($offset, $json_config, $preview = false) {
 									}
 									// validate mapping
 									//		function validateOp($query, $url, $html, $op, $opeq, $config,  $file_offset = 0) {
-									logme("---Validation try: ".$filez[$i]);
+									logme("---Validation try: ".$filez[$this_file_index]);
 
 									$valid = false;
 									try {
-										$valid = validateOp($jc_val["validator"], $filez[$i], $container, $jc_val["op"], $jc_val["opeq"], $jc_val, $fset);
+										$valid = validateOp($jc_val["validator"], $filez[$this_file_index], $container, $jc_val["op"], $jc_val["opeq"], $jc_val, $fset);
 									} catch (Exception $e) {
 										logme("error validating Op: ". $e->getMessage());
 									}
@@ -1481,7 +1481,7 @@ function runmap($offset, $json_config, $preview = false) {
 										$id = -1;
 										try {
 											// 		function parseEntry($query, $url, $ht, $isContainer = false) {
-											$id = parseEntry($jc_val["idsel"], $filez[$i], $container, false, $jc_val, false, $fset);
+											$id = parseEntry($jc_val["idsel"], $filez[$this_file_index], $container, false, $jc_val, false, $fset);
 										} catch (Exception $e) {
 											logme("error getting ID: ". $e->getMessage());
 										}
@@ -1496,7 +1496,7 @@ function runmap($offset, $json_config, $preview = false) {
 										$build_fields = array();
 										try {
 											// build fields
-											$build_fields = build_fields($jc_val, $filez[$i], $fset);
+											$build_fields = build_fields($jc_val, $filez[$this_file_index], $fset);
 										} catch (Exception $e) {
 											logme("error building fields: ". $e->getMessage());
 										}
@@ -1549,7 +1549,7 @@ function runmap($offset, $json_config, $preview = false) {
 
 								$valid = false;
 								try {
-									$valid = validateOp($jc_val["validator"], $filez[$i], "", $jc_val["op"], $jc_val["opeq"], $jc_val, $fset);
+									$valid = validateOp($jc_val["validator"], $filez[$this_file_index], "", $jc_val["op"], $jc_val["opeq"], $jc_val, $fset);
 								} catch (Exception $e) {
 									logme("error validating standard Op: ". $e->getMessage());
 								}
@@ -1565,7 +1565,7 @@ function runmap($offset, $json_config, $preview = false) {
 
 									try {
 										//	function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
-										$id = parseEntry($jc_val["idsel"], $filez[$i], "", false, $jc_val, false, $fset);
+										$id = parseEntry($jc_val["idsel"], $filez[$this_file_index], "", false, $jc_val, false, $fset);
 										logme("----id expression: ". $jc_val["idsel"]);
 									} catch (Exception $e) {
 										logme("error on id expression: ". $e->getMessage());
@@ -1582,7 +1582,7 @@ function runmap($offset, $json_config, $preview = false) {
 									$build_fields = array();
 									try {
 										// build fields
-										$build_fields = build_fields($jc_val, $filez[$i], $fset);
+										$build_fields = build_fields($jc_val, $filez[$this_file_index], $fset);
 									} catch (Exception $e) {
 										logme("error building fields: ". $e->getMessage());
 									}
