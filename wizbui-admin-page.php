@@ -14,8 +14,9 @@ include_once "includes/helper.functions.php";
 </style>
 
 <script type="text/javascript">
-	var PLUGIN_CACHE_URL = "<?php echo plugins_url(); ?>/cache/";
-	var WB_PLUGIN_URL = "<?php echo site_url(); ?>/";
+	var PLUGIN_CACHE_URL = "<?php echo plugins_url("cache", __FILE__); ?>/";
+	var WB_PLUGIN_URL = "<?php echo plugins_url("", __FILE__); ?>/";
+	var WB_SITE_URL = "<?php echo site_url("", __FILE__); ?>/";
 	var mappings = "<?php $opt = get_option('wb_mappings', null); if ($opt !==  null) { echo unserialize($opt);	} ?>";
 	<?php
 	// JS file only for this page

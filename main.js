@@ -29,8 +29,8 @@ $(function() {
 
 	// filetree - Data Browser
 	$('#filesNfolders').fileTree({
-		root: "../wp-content/plugins/content.wizard.build/cache/",
-		script: WB_PLUGIN_URL + "wp-admin/admin-post.php?action=wb_browseme_hook",
+		root: PLUGIN_CACHE_URL,
+		script: WB_SITE_URL + "wp-admin/admin-post.php?action=wb_browseme_hook",
 		expandSpeed: 100
 		}, function(file) { 
 			$("#selectedFile").show();
@@ -73,7 +73,7 @@ function get_tab() {
 }
 
 function quicksave_call() {
-	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_save_hook",
+	$.post(WB_SITE_URL+"wp-admin/admin-post.php?action=wb_save_hook",
 		{
 			whitelist: $("#whitelist").val(),
 			blacklist: $("#blacklist").val(),
@@ -95,7 +95,7 @@ function crawlUrl() {
 		// no post js crawl
 		$(".crawlspin").show();
 		$(".stop-button-crawl").show();
-		$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_save_hook",
+		$.post(WB_SITE_URL+"wp-admin/admin-post.php?action=wb_save_hook",
 		  {
 			url: $("#urls").val(),
 			whitelist: $("#whitelist").val(),
@@ -108,7 +108,7 @@ function crawlUrl() {
 		  function(dataToCrawl) {
 			$.ajax({
 				dataType: 'html',
-				url: WB_PLUGIN_URL + "wp-content/plugins/content.wizard.build/crawl.me.txt",
+				url: WB_PLUGIN_URL + "crawl.me.txt",
 				success: function(data, textStatus, jqXHR) {
 					if ($.trim(data) != "") {
 						$("#urls").val(data);
@@ -183,7 +183,7 @@ function compileMappings(autosave = true) {
 	var ret = JSON.stringify($stringify);
 	
 	if (autosave) {
-		$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_save_hook",
+		$.post(WB_SITE_URL+"wp-admin/admin-post.php?action=wb_save_hook",
 				{
 					mappings: ret,
 					quicksave: "true"
@@ -428,16 +428,16 @@ function magicgo() {
 	
 	if ((ext=="xlsx") || (ext == "xls")) {
 		// excel file
-		$("#magicframe").attr("src", WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_xlsx_hook&file=" + $("#magicfile").val());
+		$("#magicframe").attr("src", WB_SITE_URL+"wp-admin/admin-post.php?action=wb_xlsx_hook&file=" + $("#magicfile").val());
 	} else if (ext=="dboquery") {
 		// db query
-		$("#magicframe").attr("src", WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_db_hook&file=" + $("#magicfile").val());
+		$("#magicframe").attr("src", WB_SITE_URL+"wp-admin/admin-post.php?action=wb_db_hook&file=" + $("#magicfile").val());
 	} else if (ext=="csv") {
 		// csv file
-		$("#magicframe").attr("src", WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_csv_hook&file=" + $("#magicfile").val());
+		$("#magicframe").attr("src", WB_SITE_URL+"wp-admin/admin-post.php?action=wb_csv_hook&file=" + $("#magicfile").val());
 	} else {
 		// html / xml / other
-		$("#magicframe").attr("src", WB_PLUGIN_URL + "wp-content/plugins/content.wizard.build/cache/" + $("#magicfile").val());
+		$("#magicframe").attr("src", WB_PLUGIN_URL + "cache/" + $("#magicfile").val());
 	}
 
 	$(".frame-step").fadeIn("fast");
@@ -606,7 +606,7 @@ function toggleSelOptions($this) {
 
 function preview_entry(query, url, ht, isContainer = false) {
 	var mappings = compileMappings(false);
-	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_map_preview_hook", {
+	$.post(WB_SITE_URL+"wp-admin/admin-post.php?action=wb_map_preview_hook", {
 			query: query,
 			file: url,
 			preview: "true",
@@ -632,14 +632,14 @@ $(document).on("click", "#del-btn", function() {
 		filenames.push($this.val());
 	});
 
-	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_delcache_hook", {
+	$.post(WB_SITE_URL+"wp-admin/admin-post.php?action=wb_delcache_hook", {
 			killcache: filenames
 		},
 		function(data) {
 			$('#filesNfolders').html("");
 			$('#filesNfolders').fileTree({
-				root: "../wp-content/plugins/content.wizard.build/cache/",
-				script: WB_PLUGIN_URL + "wp-admin/admin-post.php?action=wb_browseme_hook",
+				root: PLUGIN_CACHE_URL,
+				script: WB_SITE_URL + "wp-admin/admin-post.php?action=wb_browseme_hook",
 				expandSpeed: 100
 				}, function(file) { 
 					$("#selectedFile").show();
@@ -654,8 +654,8 @@ $(document).on("click", "#del-btn", function() {
 function refresh_FNF() {
 	$('#filesNfolders').html("");
 	$('#filesNfolders').fileTree({
-		root: "../wp-content/plugins/content.wizard.build/cache/",
-		script: WB_PLUGIN_URL + "wp-admin/admin-post.php?action=wb_browseme_hook",
+		root: PLUGIN_CACHE_URL,
+		script: WB_SITE_URL + "wp-admin/admin-post.php?action=wb_browseme_hook",
 		expandSpeed: 100
 		}, function(file) { 
 			$("#selectedFile").show();
@@ -667,7 +667,7 @@ function refresh_FNF() {
 
 function refresh_logs() {
 	$('#logs pre').html("");
-	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_logs_hook", {
+	$.post(WB_SITE_URL+"wp-admin/admin-post.php?action=wb_logs_hook", {
 	},
 	function(data) {
 		$('#logs pre').html(data);
@@ -713,7 +713,7 @@ function mappings_run(offset, mapped = false) {
 	} else {
 		mappings = mapped;
 	}
-	$.post(WB_PLUGIN_URL+"wp-admin/admin-post.php?action=wb_map_hook", {
+	$.post(WB_SITE_URL+"wp-admin/admin-post.php?action=wb_map_hook", {
 			config: mappings,
 			runmappings: true,
 			offset: offset

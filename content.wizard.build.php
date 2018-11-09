@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
-define("WIZBUI_PLUGIN_PATH", ABSPATH . 'wp-content/plugins/content.wizard.build/');
+define("WIZBUI_PLUGIN_PATH", __DIR__ . "/");
 
 @wp_enqueue_style("wiz.css", plugin_dir_url( __FILE__ )."/wiz.css");
 
