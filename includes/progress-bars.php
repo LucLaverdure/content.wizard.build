@@ -12,7 +12,7 @@ if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 		<span class="crawled-count">
 			<?php echo count(get_real_dirs()); ?>
 		</span>
-<img src="<?php echo plugins_url(); ?>/content.wizard.build/spinner.gif" style="width:25px;margin-left:10px;display:inline-block;display:none;" class="crawlspin">
+<img src="<?php echo WIZBUI_PLUGIN_URL; ?>spinner.gif" style="width:25px;margin-left:10px;display:inline-block;display:none;" class="crawlspin">
 <div class="stop-button-crawl" style="display:none;"><a class="button" href="">Stop Crawling</a></div>
 	</div>
 	<div class="mapped">
@@ -34,7 +34,7 @@ if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 							echo $the_query->post_count;
 ?>	
 		</span>
-		<img src="<?php echo plugins_url(); ?>/content.wizard.build/spinner.gif" style="width:25px;margin-left:10px;display:inline-block;display:none;" class="mapspin">
+		<img src="<?php echo WIZBUI_PLUGIN_URL; ?>spinner.gif" style="width:25px;margin-left:10px;display:inline-block;display:none;" class="mapspin">
 		<div class="stop-button-map" style="display:none;"><a class="button" href="">Stop Mapping</a></div>
 	</div>
 </div>

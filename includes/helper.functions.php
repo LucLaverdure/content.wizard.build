@@ -40,10 +40,10 @@ function save_options() {
 		update_option('wb_apikey', serialize($_POST['apikey']));
 	}
 	if (isset($_POST['whitelist'])) {
-		update_option('wb_whitelist', serialize($_POST['whitelist']));
+		update_option('wb_whitelist', serialize(sanitize_textarea_field($_POST['whitelist'])));
 	}
 	if (isset($_POST['blacklist'])) {
-		update_option('wb_blacklist', serialize($_POST['blacklist']));
+		update_option('wb_blacklist', serialize(sanitize_textarea_field($_POST['blacklist'])));
 	}
 	if (isset($_POST['mappings'])) {
 		update_option('wb_mappings', serialize($_POST['mappings']));

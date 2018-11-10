@@ -16,7 +16,7 @@ if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 		<div style="margin:20px 0;">URLs To <strong>Crawl</strong> (one URL per line):</div>
 		<div>
 	<textarea id="urls" type="text" name="starturl" placeholder="i.e. LucLaverdure.com" wrap="off" style="height:250px;width:90%;"><?php
-	$file = ABSPATH . 'wp-content/plugins/content.wizard.build/crawl.me.txt';
+	$file = WIZBUI_PLUGIN_PATH . 'crawl.me.txt';
 	if (file_exists($file)) {
 		include_once $file;
 	}

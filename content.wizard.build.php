@@ -12,6 +12,7 @@
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 define("WIZBUI_PLUGIN_PATH", __DIR__ . "/");
+define("WIZBUI_PLUGIN_URL", plugins_url("", __FILE__) . "/");
 
 @wp_enqueue_style("wiz.css", plugin_dir_url( __FILE__ )."/wiz.css");
 
@@ -58,8 +59,8 @@ function admin_post_wb_delcache_hook_callback() {
 add_action( 'admin_post_wb_xlsx_hook', 'admin_post_wb_xlsx_hook_callback' );
 function admin_post_wb_xlsx_hook_callback() {
 	include_once(WIZBUI_PLUGIN_PATH . "includes/parse.php");
-	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]);
-	$_REQUEST["file"] = WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"];
+	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]); // prevent accessing parent folders
+	$_REQUEST["file"] = sanitize_file_name(WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"]);	
 	preview_xlsx($_REQUEST["file"]);
 }
 
@@ -67,8 +68,8 @@ function admin_post_wb_xlsx_hook_callback() {
 add_action( 'admin_post_wb_csv_hook', 'admin_post_wb_csv_hook_callback' );
 function admin_post_wb_csv_hook_callback() {
 	include_once(WIZBUI_PLUGIN_PATH . "includes/parse.php");
-	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]);
-	$_REQUEST["file"] = WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"];
+	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]); // prevent accessing parent folders
+	$_REQUEST["file"] = sanitize_file_name(WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"]);
 	preview_csv($_REQUEST["file"]);
 }
 
@@ -77,8 +78,8 @@ function admin_post_wb_csv_hook_callback() {
 add_action( 'admin_post_wb_db_hook', 'admin_post_wb_db_hook_callback' );
 function admin_post_wb_db_hook_callback() {
 	include_once(WIZBUI_PLUGIN_PATH . "includes/parse.php");
-	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]);
-	$_REQUEST["file"] = WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"];
+	$_REQUEST["file"] = str_replace("../","",$_REQUEST["file"]); // prevent accessing parent folders
+	$_REQUEST["file"] = sanitize_file_name(WIZBUI_PLUGIN_PATH . "cache/".$_REQUEST["file"]);
 	preview_db($_REQUEST["file"]);
 }
 

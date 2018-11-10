@@ -3,7 +3,7 @@
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 if (!current_user_can('administrator')) die( 'No script kiddies please!' );
 
-include_once ABSPATH . 'wp-content/plugins/content.wizard.build/includes/helper.functions.php';
+include_once WIZBUI_PLUGIN_PATH . 'includes/helper.functions.php';
 
 
 if (is_admin()) {
