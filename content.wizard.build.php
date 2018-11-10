@@ -27,7 +27,7 @@ function wizbui_callback(){
 	@wp_enqueue_script("jqEasing", plugin_dir_url( __FILE__ )."lib/jquery.easing.js");
 	@wp_enqueue_script("filetreeJS", plugin_dir_url( __FILE__ )."lib/jqueryFileTree.js");
 	include_once(WIZBUI_PLUGIN_PATH . "queue.php");
-	include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
+	if (!class_exists("DOMEvent")) include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
 	include_once(WIZBUI_PLUGIN_PATH . 'includes/helper.functions.php');
 	include_once(WIZBUI_PLUGIN_PATH . 'includes/upload.save.php');
 	include(WIZBUI_PLUGIN_PATH . "wizbui-admin-page.php");
@@ -37,7 +37,7 @@ function wizbui_callback(){
 add_action( 'admin_post_wb_save_hook', 'admin_post_wb_save_hook_callback' );
 function admin_post_wb_save_hook_callback() {
 	include_once(WIZBUI_PLUGIN_PATH . "queue.php");
-	include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
+	if (!class_exists("DOMEvent")) include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
 	include_once(WIZBUI_PLUGIN_PATH . 'includes/helper.functions.php');
 	include(WIZBUI_PLUGIN_PATH . "data.save.php");
 }
@@ -86,7 +86,7 @@ function admin_post_wb_db_hook_callback() {
 // core set Mappings
 add_action( 'admin_post_wb_map_hook', 'admin_post_wb_map_hook_callback' );
 function admin_post_wb_map_hook_callback() {
-	include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
+	if (!class_exists("DOMEvent")) include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
 	include_once(WIZBUI_PLUGIN_PATH . "includes/parse.php");
 	include_once(WIZBUI_PLUGIN_PATH . "mappings.php");
 }
@@ -94,7 +94,7 @@ function admin_post_wb_map_hook_callback() {
 // core preview Mappings
 add_action( 'admin_post_wb_map_preview_hook', 'admin_post_wb_map_preview_hook_callback' );
 function admin_post_wb_map_preview_hook_callback() {
-	include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
+	if (!class_exists("DOMEvent")) include_once(WIZBUI_PLUGIN_PATH . "lib/phpQuery.php");
 	include_once(WIZBUI_PLUGIN_PATH . "includes/parse.php");
 	include_once(WIZBUI_PLUGIN_PATH . "mappings.php");
 }
@@ -102,7 +102,7 @@ function admin_post_wb_map_preview_hook_callback() {
 // core get new logs
 add_action( 'admin_post_wb_logs_hook', 'admin_post_wb_logs_hook_callback' );
 function admin_post_wb_logs_hook_callback() {
-	include_once(WIZBUI_PLUGIN_PATH . "lib/tailcustom.php");
+	if (!class_exists("DOMEvent")) include_once(WIZBUI_PLUGIN_PATH . "lib/tailcustom.php");
 	$logs = WIZBUI_PLUGIN_PATH . "logs.txt";
 	if (file_exists($logs)) {
 		echo tailCustom($logs, 500);

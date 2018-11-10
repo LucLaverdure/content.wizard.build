@@ -6,7 +6,10 @@ define( "MAPPING_INC", 5 );
 define( "DOWNLOAD_TIMEOUT_SECS", 5 );
 define( "DOWNLOAD_ATTEMPTS", 5 );
 
+// log error messages
 function logme($string) {
+
+	// string output directly into file (no db), no need for sanitization
 
 	$filename = WIZBUI_PLUGIN_PATH . "logs.txt";
 
@@ -15,7 +18,7 @@ function logme($string) {
 	file_put_contents($filename, $log, FILE_APPEND);
 }
 
-
+// get selector value without odd characters
 function selector_val(&$item) {
 	$ret = "";
 	$chars = str_split($item);
@@ -34,10 +37,11 @@ function selector_val(&$item) {
 	return $item;
 }
 
+// save all options
 function save_options() {
 	
 	if (isset($_POST['apikey'])) {
-		update_option('wb_apikey', serialize($_POST['apikey']));
+		update_option('wb_apikey', serialize(sanitize_text_field($_POST['apikey'])));
 	}
 	if (isset($_POST['whitelist'])) {
 		update_option('wb_whitelist', serialize(sanitize_textarea_field($_POST['whitelist'])));
@@ -49,23 +53,27 @@ function save_options() {
 		update_option('wb_mappings', serialize($_POST['mappings']));
 	}
 	if (isset($_POST['paramRemoveGets'])) {
-		update_option('wb_RemoveGets', serialize($_POST['paramRemoveGets']));
+		update_option('wb_RemoveGets', serialize(sanitize_text_field($_POST['paramRemoveGets'])));
 	}
 	if (isset($_POST['paramRemoveHashes'])) {
-		update_option('wb_RemoveHashes', serialize($_POST['paramRemoveHashes']));
+		update_option('wb_RemoveHashes', serialize(sanitize_text_field($_POST['paramRemoveHashes'])));
 	}
 	if (isset($_POST['paramPostJS'])) {
-		update_option('wb_PostJS', serialize($_POST['paramPostJS']));
+		update_option('wb_PostJS', serialize(sanitize_text_field($_POST['paramPostJS'])));
 	}
 	
 }
 
+// recursive dir contents fetch
 function getDirContents($dir, &$results = array()){
+
+	$dir = sanitize_file_name($dir);
+
 	$files = array();
 	$files = @scandir($dir);
 	if (count($files) > 0 && $files != false) {
 		foreach($files as $value) {
-			$path = realpath($dir.DIRECTORY_SEPARATOR.$value);
+			$path = sanitize_file_name(realpath($dir.DIRECTORY_SEPARATOR.$value));
 			if(!is_dir($path)) {
 				$results[] = $path;
 			} else if($value != "." && $value != "..") {
@@ -76,9 +84,9 @@ function getDirContents($dir, &$results = array()){
 	return $results;
 }
 
-
+// delete cache directory
 function delete_cache_dir() {
-	$dir = WIZBUI_PLUGIN_PATH . "cache";
+	$dir = sanitize_file_name(WIZBUI_PLUGIN_PATH . "cache");
 	$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
 	$files = new RecursiveIteratorIterator($it,
 				 RecursiveIteratorIterator::CHILD_FIRST);
@@ -92,7 +100,7 @@ function delete_cache_dir() {
 	rmdir($dir);	
 }
 
-
+// get custom fields if custom fields plugin is installed
 function wizbui_get_acf_fields() {
 	$ret = array();
 	$groups = apply_filters( 'acf/get_field_groups', array() );
@@ -108,6 +116,7 @@ function wizbui_get_acf_fields() {
 	return $ret;
 }
 
+// get all basic post fields
 function wizbui_get_default_fields() {
 	$keys = array();
 	$post_type_features = get_all_post_type_supports('post');
@@ -117,6 +126,7 @@ function wizbui_get_default_fields() {
 	return $keys;
 }
 
+// get custom fields in use
 function wizbui_get_custom_fields() {
 	$f_all = array();
 	$posts_array = get_posts( array('post_type' => 'any', 'posts_per_page' => '999999999999999') );
@@ -129,6 +139,7 @@ function wizbui_get_custom_fields() {
 	return $f_all;
 }
 
+// get a merge of all fields 
 function get_all_posts_fields() {
 	$fields_acf = wizbui_get_acf_fields();
 	$fields_def = wizbui_get_default_fields();
@@ -141,18 +152,19 @@ function get_all_posts_fields() {
 	return $fields;
 }
 
+// get saved crawler blacklist
 function get_blacklist() {
 	$opt = get_option('wb_blacklist', array());
 	return explode("\n", unserialize($opt));
 }
 
-
+// get saved crawler whitelist
 function get_whitelist() {
 	$opt = get_option('wb_whitelist', array());
 	return explode("\n", unserialize($opt));
 }
 
-
+// get dirs as urls
 function get_dirs() {
 	$path_init = WIZBUI_PLUGIN_PATH . "cache";
 	if(!file_exists(dirname($path_init))) {
@@ -166,6 +178,7 @@ function get_dirs() {
 	return $dir_array;
 }
 
+// get dirs as filenames
 function get_real_dirs() {
 	$path_init = WIZBUI_PLUGIN_PATH . "cache";
 	
@@ -180,6 +193,7 @@ function get_real_dirs() {
 	return $dir_array;
 }
 
+// fix paths for referenced incomplete urls 
 function pathme($fromURL, $relURL) {
 	if (strpos($relURL, 'http') === false) {
 		if (strpos($fromURL, 'http') === false) {
@@ -197,6 +211,7 @@ function pathme($fromURL, $relURL) {
 	return $relURL;
 }
 
+// get all options saved from json configuration
 function parseJsonConfig($jsonConfig) {
 	$decodeConfig = "";
 	if (!is_array($jsonConfig)) {
@@ -313,6 +328,7 @@ function parseJsonConfig($jsonConfig) {
 	return $outputConfig;
 	
 } // function
+
 
 // query, url, html (data), return container array?, file offset
 function parseEntry($query, $url, $ht, $isContainer = false, $jconfig, $is_preview = false, $offset = 0) {
